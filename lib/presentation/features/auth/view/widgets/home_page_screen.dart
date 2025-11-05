@@ -1,0 +1,501 @@
+import 'package:flutter/material.dart';
+import 'package:oc_academy_app/presentation/features/auth/view/widgets/blog_post.dart';
+import 'package:oc_academy_app/presentation/features/auth/view/widgets/daily_challenge.dart';
+import 'package:oc_academy_app/presentation/features/auth/view/widgets/explore_speciality.dart';
+import 'package:oc_academy_app/presentation/features/auth/view/widgets/our_programs.dart';
+import 'package:oc_academy_app/presentation/features/auth/view/widgets/partnership_scrollable.dart';
+import 'package:oc_academy_app/presentation/features/auth/view/widgets/referal_card.dart';
+import 'package:oc_academy_app/presentation/features/auth/view/widgets/testimonials_card.dart';
+import 'package:oc_academy_app/presentation/features/home/view/home_screen.dart';
+import 'package:oc_academy_app/presentation/global/widgets/courses_card.dart';
+
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: const MedicalAcademyScreen(),
+    );
+  }
+}
+
+class MedicalAcademyScreen extends StatefulWidget {
+  const MedicalAcademyScreen({super.key});
+
+  @override
+  State<MedicalAcademyScreen> createState() => _MedicalAcademyScreenState();
+}
+
+class FeaturedCoursesSection extends StatelessWidget {
+  final List<FeaturedProgramData> courses;
+
+  const FeaturedCoursesSection({required this.courses, super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 300, // Adjust height as needed
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        itemCount: courses.length,
+        itemBuilder: (context, index) {
+          return FeaturedCourseCard(program: courses[index]);
+        },
+      ),
+    );
+  }
+}
+
+class _MedicalAcademyScreenState extends State<MedicalAcademyScreen> {
+  @override
+  Widget build(BuildContext context) {
+    // A dark primary color to match the app bar/background
+    const Color primaryDark = Color(0xFF1A237E);
+    // A distinct blue for the button
+    const Color accentBlue = (Color(0XFF3359A7));
+    final List<BlogData> mockBlogs = [
+      BlogData(
+        category: 'PEDIATRICS',
+        title: 'Navigating the Challenges of Modern Pediatrics',
+        readTime: '5 min read',
+        imageUrl: 'assets/images/mrcp.png',
+      ),
+      BlogData(
+        category: 'CARDIOLOGY',
+        title: 'The Future of Cardiology: AI and Predictive Analytics',
+        readTime: '8 min read',
+        imageUrl: 'assets/images/mrcp.png',
+      ),
+      BlogData(
+        category: 'CARDIOLOGY',
+        title: 'The Future of Cardiology: AI and Predictive Analytics',
+        readTime: '8 min read',
+        imageUrl: 'assets/images/mrcp.png',
+      ),
+    ];
+    final List<SpecialtyData> mockSpecialties = [
+      SpecialtyData(name: 'Cardiology', icon: Icons.favorite_border),
+      SpecialtyData(name: 'Pediatrics', icon: Icons.child_care_outlined),
+      SpecialtyData(name: 'Emergency', icon: Icons.flash_on_outlined),
+      SpecialtyData(name: 'General', icon: Icons.medical_services_outlined),
+      SpecialtyData(name: 'Neurology', icon: Icons.psychology_outlined),
+    ];
+    final List<FeaturedProgramData> mockFeaturedCourses = [
+      FeaturedProgramData(
+        title: 'International PG Program in Emergency Medicine',
+        imageUrl: 'assets/images/mrcp.png',
+        accreditedBy: 'UK Universities',
+      ),
+      FeaturedProgramData(
+        title: 'Clinical Fellowship in Diabetes Management',
+        imageUrl: 'assets/images/program2.jpg',
+        accreditedBy: 'Royal College',
+      ),
+      FeaturedProgramData(
+        title: 'Short Course in Advanced Diagnostics',
+        imageUrl: 'assets/images/program3.jpg',
+        accreditedBy: 'Global Academy',
+      ),
+    ];
+    // Example Mock Data in _MedicalAcademyScreenState build method:
+    const List<NavItem> navItems = [
+      NavItem(label: "Home", icon: Icons.home_outlined),
+      NavItem(label: "Explore", icon: Icons.search),
+      NavItem(label: "Courses", icon: Icons.book_outlined),
+      NavItem(label: "Blog", icon: Icons.article_outlined),
+      NavItem(label: "Profile", icon: Icons.person_outline),
+    ];
+    int _selectedIndex = 0;
+    void _onItemTapped(int index) {
+      setState(() {
+        _selectedIndex = index;
+      });
+    }
+
+    return Scaffold(
+      backgroundColor: Colors.white,
+      bottomNavigationBar: CustomBottomNavBar(
+        items: navItems,
+        selectedIndex: _selectedIndex,
+        onItemSelected: _onItemTapped,
+        // Optional: you can pass activeColor/inactiveColor here if needed
+      ),
+      body: SingleChildScrollView(
+        child: Column(
+          children: <Widget>[
+            SizedBox(
+              height: MediaQuery.of(context).size.height * 0.45,
+              child: Stack(
+                children: <Widget>[
+                  Positioned.fill(
+                    child: ShaderMask(
+                      shaderCallback: (Rect bounds) {
+                        return LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: <Color>[
+                            Colors.white, // Fully opaque at the top
+                            Colors.white, // Stay opaque for most of the image
+                            Colors.black, // Start fading to transparent
+                          ],
+                          stops: <double>[
+                            0.0, // Start fully opaque
+                            0.7, // Keep opaque until 70% down
+                            1.0, // Fully transparent at the bottom
+                          ],
+                        ).createShader(bounds);
+                      },
+                      blendMode: BlendMode
+                          .dstIn, // This blend mode cuts out the shape based on transparency
+                      child: Image.asset(
+                        'assets/images/mrcp.png',
+                        fit: BoxFit.fill,
+                      ),
+                    ),
+                  ),
+
+                  SafeArea(
+                    child: Padding(
+                      padding: EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          // Logo Section
+                          Row(children: <Widget>[
+                            ],
+                          ),
+                          // Title Text
+                          Padding(
+                            padding: EdgeInsets.only(bottom: 8.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    bottom: 20,
+                    left: 0,
+                    right: 0,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        _PageIndicatorDot(isActive: true),
+                        _PageIndicatorDot(isActive: false),
+                        _PageIndicatorDot(isActive: false),
+                        _PageIndicatorDot(isActive: false),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 10),
+            Container(
+              margin: const EdgeInsets.only(top: 10.0, right: 10, left: 10),
+              decoration: BoxDecoration(
+                color: Colors
+                    .white, // Slightly lighter dark background for the card
+                borderRadius: BorderRadius.circular(12.0),
+                border: (Border.all(color: Color(0XFFD6D6D6))),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    const Text(
+                      'CONTINUE LEARNING',
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 1.5,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        // Course Image Placeholder
+                        Container(
+                          width: 60,
+                          height: 60,
+                          decoration: BoxDecoration(
+                            color: primaryDark.withOpacity(0.5),
+                            borderRadius: BorderRadius.circular(8.0),
+                            border: Border.all(color: Colors.white),
+                          ),
+                          child: const Center(
+                            // Placeholder for the icon/image
+                            child: Icon(
+                              Icons.medical_services_outlined,
+                              color: Colors.white,
+                              size: 30,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 15),
+                        // Course Details
+                        const Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              Text(
+                                'Clinical Fellowship in',
+                                style: TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              Text(
+                                'Paediatrics',
+                                style: TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              SizedBox(height: 8),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    'Module 1: Definition, Prevalence...',
+                                    style: TextStyle(
+                                      color: Colors.black,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                  Text(
+                                    '60%',
+                                    style: TextStyle(
+                                      color: Color(0XFF3359A7),
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: LinearProgressIndicator(
+                        value: 0.6, // 60% progress
+                        backgroundColor: Colors.white24,
+                        valueColor: const AlwaysStoppedAnimation<Color>(
+                          accentBlue,
+                        ),
+                        minHeight: 5,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    // Resume Learning Button
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          // Handle button press
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: accentBlue, // Button color
+                          padding: const EdgeInsets.symmetric(vertical: 15),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          elevation: 0,
+                        ),
+                        child: const Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              'Resume Learning',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            SizedBox(width: 8),
+                            Icon(
+                              Icons.arrow_forward_ios,
+                              size: 16,
+                              color: Colors.white,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            // Add some padding at the bottom for scroll comfort
+            const SizedBox(height: 20),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Text(
+                  'Explore Our Programs',
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 10.0), // Added space here
+            ExploreProgramsSection(),
+            const SizedBox(height: 10.0), // Added space here
+
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Text(
+                  'Latest Blog Post',
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 10.0), // Added space here
+
+            BlogPostsSection(blogs: mockBlogs),
+            const SizedBox(height: 10.0), // Added space here
+            ExploreBySpecialtySection(
+              specialties: mockSpecialties,
+              accentBlue: Color(0XFF3359A7),
+            ),
+            const SizedBox(height: 10.0), // Added space here
+            // Example of how it's used inside the FeaturedCoursesSection widget:
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Text(
+                  'Featured Courses',
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 10.0), // Added space here
+
+            FeaturedCoursesSection(courses: mockFeaturedCourses),
+            const SizedBox(height: 10.0),
+            const PartnershipScroller(),
+            const SizedBox(height: 10.0),
+
+            DailyChallengeCard(
+              title: "Daily Clinical Challenge",
+              description:
+                  "Test your knowledge and stay sharp with our daily questions.",
+              buttonText: "Take the Challenge",
+              onButtonPressed: () {
+                // This is the action that runs when the user taps the button.
+                print("User navigated to the challenge screen.");
+              },
+            ), // Added space here
+            const SizedBox(height: 10.0),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Text(
+                  'Top Trending Fellowship Course',
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 10.0),
+
+            FeaturedCoursesSection(courses: mockFeaturedCourses),
+            const SizedBox(height: 10.0),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Text(
+                  'Top Trending Certification Course',
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 10.0),
+            FeaturedCoursesSection(courses: mockFeaturedCourses),
+            const SizedBox(height: 10.0),
+            TestimonialSlider(),
+            const SizedBox(height: 10.0),
+            ReferralCard(
+              onTap: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text(
+                      'Referral card tapped! Navigating to referral page...',
+                    ),
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// Custom widget for the page indicator dots
+class _PageIndicatorDot extends StatelessWidget {
+  final bool isActive;
+
+  const _PageIndicatorDot({required this.isActive});
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 150),
+      margin: const EdgeInsets.symmetric(horizontal: 6.0),
+      height: 8.0,
+      width: 8.0,
+      decoration: BoxDecoration(
+        color: isActive ? Colors.blueGrey : Colors.black,
+        borderRadius: BorderRadius.circular(4),
+      ),
+    );
+  }
+}

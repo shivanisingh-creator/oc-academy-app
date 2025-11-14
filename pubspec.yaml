@@ -24,6 +24,7 @@ dependencies:
   intl: ^0.20.2
   shared_preferences: ^2.2.3
   dartz: ^0.10.1
+  connectivity_plus: ^6.0.3 # Use the latest version
 
 dev_dependencies:
   flutter_test:

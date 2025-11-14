@@ -1,17 +1,30 @@
 // lib/config/app_config.dart
 
+import 'package:oc_academy_app/core/constants/api_endpoints.dart';
+
 enum Environment { production, preprod, staging }
 
 class AppConfig {
   final Environment environment;
   final String baseUrl;
   final String apiKey;
-  // Add other environment-specific settings here
+  
+  // --- New Keycloak Fields ---
+  final String keycloakBaseUrl;
+  final String keycloakRealm;
+  // ---------------------------
+
+  // Define static Keycloak paths (these are constant across all Keycloak servers)
+  static const String keycloakTokenPath = '/protocol/openid-connect/token';
+  static const String keycloakAuthPath = '/protocol/openid-connect/auth'; 
 
   AppConfig({
     required this.environment,
     required this.baseUrl,
     required this.apiKey,
+    // --- New required Keycloak fields ---
+    required this.keycloakBaseUrl,
+    required this.keycloakRealm,
   });
 
   // Factory method to initialize config based on a passed environment string
@@ -20,28 +33,38 @@ class AppConfig {
       case 'production':
         return AppConfig._prod();
       case 'preprod':
-        return AppConfig._preprod();
       case 'staging':
       default:
         return AppConfig._staging();
     }
   }
 
+  // --- Private Constructors for Environment-Specific Values ---
+
   // Private constructor for Production
   AppConfig._prod()
-      : environment = Environment.production,
-        baseUrl = 'https://api.yourproduct.com/v1', // ⚠️ Actual Production URL
-        apiKey = 'PROD_API_KEY_123';
+    : environment = Environment.production,
+      baseUrl = ApiEndpoints.baseProdUrl,
+      apiKey = 'PROD_API_KEY_123',
+      // Keycloak specific production settings
+      keycloakBaseUrl = ApiEndpoints.keycloakProdUrl,
+      keycloakRealm = ApiEndpoints.keycloakProdRealm;
 
   // Private constructor for Pre-Production
   AppConfig._preprod()
-      : environment = Environment.preprod,
-        baseUrl = 'https://api.yourpreprod.com/v1', // Pre-Production URL
-        apiKey = 'PREPROD_API_KEY_456';
+    : environment = Environment.preprod,
+      baseUrl = ApiEndpoints.basePreProdUrl,
+      apiKey = 'PREPROD_API_KEY_456',
+      // Keycloak specific pre-production settings
+      keycloakBaseUrl = ApiEndpoints.keycloakPreProdUrl,
+      keycloakRealm = ApiEndpoints.keycloakPreProdRealm;
 
   // Private constructor for Staging (Default)
   AppConfig._staging()
-      : environment = Environment.staging,
-        baseUrl = 'https://api.yourstaging.com/v1', // Staging/Dev URL
-        apiKey = 'STAGING_API_KEY_789';
+    : environment = Environment.staging,
+      baseUrl = ApiEndpoints.baseStagingUrl,
+      apiKey = 'STAGING_API_KEY_789',
+      // Keycloak specific staging settings
+      keycloakBaseUrl = ApiEndpoints.keycloakStagingUrl, // e.g., https://stg-keycloak.ocacademy.in
+      keycloakRealm = ApiEndpoints.keycloakStagingRealm; // e.g., stg-ocacademy
 }

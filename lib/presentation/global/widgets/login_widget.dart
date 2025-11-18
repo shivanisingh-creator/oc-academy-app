@@ -1,6 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: LoginScreen(),
+    );
+  }
+}
+
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -23,10 +39,10 @@ class _LoginScreenState extends State<LoginScreen> {
     const Color primaryBlue = Color(
       0XFF3359A7,
     ); // For buttons and active states
-    const Color gradientStart = Color(0xFFEFF6FF); // Corresponds to Tailwind blue-50
+    const Color gradientStart = Color(0xFFEFF6FF); // White at the top
     const Color gradientEnd = Color(
-      0xFFFFFFFF,
-    ); // Use white for the end color to create a subtle gradient
+      0xFFF0F2F5,
+    ); // Light grey/off-white at the bottom
     const Color logoPink = Color(0xFFEC407A); // Pink for the 'OC' logo
 
     return Scaffold(
@@ -37,10 +53,9 @@ class _LoginScreenState extends State<LoginScreen> {
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            // Updated colors to match the subtle blue-50 to white gradient
-            colors: [gradientStart, gradientStart], 
-            // Removed stops property to allow natural blending
+            end: Alignment.center,
+            colors: [gradientStart, gradientStart],
+            stops: [0.0, 1],
           ),
         ),
         child: SafeArea(
@@ -50,6 +65,8 @@ class _LoginScreenState extends State<LoginScreen> {
               vertical: 40.0,
             ),
             child: Column(
+              mainAxisAlignment:
+                  MainAxisAlignment.center, // Center content vertically
               crossAxisAlignment:
                   CrossAxisAlignment.stretch, // Stretch children horizontally
               children: <Widget>[
@@ -62,12 +79,12 @@ class _LoginScreenState extends State<LoginScreen> {
                       SvgPicture.asset(
                         "assets/images/oc_academy.svg",
                         height: 100,
-                        colorFilter: ColorFilter.mode(logoPink, BlendMode.srcIn), // Use colorFilter for SVG color
+                        color: logoPink,
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 60),
+                const SizedBox(height: 30),
 
                 // Title Text
                 const Text(
@@ -222,7 +239,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     children: [
                       // Google logo (Placeholder/Fallback)
                       SvgPicture.asset(
-                        'assets/images/google.svg', 
+                        'assets/images/google.svg',
                         height: 24,
                         width: 24,
                         errorBuilder: (context, error, stackTrace) =>
@@ -247,7 +264,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 const SizedBox(height: 40),
 
                 // Disclaimer Text
-                // The 'const Spacer()' was removed here to eliminate the extra white space.
                 RichText(
                   textAlign: TextAlign.center,
                   text: TextSpan(
@@ -283,6 +299,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ],
                   ),
                 ),
+                const SizedBox(height: 20),
               ],
             ),
           ),

@@ -7,6 +7,10 @@ class ApiUtils {
   final Dio _dio;
   final AppConfig _config;
 
+  // 🚨 FIX: Add a public getter to expose the configuration 🚨
+  // This allows external classes (like KeycloakService) to access the environment settings.
+  AppConfig get config => _config; 
+
   // 1. Private Constructor: Only callable internally
   ApiUtils._internal(this._config) 
       : _dio = Dio(BaseOptions(
@@ -25,7 +29,6 @@ class ApiUtils {
   }
 
   // 4. Singleton Getter: Used everywhere in the app
-  // This throws an error if it's called before initialize()
   static ApiUtils get instance {
     if (_instance == null) {
       throw Exception("ApiUtils must be initialized by calling ApiUtils.initialize(config) in main()");
@@ -61,7 +64,7 @@ class ApiUtils {
     );
   }
 
-  // --- Error Handling Methods (As provided by you) ---
+  // --- Error Handling Methods (Unchanged) ---
 
   String getNetworkError() {
     return 'Please check your internet connection.';
@@ -72,7 +75,6 @@ class ApiUtils {
 
     if (error is DioException) {
       if (error.type == DioExceptionType.badResponse && error.response != null) {
-        // Attempt to get a custom message from the API response body
         message = error.response!.data['message'] ?? 'Server Error: ${error.response!.statusCode}';
       } else if (error.type == DioExceptionType.connectionTimeout) {
         message = 'Request timed out.';
@@ -85,6 +87,4 @@ class ApiUtils {
 }
 
 // Global instance to match your previous structure:
-// NOTE: This global variable will rely on ApiUtils.instance getter 
-// and should only be used after initialization.
 final apiUtils = ApiUtils.instance;

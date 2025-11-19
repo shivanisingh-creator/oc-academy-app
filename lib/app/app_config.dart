@@ -12,6 +12,8 @@ class AppConfig {
   // --- New Keycloak Fields ---
   final String keycloakBaseUrl;
   final String keycloakRealm;
+  final String keycloakClientId;
+  final String keycloakClientSecret;
   // ---------------------------
 
   // Define static Keycloak paths (these are constant across all Keycloak servers)
@@ -25,6 +27,8 @@ class AppConfig {
     // --- New required Keycloak fields ---
     required this.keycloakBaseUrl,
     required this.keycloakRealm,
+    required this.keycloakClientId,
+    required this.keycloakClientSecret,
   });
 
   // Factory method to initialize config based on a passed environment string
@@ -33,6 +37,7 @@ class AppConfig {
       case 'production':
         return AppConfig._prod();
       case 'preprod':
+        return AppConfig._preprod();
       case 'staging':
       default:
         return AppConfig._staging();
@@ -48,7 +53,9 @@ class AppConfig {
       apiKey = 'PROD_API_KEY_123',
       // Keycloak specific production settings
       keycloakBaseUrl = ApiEndpoints.keycloakProdUrl,
-      keycloakRealm = ApiEndpoints.keycloakProdRealm;
+      keycloakRealm = ApiEndpoints.keycloakProdRealm,
+      keycloakClientId = ApiEndpoints.keycloakProdClientId,
+      keycloakClientSecret = ApiEndpoints.keycloakProdClientSecret;
 
   // Private constructor for Pre-Production
   AppConfig._preprod()
@@ -57,7 +64,9 @@ class AppConfig {
       apiKey = 'PREPROD_API_KEY_456',
       // Keycloak specific pre-production settings
       keycloakBaseUrl = ApiEndpoints.keycloakPreProdUrl,
-      keycloakRealm = ApiEndpoints.keycloakPreProdRealm;
+      keycloakRealm = ApiEndpoints.keycloakPreProdRealm,
+      keycloakClientId = ApiEndpoints.keycloakPreProdClientId,
+      keycloakClientSecret = ApiEndpoints.keycloakPreProdClientSecret;
 
   // Private constructor for Staging (Default)
   AppConfig._staging()
@@ -66,5 +75,7 @@ class AppConfig {
       apiKey = 'STAGING_API_KEY_789',
       // Keycloak specific staging settings
       keycloakBaseUrl = ApiEndpoints.keycloakStagingUrl, // e.g., https://stg-keycloak.ocacademy.in
-      keycloakRealm = ApiEndpoints.keycloakStagingRealm; // e.g., stg-ocacademy
+      keycloakRealm = ApiEndpoints.keycloakStagingRealm,
+      keycloakClientId = ApiEndpoints.keycloakStagingClientId,
+      keycloakClientSecret = ApiEndpoints.keycloakStagingClientSecret; // e.g., stg-ocacademy
 }

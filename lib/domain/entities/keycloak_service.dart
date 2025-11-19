@@ -62,7 +62,7 @@ class KeycloakService {
 
       // 3. Process Success
       final tokenResponse = KeycloakTokenResponse.fromJson(
-        responseData as Map<String, dynamic>,
+        responseData.data as Map<String, dynamic>,
       );
 
       // 4. Save the token using the dedicated storage service

@@ -4,10 +4,30 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+        
+        {
+            "name": "Flutter (staging)",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main_staging.dart"
+        },
+        {
+            "name": "Flutter (preprod)",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main_preprod.dart"
+        },
+        {
+            "name": "Flutter (prod)",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main_prod.dart"
+        },
         {
             "name": "oc_academy_app",
             "request": "launch",
-            "type": "dart"
+            "type": "dart",
+            "program": "lib/main_prod.dart"
         },
         {
             "name": "oc_academy_app (profile mode)",

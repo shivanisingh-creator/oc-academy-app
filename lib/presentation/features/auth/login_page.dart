@@ -4,6 +4,7 @@ import 'package:oc_academy_app/app/app_config.dart';
 import 'package:oc_academy_app/data/repositories/login_repository.dart';
 import 'package:oc_academy_app/domain/entities/keycloak_service.dart';
 import 'package:oc_academy_app/presentation/features/auth/view/widgets/otp_verification_screen.dart';
+import 'package:oc_academy_app/core/utils/error_tooltip.dart';
 
 class LoginPage extends StatefulWidget {
   final AppConfig config;
@@ -16,6 +17,7 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final TextEditingController _phoneNumberController = TextEditingController();
   final AuthRepository _authRepository = AuthRepository();
+  final GlobalKey _phoneFieldKey = GlobalKey();
 
   @override
   void dispose() {
@@ -94,6 +96,7 @@ class _LoginPageState extends State<LoginPage> {
 
                 // Phone Number Input
                 Container(
+                  key: _phoneFieldKey,
                   padding: const EdgeInsets.symmetric(horizontal: 12.0),
                   decoration: BoxDecoration(
                     color: Colors.white,
@@ -165,6 +168,14 @@ class _LoginPageState extends State<LoginPage> {
                 // Send OTP Button
                 ElevatedButton(
                   onPressed: () async {
+                    if (_phoneNumberController.text.length < 10) {
+                      ErrorTooltip.show(
+                        context,
+                        _phoneFieldKey,
+                        "Oops! Invalid number",
+                      );
+                      return;
+                    }
                     // Fetch a fresh Keycloak token
                     await KeycloakService().getKeycloakToken(
                       clientId: widget.config.keycloakClientId,

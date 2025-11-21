@@ -3,6 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:oc_academy_app/app/app_config.dart';
 import 'package:oc_academy_app/data/repositories/login_repository.dart';
 import 'package:oc_academy_app/domain/entities/keycloak_service.dart';
+import 'package:oc_academy_app/presentation/features/auth/view/widgets/otp_verification_screen.dart';
 
 class LoginPage extends StatefulWidget {
   final AppConfig config;
@@ -29,9 +30,6 @@ class _LoginPageState extends State<LoginPage> {
       0XFF3359A7,
     ); // For buttons and active states
     const Color gradientStart = Color(0xFFEFF6FF); // White at the top
-    const Color gradientEnd = Color(
-      0xFFF0F2F5,
-    ); // Light grey/off-white at the bottom
     const Color logoPink = Color(0xFFEC407A); // Pink for the 'OC' logo
 
     return Scaffold(
@@ -174,7 +172,20 @@ class _LoginPageState extends State<LoginPage> {
                       clientSecret: widget.config.keycloakClientSecret,
                     );
                     // Then, call the signupLoginMobile endpoint
-                    _authRepository.signupLoginMobile(_phoneNumberController.text);
+                    final response = await _authRepository
+                        .signupLoginMobile(_phoneNumberController.text);
+                    if (response != null && response.response == "OTP sent") {
+                      if (mounted) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => OtpVerificationScreen(
+                              phoneNumber: _phoneNumberController.text,
+                            ),
+                          ),
+                        );
+                      }
+                    }
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: primaryBlue,

@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
+import 'package:oc_academy_app/core/utils/storage.dart';
+import 'package:oc_academy_app/data/models/auth/verify_otp_request.dart';
+import 'package:oc_academy_app/data/repositories/login_repository.dart';
+import 'package:oc_academy_app/presentation/features/auth/view/widgets/home_page_screen.dart';
 import 'package:pinput/pinput.dart'; // Import the pinput package
 
 // Constants for styling
@@ -26,6 +30,8 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
   // We only need one controller and one focus node for Pinput
   final TextEditingController _pinController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
+  final AuthRepository _authRepository = AuthRepository();
+  final TokenStorage _tokenStorage = TokenStorage();
   
   // State to hold the countdown timer
   late Timer _timer;
@@ -76,10 +82,32 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
     }
   }
 
-  void _onSubmit() {
+  void _onSubmit() async {
     if (_currentOtp.length == otpLength) {
       print('OTP Submitted: ${_currentOtp}');
-      // Implement verification logic here
+      final request = VerifyOtpRequest(
+        currentDevice: "device name",
+        deviceToken: "Device Token",
+        fcmToken: "fcm_token",
+        mobileNumber: widget.phoneNumber,
+        otp: _currentOtp,
+        registrationSource: "webapp",
+        isLead: false,
+        productType: 0,
+      );
+      final response = await _authRepository.verifyOtp(request);
+      if (response != null) {
+        print('✅ OTP Verification Success: ${response.response?.message}');
+        if (response.response?.isNewUser == false && response.response?.accessToken != null) {
+          await _tokenStorage.saveApiAccessToken(response.response!.accessToken);
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const MyApp()),
+          );
+        }
+      } else {
+        print('❌ OTP Verification Failed');
+      }
     } else {
       print('Please enter the full OTP.');
     }

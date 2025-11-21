@@ -8,7 +8,7 @@ class AppConfig {
   final Environment environment;
   final String baseUrl;
   final String apiKey;
-  
+
   // --- New Keycloak Fields ---
   final String keycloakBaseUrl;
   final String keycloakRealm;
@@ -18,7 +18,7 @@ class AppConfig {
 
   // Define static Keycloak paths (these are constant across all Keycloak servers)
   static const String keycloakTokenPath = '/protocol/openid-connect/token';
-  static const String keycloakAuthPath = '/protocol/openid-connect/auth'; 
+  static const String keycloakAuthPath = '/protocol/openid-connect/auth';
 
   AppConfig({
     required this.environment,
@@ -74,8 +74,10 @@ class AppConfig {
       baseUrl = ApiEndpoints.baseStagingUrl,
       apiKey = 'STAGING_API_KEY_789',
       // Keycloak specific staging settings
-      keycloakBaseUrl = ApiEndpoints.keycloakStagingUrl, // e.g., https://stg-keycloak.ocacademy.in
+      keycloakBaseUrl = ApiEndpoints
+          .keycloakStagingUrl, // e.g., https://stg-keycloak.ocacademy.in
       keycloakRealm = ApiEndpoints.keycloakStagingRealm,
       keycloakClientId = ApiEndpoints.keycloakStagingClientId,
-      keycloakClientSecret = ApiEndpoints.keycloakStagingClientSecret; // e.g., stg-ocacademy
+      keycloakClientSecret =
+          ApiEndpoints.keycloakStagingClientSecret; // e.g., stg-ocacademy
 }

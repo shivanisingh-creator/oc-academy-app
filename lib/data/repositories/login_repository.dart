@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:oc_academy_app/core/constants/api_endpoints.dart';
 import 'package:oc_academy_app/core/utils/helpers/api_utils.dart';
 import 'package:oc_academy_app/core/utils/storage.dart';
 import 'package:oc_academy_app/data/models/auth/signup_login_mobile_response.dart';
@@ -19,7 +20,7 @@ class AuthRepository {
       print("Calling API: $fullUrl");
 
       final response = await _apiUtils.post(
-        url: '/auth/signupLogin/mobile',
+        url: ApiEndpoints.signupLoginMobile,
         data: {
           "mobileNumber": mobileNumber,
           "appleUserId": "string" /// TODO: Handle this properly

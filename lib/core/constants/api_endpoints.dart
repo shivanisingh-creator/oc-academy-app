@@ -27,4 +27,9 @@ class ApiEndpoints {
     static const String keycloakProdClientSecret = 'Eik0J5noiLWCqvLTzBxCkuEc0LAXBMNy';
     static const String keycloakPreProdClientSecret = 'YRwwmADpGd5lvvHPsMOWbqwJrlaZWwnd';
     static const String keycloakStagingClientSecret = 'SMA9xI3AVIwfVAWiXS7DMbEYi339ZxAs';
+
+    ///Login APIs
+      static const String signupLoginMobile = '/auth/signupLogin/mobile';
+
+    
 }

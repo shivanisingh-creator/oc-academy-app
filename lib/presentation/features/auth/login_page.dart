@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:oc_academy_app/app/app_config.dart';
-import 'package:oc_academy_app/data/repositories/auth_repository.dart';
+import 'package:oc_academy_app/data/repositories/login_repository.dart';
 import 'package:oc_academy_app/domain/entities/keycloak_service.dart';
 
 class LoginPage extends StatefulWidget {

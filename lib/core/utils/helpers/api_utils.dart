@@ -75,7 +75,11 @@ class ApiUtils {
 
     if (error is DioException) {
       if (error.type == DioExceptionType.badResponse && error.response != null) {
-        message = error.response!.data['message'] ?? 'Server Error: ${error.response!.statusCode}';
+        if (error.response!.data is Map<String, dynamic>) {
+          message = error.response!.data['message'] ?? 'Server Error: ${error.response!.statusCode}';
+        } else {
+          message = error.response!.data.toString();
+        }
       } else if (error.type == DioExceptionType.connectionTimeout) {
         message = 'Request timed out.';
       } else if (error.type == DioExceptionType.unknown) {

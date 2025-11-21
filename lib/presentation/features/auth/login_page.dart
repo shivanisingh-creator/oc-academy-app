@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:oc_academy_app/app/app_config.dart';
+import 'package:oc_academy_app/data/repositories/auth_repository.dart';
 import 'package:oc_academy_app/domain/entities/keycloak_service.dart';
 
 class LoginPage extends StatefulWidget {
@@ -13,7 +14,7 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   final TextEditingController _phoneNumberController = TextEditingController();
-  final KeycloakService _keycloakService = KeycloakService();
+  final AuthRepository _authRepository = AuthRepository();
 
   @override
   void dispose() {
@@ -166,13 +167,14 @@ class _LoginPageState extends State<LoginPage> {
 
                 // Send OTP Button
                 ElevatedButton(
-                  onPressed: () {
-                    // Implement OTP sending logic here
-                    print('Calling Keycloak to get access token...');
-                    _keycloakService.getKeycloakToken(
+                  onPressed: () async {
+                    // Fetch a fresh Keycloak token
+                    await KeycloakService().getKeycloakToken(
                       clientId: widget.config.keycloakClientId,
                       clientSecret: widget.config.keycloakClientSecret,
                     );
+                    // Then, call the signupLoginMobile endpoint
+                    _authRepository.signupLoginMobile(_phoneNumberController.text);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: primaryBlue,

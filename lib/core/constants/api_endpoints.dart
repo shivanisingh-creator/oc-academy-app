@@ -3,7 +3,7 @@ class ApiEndpoints {
   static const String baseProdUrl = 'https://oca-commons-api.ocacademy.in/api';
 
   ///base url for the staging
-  static const String baseStagingUrl = 'https://stg-oca-commons-api.ocacademy.in/api';
+  static const String baseStagingUrl = 'https://stg-oca-commons-api.ocacademy.in/api/';
 
   ///base url for the pre-prod
   static const String basePreProdUrl = 'https://stg-oca-commons-api.ocacademy.in/api';

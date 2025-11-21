@@ -29,7 +29,6 @@ class _LoginPageState extends State<LoginPage> {
     const Color primaryBlue = Color(
       0XFF3359A7,
     ); // For buttons and active states
-    const Color gradientStart = Color(0xFFEFF6FF); // White at the top
     const Color logoPink = Color(0xFFEC407A); // Pink for the 'OC' logo
 
     return Scaffold(
@@ -41,7 +40,7 @@ class _LoginPageState extends State<LoginPage> {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.center,
-            colors: [gradientStart, gradientStart],
+            colors: [Colors.white, Colors.white],
             stops: [0.0, 1],
           ),
         ),
@@ -171,7 +170,6 @@ class _LoginPageState extends State<LoginPage> {
                       clientId: widget.config.keycloakClientId,
                       clientSecret: widget.config.keycloakClientSecret,
                     );
-                    // Then, call the signupLoginMobile endpoint
                     final response = await _authRepository
                         .signupLoginMobile(_phoneNumberController.text);
                     if (response != null && response.response == "OTP sent") {

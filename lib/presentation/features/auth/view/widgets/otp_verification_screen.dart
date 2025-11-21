@@ -3,7 +3,7 @@ import 'dart:async';
 
 // Constants for styling
 const Color primaryBlue = Color(0XFF3359A7);
-const Color lightBlueBackground = Color(0xFFEFF6FF);
+const Color whiteBackground = Colors.white;
 const int otpLength = 6;
 const int resendTimeout = 60; // 60 seconds
 
@@ -118,21 +118,21 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
   @override
   Widget build(BuildContext context) {
     bool isOtpComplete = _currentOtp.length == otpLength;
-
     return Scaffold(
+      backgroundColor: whiteBackground,
       appBar: AppBar(
         // Use a back button to mimic navigation flow back to the login screen
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black87),
           onPressed: () => Navigator.of(context).pop(), 
         ),
-        backgroundColor: lightBlueBackground,
+        backgroundColor: whiteBackground,
         elevation: 0,
         title: const Text('Verify OTP', style: TextStyle(color: Colors.black87)),
       ),
       body: Container(
         decoration: const BoxDecoration(
-          color: lightBlueBackground,
+          color: whiteBackground,
         ),
         child: SafeArea(
           child: SingleChildScrollView(
@@ -148,9 +148,9 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                   'Enter the code sent to your phone',
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    fontSize: 22,
+                    fontSize: 20,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black87,
+                    color: Colors.black,
                   ),
                 ),
                 const SizedBox(height: 16),

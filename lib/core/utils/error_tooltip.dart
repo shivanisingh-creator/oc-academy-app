@@ -29,11 +29,6 @@ class ErrorTooltip {
     );
 
     Overlay.of(context).insert(_overlayEntry!);
-
-    // Automatically hide after 3 seconds
-    Future.delayed(const Duration(seconds: 3)).then((_) {
-      hide();
-    });
   }
 
   static void hide() {

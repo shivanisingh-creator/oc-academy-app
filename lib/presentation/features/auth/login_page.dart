@@ -20,6 +20,14 @@ class _LoginPageState extends State<LoginPage> {
   final GlobalKey _phoneFieldKey = GlobalKey();
 
   @override
+  void initState() {
+    super.initState();
+    _phoneNumberController.addListener(() {
+      ErrorTooltip.hide();
+    });
+  }
+
+  @override
   void dispose() {
     _phoneNumberController.dispose();
     super.dispose();

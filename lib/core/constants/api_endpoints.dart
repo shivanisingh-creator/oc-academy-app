@@ -32,6 +32,7 @@ class ApiEndpoints {
       static const String signupLoginMobile = '/auth/signupLogin/mobile';
       static const String verifyOtp = '/auth/verifyOtp';
       static const String createProfile = '/auth/createProfile';
+      static const String signupLoginGoogle = '/auth/google/login';
 
     
 }

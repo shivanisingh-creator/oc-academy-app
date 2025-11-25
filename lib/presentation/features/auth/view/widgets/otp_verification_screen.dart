@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
-import 'package:oc_academy_app/core/utils/storage.dart';
 import 'package:oc_academy_app/data/models/auth/verify_otp_request.dart';
 import 'package:oc_academy_app/data/repositories/login_repository.dart';
-import 'package:oc_academy_app/presentation/features/auth/view/signup_screen.dart';
-import 'package:oc_academy_app/presentation/features/auth/view/widgets/home_page_screen.dart';
 import 'package:pinput/pinput.dart'; // Import the pinput package
 import 'package:oc_academy_app/core/utils/error_tooltip.dart';
+import 'package:oc_academy_app/presentation/features/auth/view/mixins/auth_navigation_helper.dart';
 
 // Constants for styling
 const Color primaryBlue = Color(0XFF3359A7);
@@ -18,10 +16,7 @@ class OtpVerificationScreen extends StatefulWidget {
   // The phone number passed from the previous screen
   final String phoneNumber;
 
-  const OtpVerificationScreen({
-    super.key,
-    required this.phoneNumber,
-  });
+  const OtpVerificationScreen({super.key, required this.phoneNumber});
 
   @override
   State<OtpVerificationScreen> createState() => _OtpVerificationScreenState();
@@ -33,14 +28,13 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
   final TextEditingController _pinController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
   final AuthRepository _authRepository = AuthRepository();
-  final TokenStorage _tokenStorage = TokenStorage();
   final GlobalKey _pinPutKey = GlobalKey();
-  
+
   // State to hold the countdown timer
   late Timer _timer;
   int _secondsRemaining = resendTimeout;
   bool _canResend = false;
-  
+
   // Storage for the complete OTP value (now just the text from the single controller)
   String get _currentOtp {
     return _pinController.text;
@@ -49,11 +43,11 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
   @override
   void initState() {
     super.initState();
-    
+
     // Start the resend timer
     _startTimer();
-    
-    // Manual auto-focus/change listeners are no longer needed, 
+
+    // Manual auto-focus/change listeners are no longer needed,
     // as Pinput handles those internally.
   }
 
@@ -80,8 +74,8 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
 
   void _onResendOtp() {
     if (_canResend) {
-      print('OTP Resent to ${widget.phoneNumber}');
-      
+      // print('OTP Resent to ${widget.phoneNumber}');
+
       // Clear the current OTP input using the single controller
       _pinController.clear();
       FocusScope.of(context).requestFocus(_focusNode);
@@ -91,7 +85,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
 
   void _onSubmit() async {
     if (_currentOtp.length == otpLength) {
-      print('OTP Submitted: ${_currentOtp}');
+      // print('OTP Submitted: ${_currentOtp}');
       final request = VerifyOtpRequest(
         currentDevice: "device name",
         deviceToken: "Device Token",
@@ -114,7 +108,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
           if (match != null && match.groupCount >= 1) {
             attemptsLeft = int.tryParse(match.group(1)!) ?? 0;
           }
-          
+
           ErrorTooltip.show(
             context,
             _pinPutKey,
@@ -126,31 +120,23 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
               _canResend = true;
             });
           }
-        } else if (response.response?.isNewUser == true) {
-          final preAccessToken = response.response?.preAccessToken;
-          if (preAccessToken != null) {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (context) => SignupScreen(
-                  phoneNumber: widget.phoneNumber,
-                  preAccessToken: preAccessToken,
-                ),
-              ),
-            );
-          }
-        } else if (response.response?.isNewUser == false && response.response?.accessToken != null) {
-          await _tokenStorage.saveApiAccessToken(response.response!.accessToken);
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const MyApp()),
+        } else if (response.response?.isNewUser == true ||
+            (response.response?.isNewUser == false &&
+                response.response?.accessToken != null)) {
+          if (!mounted) return;
+          await AuthNavigationHelper.handleLoginSuccess(
+            context: context,
+            isNewUser: response.response!.isNewUser ?? false,
+            accessToken: response.response!.accessToken,
+            preAccessToken: response.response!.preAccessToken,
+            phoneNumber: widget.phoneNumber,
           );
         }
       } else {
-        print('❌ OTP Verification Failed');
+        // Logger().e('❌ OTP Verification Failed');
       }
     } else {
-      print('Please enter the full OTP.');
+      // Logger().w('Please enter the full OTP.');
     }
   }
 
@@ -176,27 +162,18 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
     ),
     decoration: BoxDecoration(
       borderRadius: BorderRadius.circular(8),
-      border: Border.all(
-        color: Colors.grey.shade400,
-        width: 1,
-      ),
+      border: Border.all(color: Colors.grey.shade400, width: 1),
     ),
   );
 
   // Define the theme for the currently focused pin box
   PinTheme get _focusedPinTheme => _defaultPinTheme.copyDecorationWith(
-    border: Border.all(
-      color: primaryBlue,
-      width: 2,
-    ),
+    border: Border.all(color: primaryBlue, width: 2),
   );
 
   // Define the theme for all pin boxes once the full OTP is entered
   PinTheme get _submittedPinTheme => _defaultPinTheme.copyDecorationWith(
-    border: Border.all(
-      color: primaryBlue,
-      width: 1.5,
-    ),
+    border: Border.all(color: primaryBlue, width: 1.5),
   );
 
   @override
@@ -207,16 +184,17 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black87),
-          onPressed: () => Navigator.of(context).pop(), 
+          onPressed: () => Navigator.of(context).pop(),
         ),
         backgroundColor: whiteBackground,
         elevation: 0,
-        title: const Text('Verify OTP', style: TextStyle(color: Colors.black87)),
+        title: const Text(
+          'Verify OTP',
+          style: TextStyle(color: Colors.black87),
+        ),
       ),
       body: Container(
-        decoration: const BoxDecoration(
-          color: whiteBackground,
-        ),
+        decoration: const BoxDecoration(color: whiteBackground),
         child: SafeArea(
           child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(
@@ -252,10 +230,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                 const Text(
                   'Enter OTP',
                   textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey,
-                  ),
+                  style: TextStyle(fontSize: 14, color: Colors.grey),
                 ),
                 const SizedBox(height: 40),
 
@@ -266,31 +241,31 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                   controller: _pinController,
                   focusNode: _focusNode,
                   keyboardType: TextInputType.number,
-                  
+
                   // Crucial for enabling platform-level autofill
-                  autofocus: true, 
-                  
+                  autofocus: true,
+
                   // Styling based on the PinTheme getters defined above
                   defaultPinTheme: _defaultPinTheme,
                   focusedPinTheme: _focusedPinTheme,
                   submittedPinTheme: _submittedPinTheme,
-                  
+
                   // Automatically calls onSubmit when the full OTP is entered
                   onCompleted: (pin) => _onSubmit(),
-                  
+
                   // Updates the state to enable/disable the submit button
                   onChanged: (value) {
                     ErrorTooltip.hide();
-                    if(mounted){
+                    if (mounted) {
                       setState(() {});
                     }
                   },
-                  
+
                   // Ensures the keyboard suggests the one-time code on iOS
                   autofillHints: const [AutofillHints.oneTimeCode],
                 ),
+
                 // --- END Pinput Widget ---
-                
                 const SizedBox(height: 30),
 
                 // Resend Timer/Button
@@ -311,7 +286,9 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                           fontSize: 14,
                           color: _canResend ? primaryBlue : Colors.grey,
                           fontWeight: FontWeight.bold,
-                          decoration: _canResend ? TextDecoration.underline : TextDecoration.none,
+                          decoration: _canResend
+                              ? TextDecoration.underline
+                              : TextDecoration.none,
                         ),
                       ),
                     ),
@@ -321,23 +298,27 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
 
                 // Submit Button
                 ElevatedButton(
-                  onPressed: isOtpComplete ? (_canResend ? _onResendOtp : _onSubmit) : null,
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(26),
-                    ),
-                    elevation: 0,
-                  ).copyWith(
-                    backgroundColor: MaterialStateProperty.resolveWith<Color>(
-                      (Set<MaterialState> states) {
-                        if (states.contains(MaterialState.disabled)) {
-                          return primaryBlue.withOpacity(0.5); 
-                        }
-                        return primaryBlue;
-                      },
-                    ),
-                  ),
+                  onPressed: isOtpComplete
+                      ? (_canResend ? _onResendOtp : _onSubmit)
+                      : null,
+                  style:
+                      ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(26),
+                        ),
+                        elevation: 0,
+                      ).copyWith(
+                        backgroundColor:
+                            MaterialStateProperty.resolveWith<Color>((
+                              Set<MaterialState> states,
+                            ) {
+                              if (states.contains(MaterialState.disabled)) {
+                                return primaryBlue.withOpacity(0.5);
+                              }
+                              return primaryBlue;
+                            }),
+                      ),
                   child: Text(
                     _canResend ? 'Resend OTP' : 'Submit',
                     style: const TextStyle(
@@ -352,7 +333,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                 // Change Phone Number Button
                 OutlinedButton(
                   onPressed: () {
-                    Navigator.of(context).pop(); 
+                    Navigator.of(context).pop();
                   },
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),

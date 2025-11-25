@@ -28,6 +28,10 @@ dependencies:
   connectivity_plus: ^6.0.3 # Use the latest version
   pinput: 6.0.0 
   country_code_picker: ^3.0.0 # Add this line
+  firebase_messaging: ^15.0.1
+  device_info_plus: ^10.1.0
+  
+  google_sign_in: ^6.0.0
 
 dev_dependencies:
   flutter_test:

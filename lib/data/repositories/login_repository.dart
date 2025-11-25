@@ -8,9 +8,45 @@ import 'package:oc_academy_app/data/models/auth/signup_login_mobile_response.dar
 import 'package:oc_academy_app/data/models/auth/verify_otp_request.dart';
 import 'package:oc_academy_app/data/models/auth/verify_otp_response.dart';
 
+import 'package:oc_academy_app/data/models/auth/signup_login_google_request.dart';
+import 'package:oc_academy_app/data/models/auth/signup_login_google_response.dart';
+
 class AuthRepository {
   final ApiUtils _apiUtils = ApiUtils.instance;
   final TokenStorage _tokenStorage = TokenStorage();
+
+  Future<SignupLoginGoogleResponse?> signInWithGoogle(
+      SignupLoginGoogleRequest request) async {
+    try {
+      final String? token = await _tokenStorage.getAccessToken();
+      if (token == null) {
+        print("❌ No access token found.");
+        return null;
+      }
+
+      final response = await _apiUtils.post(
+        url: ApiEndpoints.signupLoginGoogle,
+        data: request.toJson(),
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        print("✅ Google Sign-In successful.");
+        final googleSignInResponse =
+            SignupLoginGoogleResponse.fromJson(response.data);
+        print("Response: ${googleSignInResponse.response}");
+        return googleSignInResponse;
+      }
+      return null;
+    } catch (e) {
+      print("❌ Exception during signInWithGoogle: ${_apiUtils.handleError(e)}");
+      return null;
+    }
+  }
 
   Future<SignupLoginMobileResponse?> signupLoginMobile(String mobileNumber) async {
     try {

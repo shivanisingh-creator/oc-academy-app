@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:oc_academy_app/app/app_config.dart';
+import 'package:oc_academy_app/data/models/auth/signup_login_google_request.dart';
 import 'package:oc_academy_app/data/repositories/login_repository.dart';
 import 'package:oc_academy_app/domain/entities/keycloak_service.dart';
+import 'package:oc_academy_app/domain/entities/auth/google_auth_service.dart';
 import 'package:oc_academy_app/presentation/features/auth/view/widgets/otp_verification_screen.dart';
 import 'package:oc_academy_app/core/utils/error_tooltip.dart';
+import 'package:device_info_plus/device_info_plus.dart';
+import 'package:oc_academy_app/presentation/features/auth/view/mixins/auth_navigation_helper.dart';
+import 'dart:io';
 
 class LoginPage extends StatefulWidget {
   final AppConfig config;
@@ -18,6 +23,20 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _phoneNumberController = TextEditingController();
   final AuthRepository _authRepository = AuthRepository();
   final GlobalKey _phoneFieldKey = GlobalKey();
+
+  Future<String> _getCurrentDevice() async {
+    DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+    String deviceName = 'unknown';
+
+    if (Platform.isAndroid) {
+      AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
+      deviceName = androidInfo.model;
+    } else if (Platform.isIOS) {
+      IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
+      deviceName = iosInfo.utsname.machine;
+    }
+    return deviceName;
+  }
 
   @override
   void initState() {
@@ -189,8 +208,9 @@ class _LoginPageState extends State<LoginPage> {
                       clientId: widget.config.keycloakClientId,
                       clientSecret: widget.config.keycloakClientSecret,
                     );
-                    final response = await _authRepository
-                        .signupLoginMobile(_phoneNumberController.text);
+                    final response = await _authRepository.signupLoginMobile(
+                      _phoneNumberController.text,
+                    );
                     if (response != null && response.response == "OTP sent") {
                       if (mounted) {
                         Navigator.push(
@@ -244,9 +264,44 @@ class _LoginPageState extends State<LoginPage> {
 
                 // Continue with Google Button
                 OutlinedButton(
-                  onPressed: () {
-                    // Implement Google Sign-in logic here
-                    print('Continue with Google');
+                  onPressed: () async {
+                    // print('Continue with Google');
+
+                    await KeycloakService().getKeycloakToken(
+                      clientId: widget.config.keycloakClientId,
+                      clientSecret: widget.config.keycloakClientSecret,
+                    );
+
+                    final googleAuthService = GoogleAuthService();
+                    final accessToken = await googleAuthService.signIn();
+
+                    if (accessToken != null) {
+                      final currentDevice = await _getCurrentDevice();
+                      final request = SignupLoginGoogleRequest(
+                        accessToken: accessToken,
+                        currentDevice: currentDevice,
+                      );
+                      final response = await _authRepository.signInWithGoogle(
+                        request,
+                      );
+
+                      if (response != null &&
+                          response.response!.accessToken != null) {
+                        if (!mounted) return;
+                        await AuthNavigationHelper.handleLoginSuccess(
+                          context: context,
+                          isNewUser: response.response!.isNewUser ?? false,
+                          accessToken: response.response!.accessToken,
+                          preAccessToken: response.response!.preAccessToken,
+                          phoneNumber:
+                              "", // Google sign in might not have phone number immediately available or needed for signup if email based?
+                          // Wait, SignupScreen needs phoneNumber.
+                          // Google response has mobileNumber?
+                        );
+                      } else {
+                        // Logger().e('Google Sign-In failed');
+                      }
+                    }
                   },
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 14),

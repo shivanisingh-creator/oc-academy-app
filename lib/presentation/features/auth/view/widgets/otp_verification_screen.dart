@@ -3,8 +3,10 @@ import 'dart:async';
 import 'package:oc_academy_app/core/utils/storage.dart';
 import 'package:oc_academy_app/data/models/auth/verify_otp_request.dart';
 import 'package:oc_academy_app/data/repositories/login_repository.dart';
+import 'package:oc_academy_app/presentation/features/auth/view/signup_screen.dart';
 import 'package:oc_academy_app/presentation/features/auth/view/widgets/home_page_screen.dart';
 import 'package:pinput/pinput.dart'; // Import the pinput package
+import 'package:oc_academy_app/core/utils/error_tooltip.dart';
 
 // Constants for styling
 const Color primaryBlue = Color(0XFF3359A7);
@@ -32,6 +34,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
   final FocusNode _focusNode = FocusNode();
   final AuthRepository _authRepository = AuthRepository();
   final TokenStorage _tokenStorage = TokenStorage();
+  final GlobalKey _pinPutKey = GlobalKey();
   
   // State to hold the countdown timer
   late Timer _timer;
@@ -58,12 +61,16 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
     _secondsRemaining = resendTimeout;
     _canResend = false;
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
       if (_secondsRemaining > 0) {
         setState(() {
           _secondsRemaining--;
         });
       } else {
-        _timer.cancel();
+        timer.cancel();
         setState(() {
           _canResend = true;
         });
@@ -96,9 +103,43 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
         productType: 0,
       );
       final response = await _authRepository.verifyOtp(request);
+      if (!mounted) return;
       if (response != null) {
-        print('✅ OTP Verification Success: ${response.response?.message}');
-        if (response.response?.isNewUser == false && response.response?.accessToken != null) {
+        if (response.response?.status == 'FAILED') {
+          // Parse attempts left from the message
+          final message = response.response?.message ?? '';
+          final RegExp exp = RegExp(r'(\d+)\sAttempts Left');
+          final Match? match = exp.firstMatch(message);
+          int attemptsLeft = 0;
+          if (match != null && match.groupCount >= 1) {
+            attemptsLeft = int.tryParse(match.group(1)!) ?? 0;
+          }
+          
+          ErrorTooltip.show(
+            context,
+            _pinPutKey,
+            '$message. You have $attemptsLeft attempts left.',
+          );
+          if (attemptsLeft == 0) {
+            if (!mounted) return;
+            setState(() {
+              _canResend = true;
+            });
+          }
+        } else if (response.response?.isNewUser == true) {
+          final preAccessToken = response.response?.preAccessToken;
+          if (preAccessToken != null) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => SignupScreen(
+                  phoneNumber: widget.phoneNumber,
+                  preAccessToken: preAccessToken,
+                ),
+              ),
+            );
+          }
+        } else if (response.response?.isNewUser == false && response.response?.accessToken != null) {
           await _tokenStorage.saveApiAccessToken(response.response!.accessToken);
           Navigator.pushReplacement(
             context,
@@ -119,6 +160,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
     // Dispose the single controller and focus node
     _pinController.dispose();
     _focusNode.dispose();
+    ErrorTooltip.hide();
     super.dispose();
   }
 
@@ -219,6 +261,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
 
                 // --- NEW: Pinput Widget for OTP Input ---
                 Pinput(
+                  key: _pinPutKey,
                   length: otpLength,
                   controller: _pinController,
                   focusNode: _focusNode,
@@ -236,7 +279,12 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                   onCompleted: (pin) => _onSubmit(),
                   
                   // Updates the state to enable/disable the submit button
-                  onChanged: (value) => setState(() {}),
+                  onChanged: (value) {
+                    ErrorTooltip.hide();
+                    if(mounted){
+                      setState(() {});
+                    }
+                  },
                   
                   // Ensures the keyboard suggests the one-time code on iOS
                   autofillHints: const [AutofillHints.oneTimeCode],
@@ -273,7 +321,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
 
                 // Submit Button
                 ElevatedButton(
-                  onPressed: isOtpComplete ? _onSubmit : null,
+                  onPressed: isOtpComplete ? (_canResend ? _onResendOtp : _onSubmit) : null,
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
@@ -290,9 +338,9 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                       },
                     ),
                   ),
-                  child: const Text(
-                    'Submit',
-                    style: TextStyle(
+                  child: Text(
+                    _canResend ? 'Resend OTP' : 'Submit',
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 18,
                       fontWeight: FontWeight.bold,

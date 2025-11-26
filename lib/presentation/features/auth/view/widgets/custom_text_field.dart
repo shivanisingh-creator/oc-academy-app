@@ -8,6 +8,7 @@ class CustomLabeledTextField extends StatelessWidget {
   final bool obscureText;
   final Widget? suffixIcon;
   final int? maxLines;
+  final bool readOnly;
 
   const CustomLabeledTextField({
     super.key,
@@ -18,6 +19,7 @@ class CustomLabeledTextField extends StatelessWidget {
     this.obscureText = false,
     this.suffixIcon,
     this.maxLines = 1,
+    this.readOnly = false,
   });
 
   @override
@@ -39,13 +41,16 @@ class CustomLabeledTextField extends StatelessWidget {
           keyboardType: keyboardType,
           obscureText: obscureText,
           maxLines: maxLines,
+          readOnly: readOnly,
           decoration: InputDecoration(
             hintText: hintText,
             hintStyle: const TextStyle(color: Colors.grey),
             filled: true,
             fillColor: Colors.white,
-            contentPadding:
-                const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+            contentPadding: const EdgeInsets.symmetric(
+              vertical: 14,
+              horizontal: 16,
+            ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
               borderSide: const BorderSide(color: Colors.grey, width: 1.0),
@@ -56,7 +61,10 @@ class CustomLabeledTextField extends StatelessWidget {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
-              borderSide: const BorderSide(color: Color(0XFF3359A7), width: 2.0),
+              borderSide: const BorderSide(
+                color: Color(0XFF3359A7),
+                width: 2.0,
+              ),
             ),
             suffixIcon: suffixIcon,
           ),

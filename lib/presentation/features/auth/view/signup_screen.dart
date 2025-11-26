@@ -12,8 +12,13 @@ import 'package:oc_academy_app/presentation/features/auth/view/widgets/home_page
 class SignupScreen extends StatefulWidget {
   final String phoneNumber;
   final String preAccessToken;
-  const SignupScreen(
-      {super.key, required this.phoneNumber, required this.preAccessToken});
+  final String? email;
+  const SignupScreen({
+    super.key,
+    required this.phoneNumber,
+    required this.preAccessToken,
+    this.email,
+  });
 
   @override
   State<SignupScreen> createState() => _SignupScreenState();
@@ -44,6 +49,11 @@ class _SignupScreenState extends State<SignupScreen> {
     super.initState();
     _phoneController.text = widget.phoneNumber;
     _phoneController.addListener(_validatePhoneNumber);
+
+    // Prefill email if provided (from Google Sign-In)
+    if (widget.email != null && widget.email!.isNotEmpty) {
+      _emailController.text = widget.email!;
+    }
   }
 
   @override
@@ -75,15 +85,15 @@ class _SignupScreenState extends State<SignupScreen> {
         email: _emailController.text,
         registrationSource: "webapp",
         preAccessToken: widget.preAccessToken,
-        professionId: _professions.indexOf(_selectedProfession!) +
+        professionId:
+            _professions.indexOf(_selectedProfession!) +
             1, // Assuming 1-based indexing for profession IDs
         title: _selectedProfession == 'Doctor'
             ? 'Dr.'
             : '', // Example: Set title based on profession
       );
 
-      final response =
-          await _authRepository.createProfile(request);
+      final response = await _authRepository.createProfile(request);
       if (response != null && response.response?.accessToken != null) {
         await _tokenStorage.saveApiAccessToken(response.response!.accessToken!);
         Navigator.pushReplacement(
@@ -110,11 +120,11 @@ class _SignupScreenState extends State<SignupScreen> {
 
   bool _formIsValid() {
     return _selectedProfession != null &&
-           _firstNameController.text.isNotEmpty &&
-           _lastNameController.text.isNotEmpty &&
-           _phoneController.text.isNotEmpty &&
-           _emailController.text.isNotEmpty &&
-           _agreedToTerms;
+        _firstNameController.text.isNotEmpty &&
+        _lastNameController.text.isNotEmpty &&
+        _phoneController.text.isNotEmpty &&
+        _emailController.text.isNotEmpty &&
+        _agreedToTerms;
   }
 
   @override
@@ -188,7 +198,7 @@ class _SignupScreenState extends State<SignupScreen> {
               label: 'Phone Number',
               controller: _phoneController,
               isValid: _isPhoneNumberValid,
-              readOnly: true,
+              readOnly: widget.phoneNumber.isNotEmpty,
             ),
             const SizedBox(height: 20),
 
@@ -198,6 +208,7 @@ class _SignupScreenState extends State<SignupScreen> {
               hintText: 'Enter your email address',
               controller: _emailController,
               keyboardType: TextInputType.emailAddress,
+              readOnly: widget.email != null && widget.email!.isNotEmpty,
             ),
             const SizedBox(height: 20),
 
@@ -217,15 +228,17 @@ class _SignupScreenState extends State<SignupScreen> {
                     TextSpan(
                       text: 'terms of use',
                       style: TextStyle(
-                          color: Color(0XFF3359A7),
-                          fontWeight: FontWeight.bold),
+                        color: Color(0XFF3359A7),
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     TextSpan(text: ' and '),
                     TextSpan(
                       text: 'privacy policy.',
                       style: TextStyle(
-                          color: Color(0XFF3359A7),
-                          fontWeight: FontWeight.bold),
+                        color: Color(0XFF3359A7),
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ],
                 ),
@@ -238,23 +251,24 @@ class _SignupScreenState extends State<SignupScreen> {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: _formIsValid() ? _submitForm : null,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0XFF3359A7),
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  elevation: 0,
-                ).copyWith(
-                  backgroundColor: MaterialStateProperty.resolveWith<Color>(
-                    (Set<MaterialState> states) {
-                      if (states.contains(MaterialState.disabled)) {
-                        return const Color(0XFF3359A7).withOpacity(0.5);
-                      }
-                      return const Color(0XFF3359A7);
-                    },
-                  ),
-                ),
+                style:
+                    ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0XFF3359A7),
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      elevation: 0,
+                    ).copyWith(
+                      backgroundColor: MaterialStateProperty.resolveWith<Color>(
+                        (Set<MaterialState> states) {
+                          if (states.contains(MaterialState.disabled)) {
+                            return const Color(0XFF3359A7).withOpacity(0.5);
+                          }
+                          return const Color(0XFF3359A7);
+                        },
+                      ),
+                    ),
                 child: const Text(
                   'Submit',
                   style: TextStyle(
@@ -277,8 +291,9 @@ class _SignupScreenState extends State<SignupScreen> {
                     TextSpan(
                       text: 'Login here',
                       style: const TextStyle(
-                          color: Color(0XFF3359A7),
-                          fontWeight: FontWeight.bold),
+                        color: Color(0XFF3359A7),
+                        fontWeight: FontWeight.bold,
+                      ),
                       // onTap for navigation (e.g., Navigator.push for LoginScreen)
                       recognizer: TapGestureRecognizer()
                         ..onTap = () {

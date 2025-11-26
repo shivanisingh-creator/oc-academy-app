@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:oc_academy_app/core/utils/storage.dart';
 import 'package:oc_academy_app/presentation/features/auth/view/signup_screen.dart';
 import 'package:oc_academy_app/presentation/features/auth/view/widgets/home_page_screen.dart';
+import 'package:oc_academy_app/data/repositories/user_repository.dart';
 
 class AuthNavigationHelper {
   static Future<void> handleLoginSuccess({
@@ -10,6 +11,7 @@ class AuthNavigationHelper {
     String? accessToken,
     String? preAccessToken,
     required String phoneNumber,
+    String? email,
   }) async {
     final TokenStorage tokenStorage = TokenStorage();
 
@@ -19,8 +21,9 @@ class AuthNavigationHelper {
           context,
           MaterialPageRoute(
             builder: (context) => SignupScreen(
-              phoneNumber: phoneNumber,
+              phoneNumber: email != null && email.isNotEmpty ? "" : phoneNumber,
               preAccessToken: preAccessToken,
+              email: email,
             ),
           ),
         );
@@ -28,6 +31,11 @@ class AuthNavigationHelper {
     } else {
       if (accessToken != null) {
         await tokenStorage.saveApiAccessToken(accessToken);
+
+        // Fetch user details
+        final UserRepository userRepository = UserRepository();
+        await userRepository.getUserLite();
+
         if (!context.mounted) return;
         Navigator.pushReplacement(
           context,

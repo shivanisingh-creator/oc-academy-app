@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:logger/logger.dart';
 import 'package:oc_academy_app/app/app_config.dart';
 import 'package:oc_academy_app/data/models/auth/signup_login_google_request.dart';
 import 'package:oc_academy_app/data/repositories/login_repository.dart';
@@ -286,20 +287,20 @@ class _LoginPageState extends State<LoginPage> {
                       );
 
                       if (response != null &&
-                          response.response!.accessToken != null) {
+                          (response.response!.accessToken != null ||
+                              response.response!.isNewUser == true)) {
                         if (!mounted) return;
                         await AuthNavigationHelper.handleLoginSuccess(
+                          // ignore: use_build_context_synchronously
                           context: context,
                           isNewUser: response.response!.isNewUser ?? false,
                           accessToken: response.response!.accessToken,
                           preAccessToken: response.response!.preAccessToken,
-                          phoneNumber:
-                              "", // Google sign in might not have phone number immediately available or needed for signup if email based?
-                          // Wait, SignupScreen needs phoneNumber.
-                          // Google response has mobileNumber?
+                          phoneNumber: response.response!.mobileNumber ?? "",
+                          email: response.response!.email,
                         );
                       } else {
-                        // Logger().e('Google Sign-In failed');
+                        Logger().e('Google Sign-In failed');
                       }
                     }
                   },

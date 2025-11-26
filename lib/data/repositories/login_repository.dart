@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:logger/logger.dart';
 import 'package:oc_academy_app/core/constants/api_endpoints.dart';
 import 'package:oc_academy_app/core/utils/helpers/api_utils.dart';
 import 'package:oc_academy_app/core/utils/storage.dart';
@@ -14,73 +15,79 @@ import 'package:oc_academy_app/data/models/auth/signup_login_google_response.dar
 class AuthRepository {
   final ApiUtils _apiUtils = ApiUtils.instance;
   final TokenStorage _tokenStorage = TokenStorage();
+  final Logger _logger = Logger();
 
   Future<SignupLoginGoogleResponse?> signInWithGoogle(
-      SignupLoginGoogleRequest request) async {
+    SignupLoginGoogleRequest request,
+  ) async {
     try {
       final String? token = await _tokenStorage.getAccessToken();
       if (token == null) {
-        print("❌ No access token found.");
+        _logger.e("❌ No access token found.");
         return null;
       }
 
       final response = await _apiUtils.post(
         url: ApiEndpoints.signupLoginGoogle,
         data: request.toJson(),
-        options: Options(
-          headers: {
-            'Authorization': 'Bearer $token',
-          },
-        ),
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
 
       if (response.statusCode == 200) {
-        print("✅ Google Sign-In successful.");
-        final googleSignInResponse =
-            SignupLoginGoogleResponse.fromJson(response.data);
-        print("Response: ${googleSignInResponse.response}");
+        _logger.i("✅ Google Sign-In successful.");
+        final googleSignInResponse = SignupLoginGoogleResponse.fromJson(
+          response.data,
+        );
+        _logger.i("Response: ${googleSignInResponse.response}");
         return googleSignInResponse;
       }
       return null;
     } catch (e) {
-      print("❌ Exception during signInWithGoogle: ${_apiUtils.handleError(e)}");
+      _logger.e(
+        "❌ Exception during signInWithGoogle: ${_apiUtils.handleError(e)}",
+      );
       return null;
     }
   }
 
-  Future<SignupLoginMobileResponse?> signupLoginMobile(String mobileNumber) async {
+  Future<SignupLoginMobileResponse?> signupLoginMobile(
+    String mobileNumber,
+  ) async {
     try {
       final String? token = await _tokenStorage.getAccessToken();
       if (token == null) {
-        print("❌ No access token found.");
+        _logger.e("❌ No access token found.");
         return null;
       }
 
-      final String fullUrl = '${_apiUtils.config.baseUrl}/auth/signupLogin/mobile';
-      print("Calling API: $fullUrl");
+      final String fullUrl =
+          '${_apiUtils.config.baseUrl}/auth/signupLogin/mobile';
+      _logger.i("Calling API: $fullUrl");
 
       final response = await _apiUtils.post(
         url: ApiEndpoints.signupLoginMobile,
         data: {
           "mobileNumber": mobileNumber,
-          "appleUserId": "string" /// TODO: Handle this properly
+          "appleUserId": "string",
+
+          /// TODO: Handle this properly
         },
-        options: Options(
-          headers: {
-            'Authorization': 'Bearer $token',
-          },
-        ),
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
 
       if (response.statusCode == 200) {
-        print("✅ OTP sent successfully.");
-        final signupResponse = SignupLoginMobileResponse.fromJson(response.data);
-        print("Response: ${signupResponse.response}");
+        _logger.i("✅ OTP sent successfully.");
+        final signupResponse = SignupLoginMobileResponse.fromJson(
+          response.data,
+        );
+        _logger.i("Response: ${signupResponse.response}");
         return signupResponse;
       }
       return null;
     } catch (e) {
-      print("❌ Exception during signupLoginMobile: ${_apiUtils.handleError(e)}");
+      _logger.e(
+        "❌ Exception during signupLoginMobile: ${_apiUtils.handleError(e)}",
+      );
       return null;
     }
   }
@@ -89,41 +96,41 @@ class AuthRepository {
     try {
       final String? token = await _tokenStorage.getAccessToken();
       if (token == null) {
-        print("❌ No access token found.");
+        _logger.e("❌ No access token found.");
         return null;
       }
 
       final response = await _apiUtils.post(
         url: ApiEndpoints.verifyOtp,
         data: request.toJson(),
-        options: Options(
-          headers: {
-            'Authorization': 'Bearer $token',
-          },
-        ),
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
 
       if (response.statusCode == 200) {
-        print("✅ OTP verified successfully.");
+        _logger.i("✅ OTP verified successfully.");
         final verifyOtpResponse = VerifyOtpResponse.fromJson(response.data);
-        print("Response: ${verifyOtpResponse.response}");
+        _logger.i("Response: ${verifyOtpResponse.response}");
         return verifyOtpResponse;
       }
       return null;
     } catch (e) {
-      print("❌ Exception during verifyOtp: ${_apiUtils.handleError(e)}");
+      _logger.e("❌ Exception during verifyOtp: ${_apiUtils.handleError(e)}");
       return null;
     }
   }
 
   Future<CreateProfileResponse?> createProfile(
-      CreateProfileRequest request) async {
+    CreateProfileRequest request,
+  ) async {
     try {
       final String? token = await _tokenStorage.getAccessToken();
       if (token == null) {
-        print("❌ No access token found.");
+        _logger.e("❌ No access token found.");
         return null;
       }
+
+      // Get the saved API access token to use as hk-access-token
+      final String? hkAccessToken = await _tokenStorage.getApiAccessToken();
 
       final response = await _apiUtils.post(
         url: ApiEndpoints.createProfile,
@@ -131,20 +138,24 @@ class AuthRepository {
         options: Options(
           headers: {
             'Authorization': 'Bearer $token',
+            'hk-access-token': hkAccessToken,
           },
         ),
       );
 
       if (response.statusCode == 200) {
-        print("✅ Profile created successfully.");
-        final createProfileResponse =
-            CreateProfileResponse.fromJson(response.data);
-        print("Response: ${createProfileResponse.response}");
+        _logger.i("✅ Profile created successfully.");
+        final createProfileResponse = CreateProfileResponse.fromJson(
+          response.data,
+        );
+        _logger.i("Response: ${createProfileResponse.response}");
         return createProfileResponse;
       }
       return null;
     } catch (e) {
-      print("❌ Exception during createProfile: ${_apiUtils.handleError(e)}");
+      _logger.e(
+        "❌ Exception during createProfile: ${_apiUtils.handleError(e)}",
+      );
       return null;
     }
   }

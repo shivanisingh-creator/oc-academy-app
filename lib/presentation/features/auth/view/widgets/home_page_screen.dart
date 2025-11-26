@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:oc_academy_app/data/models/home/banner_response.dart'
+    as banner_model;
+import 'package:oc_academy_app/data/repositories/home_repository.dart';
 import 'package:oc_academy_app/presentation/features/auth/view/widgets/blog_post.dart';
 import 'package:oc_academy_app/presentation/features/auth/view/widgets/daily_challenge.dart';
 import 'package:oc_academy_app/presentation/features/auth/view/widgets/explore_speciality.dart';
@@ -54,6 +57,37 @@ class FeaturedCoursesSection extends StatelessWidget {
 }
 
 class _MedicalAcademyScreenState extends State<MedicalAcademyScreen> {
+  final HomeRepository _homeRepository = HomeRepository();
+  List<banner_model.Banner> _banners = [];
+  bool _isLoadingBanners = true;
+  int _currentBannerIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchBanners();
+  }
+
+  Future<void> _fetchBanners() async {
+    try {
+      final response = await _homeRepository.getBanners();
+      if (response != null && response.response != null) {
+        setState(() {
+          _banners = response.response!;
+          _isLoadingBanners = false;
+        });
+      } else {
+        setState(() {
+          _isLoadingBanners = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _isLoadingBanners = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     // A dark primary color to match the app bar/background
@@ -134,32 +168,102 @@ class _MedicalAcademyScreenState extends State<MedicalAcademyScreen> {
               height: MediaQuery.of(context).size.height * 0.45,
               child: Stack(
                 children: <Widget>[
-                  Positioned.fill(
-                    child: ShaderMask(
-                      shaderCallback: (Rect bounds) {
-                        return LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: <Color>[
-                            Colors.white, // Fully opaque at the top
-                            Colors.white, // Stay opaque for most of the image
-                            Colors.black, // Start fading to transparent
-                          ],
-                          stops: <double>[
-                            0.0, // Start fully opaque
-                            0.7, // Keep opaque until 70% down
-                            1.0, // Fully transparent at the bottom
-                          ],
-                        ).createShader(bounds);
-                      },
-                      blendMode: BlendMode
-                          .dstIn, // This blend mode cuts out the shape based on transparency
-                      child: Image.asset(
-                        'assets/images/mrcp.png',
-                        fit: BoxFit.fill,
+                  // Banner carousel
+                  if (_isLoadingBanners)
+                    Positioned.fill(
+                      child: Container(
+                        color: Colors.grey[300],
+                        child: const Center(child: CircularProgressIndicator()),
+                      ),
+                    )
+                  else if (_banners.isNotEmpty)
+                    Positioned.fill(
+                      child: PageView.builder(
+                        itemCount: _banners.length,
+                        onPageChanged: (index) {
+                          setState(() {
+                            _currentBannerIndex = index;
+                          });
+                        },
+                        itemBuilder: (context, index) {
+                          final banner = _banners[index];
+                          return ShaderMask(
+                            shaderCallback: (Rect bounds) {
+                              return LinearGradient(
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                                colors: <Color>[
+                                  Colors.white,
+                                  Colors.white,
+                                  Colors.black,
+                                ],
+                                stops: <double>[0.0, 0.7, 1.0],
+                              ).createShader(bounds);
+                            },
+                            blendMode: BlendMode.dstIn,
+                            child: Image.network(
+                              banner.contentAppUrl ?? '',
+                              fit: BoxFit.fill,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Container(
+                                  color: Colors.grey[300],
+                                  child: const Center(
+                                    child: Icon(
+                                      Icons.image_not_supported,
+                                      size: 50,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                );
+                              },
+                              loadingBuilder:
+                                  (context, child, loadingProgress) {
+                                    if (loadingProgress == null) return child;
+                                    return Container(
+                                      color: Colors.grey[300],
+                                      child: Center(
+                                        child: CircularProgressIndicator(
+                                          value:
+                                              loadingProgress
+                                                      .expectedTotalBytes !=
+                                                  null
+                                              ? loadingProgress
+                                                        .cumulativeBytesLoaded /
+                                                    loadingProgress
+                                                        .expectedTotalBytes!
+                                              : null,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                            ),
+                          );
+                        },
+                      ),
+                    )
+                  else
+                    // Fallback to static image if no banners
+                    Positioned.fill(
+                      child: ShaderMask(
+                        shaderCallback: (Rect bounds) {
+                          return LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: <Color>[
+                              Colors.white,
+                              Colors.white,
+                              Colors.black,
+                            ],
+                            stops: <double>[0.0, 0.7, 1.0],
+                          ).createShader(bounds);
+                        },
+                        blendMode: BlendMode.dstIn,
+                        child: Image.asset(
+                          'assets/images/mrcp.png',
+                          fit: BoxFit.fill,
+                        ),
                       ),
                     ),
-                  ),
 
                   SafeArea(
                     child: Padding(
@@ -189,12 +293,19 @@ class _MedicalAcademyScreenState extends State<MedicalAcademyScreen> {
                     right: 0,
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        _PageIndicatorDot(isActive: true),
-                        _PageIndicatorDot(isActive: false),
-                        _PageIndicatorDot(isActive: false),
-                        _PageIndicatorDot(isActive: false),
-                      ],
+                      children: _banners.isNotEmpty
+                          ? List.generate(
+                              _banners.length,
+                              (index) => _PageIndicatorDot(
+                                isActive: index == _currentBannerIndex,
+                              ),
+                            )
+                          : <Widget>[
+                              _PageIndicatorDot(isActive: true),
+                              _PageIndicatorDot(isActive: false),
+                              _PageIndicatorDot(isActive: false),
+                              _PageIndicatorDot(isActive: false),
+                            ],
                     ),
                   ),
                 ],

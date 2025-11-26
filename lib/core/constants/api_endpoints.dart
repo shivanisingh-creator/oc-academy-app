@@ -43,6 +43,7 @@ class ApiEndpoints {
 
   ///Home APIs
   static const String getBanners = '/home/banner/getAll';
+  static const String getGlobalPartners = '/home/globalPartners';
 
-  // static const String hkAccessToken = 'b84512e6-f088-4a31-ac32-09674b9dfe14';
+  static const String hkAccessToken = 'b84512e6-f088-4a31-ac32-09674b9dfe14';
 }

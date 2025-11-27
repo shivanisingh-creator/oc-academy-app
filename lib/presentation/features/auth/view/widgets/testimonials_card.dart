@@ -1,126 +1,75 @@
 import 'package:flutter/material.dart';
+import 'package:oc_academy_app/data/models/home/testimonial_response.dart';
+import 'package:oc_academy_app/data/repositories/home_repository.dart';
 
-// --- 1. Data Model ---
-/// Defines the structure for a single testimonial entry.
-class Testimonial {
-  final String quote;
-  final String name;
-  final String designation;
-  final String imageUrl;
-
-  const Testimonial({
-    required this.quote,
-    required this.name,
-    required this.designation,
-    required this.imageUrl,
-  });
-}
-
-// Public Mock Data for easy access if needed
-const List<Testimonial> mockTestimonials = [
-  Testimonial(
-    quote:
-        "The depth of knowledge and practical insights I gained from the fellowship here is unparalleled. It has truly accelerated my career.",
-    name: "Dr. Chloe Sharma",
-    designation: "PG Program in Advanced Cardiology",
-    imageUrl: "assets/images/mrcp.png",
-  ),
-  Testimonial(
-    quote:
-        "An incredible learning journey! The faculty support was exceptional, and the hands-on projects were crucial for mastering the skills.",
-    name: "Anya Singh",
-    designation: "Masters in Computer Science",
-    imageUrl: "assets/images/mrcp.png",
-  ),
-  Testimonial(
-    quote:
-        "I highly recommend this program to anyone serious about their career. It opened doors I didn't even know existed. Simply transformative!",
-    name: "Ben Lee",
-    designation: "Executive MBA Program",
-    imageUrl: "assets/images/mrcp.png",
-  ),
-];
-
-// --- 2. Reusable Testimonial Card Widget (The content unit) ---
+// --- Reusable Testimonial Card Widget (The content unit) ---
 /// Displays a single testimonial with profile image, quote, name, and designation.
 class TestimonialCard extends StatelessWidget {
   final Testimonial testimonial;
 
-  const TestimonialCard({
-    super.key,
-    required this.testimonial,
-  });
+  const TestimonialCard({super.key, required this.testimonial});
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        // Profile Image
-        Container(
-          width: 120,
-          height: 120,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 10,
-                offset: const Offset(0, 5),
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          // Profile Image
+          Container(
+            width: 100,
+            height: 100,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 10,
+                  offset: const Offset(0, 5),
+                ),
+              ],
+            ),
+            child: ClipOval(
+              child: Image.network(
+                testimonial.contentUrl ?? '',
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) =>
+                    const Icon(Icons.person, size: 60, color: Colors.grey),
               ),
-            ],
-          ),
-          child: ClipOval(
-            child: Image.network(
-              testimonial.imageUrl,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) =>
-                  const Icon(Icons.person, size: 60, color: Colors.grey),
             ),
           ),
-        ),
-        const SizedBox(height: 30),
+          const SizedBox(height: 20),
 
-        // Quote
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0),
-          child: Text(
-            '"${testimonial.quote}"',
+          // Quote
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20.0),
+            child: Text(
+              '"${testimonial.description ?? ''}"',
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 18,
+                fontStyle: FontStyle.italic,
+                color: Color(0xFF4A4A4A), // Dark grey for text
+                height: 1.5,
+                fontFamily: 'Inter',
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+
+          // Name
+          Text(
+            "${testimonial.title ?? ''} ${testimonial.name ?? ''}",
             textAlign: TextAlign.center,
             style: const TextStyle(
-              fontSize: 18,
-              fontStyle: FontStyle.italic,
-              color: Color(0xFF4A4A4A), // Dark grey for text
-              height: 1.5,
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF1F2937), // Primary dark text color
               fontFamily: 'Inter',
             ),
           ),
-        ),
-        const SizedBox(height: 30),
-
-        // Name
-        Text(
-          testimonial.name,
-          textAlign: TextAlign.center,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: Color(0xFF1F2937), // Primary dark text color
-            fontFamily: 'Inter',
-          ),
-        ),
-        const SizedBox(height: 4),
-
-        // Designation
-        Text(
-          testimonial.designation,
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 14,
-            color: Colors.grey[600],
-            fontFamily: 'Inter',
-          ),
-        ),
-      ],
+          const SizedBox(height: 4),
+        ],
+      ),
     );
   }
 }
@@ -129,10 +78,7 @@ class TestimonialCard extends StatelessWidget {
 class DotIndicator extends StatelessWidget {
   final bool isActive;
 
-  const DotIndicator({
-    super.key,
-    required this.isActive,
-  });
+  const DotIndicator({super.key, required this.isActive});
 
   @override
   Widget build(BuildContext context) {
@@ -152,12 +98,7 @@ class DotIndicator extends StatelessWidget {
 // --- 4. Swipable Widget with Indicator (The main container) ---
 /// A swipable carousel of testimonials with a page indicator.
 class TestimonialSlider extends StatefulWidget {
-  final List<Testimonial> testimonials;
-
-  const TestimonialSlider({
-    super.key,
-    this.testimonials = mockTestimonials, // Use mock data as default
-  });
+  const TestimonialSlider({super.key});
 
   @override
   State<TestimonialSlider> createState() => _TestimonialSliderState();
@@ -165,13 +106,33 @@ class TestimonialSlider extends StatefulWidget {
 
 class _TestimonialSliderState extends State<TestimonialSlider> {
   final PageController _pageController = PageController();
+  final HomeRepository _homeRepository = HomeRepository();
+  List<Testimonial> _testimonials = [];
+  bool _isLoading = true;
   int _currentPage = 0;
 
   @override
   void initState() {
     super.initState();
-    if (widget.testimonials.isNotEmpty) {
-      _pageController.addListener(_onPageChanged);
+    _fetchTestimonials();
+    _pageController.addListener(_onPageChanged);
+  }
+
+  Future<void> _fetchTestimonials() async {
+    try {
+      final response = await _homeRepository.getTestimonials();
+      if (mounted) {
+        setState(() {
+          _testimonials = response?.response ?? [];
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -196,8 +157,15 @@ class _TestimonialSliderState extends State<TestimonialSlider> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.testimonials.isEmpty) {
-      return const Center(child: Text("No testimonials available."));
+    if (_isLoading) {
+      return const SizedBox(
+        height: 200,
+        child: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (_testimonials.isEmpty) {
+      return const SizedBox.shrink();
     }
 
     return Column(
@@ -217,12 +185,12 @@ class _TestimonialSliderState extends State<TestimonialSlider> {
 
         // Swipable Testimonial Area
         SizedBox(
-          height: 370, // Fixed height for PageView content
+          height: 400, // Fixed height for PageView content
           child: PageView.builder(
             controller: _pageController,
-            itemCount: widget.testimonials.length,
+            itemCount: _testimonials.length,
             itemBuilder: (context, index) {
-              return TestimonialCard(testimonial: widget.testimonials[index]);
+              return TestimonialCard(testimonial: _testimonials[index]);
             },
           ),
         ),
@@ -231,10 +199,8 @@ class _TestimonialSliderState extends State<TestimonialSlider> {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: List.generate(
-            widget.testimonials.length,
-            (index) => DotIndicator(
-              isActive: index == _currentPage,
-            ),
+            _testimonials.length,
+            (index) => DotIndicator(isActive: index == _currentPage),
           ),
         ),
       ],

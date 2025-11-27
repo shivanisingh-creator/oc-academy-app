@@ -6,6 +6,7 @@ import 'package:oc_academy_app/core/utils/storage.dart';
 import 'package:oc_academy_app/data/models/home/banner_response.dart';
 import 'package:oc_academy_app/data/models/home/global_partners_response.dart';
 import 'package:oc_academy_app/data/models/home/testimonial_response.dart';
+import 'package:oc_academy_app/data/models/home/specialty_response.dart';
 
 class HomeRepository {
   final ApiUtils _apiUtils = ApiUtils.instance;
@@ -115,6 +116,44 @@ class HomeRepository {
     } catch (e) {
       _logger.e(
         "❌ Exception during getTestimonials: ${_apiUtils.handleError(e)}",
+      );
+      return null;
+    }
+  }
+
+  Future<SpecialtyResponse?> getSpecialties() async {
+    try {
+      final String? token = await _tokenStorage.getAccessToken();
+      if (token == null) {
+        _logger.e("❌ No access token found.");
+        return null;
+      }
+
+      // Get the saved API access token to use as hk-access-token
+      final String? hkAccessToken = await _tokenStorage.getApiAccessToken();
+
+      final response = await _apiUtils.get(
+        url: ApiEndpoints.getSpecialties,
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+            if (hkAccessToken != null) 'hk-access-token': hkAccessToken,
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        _logger.i("✅ Get Specialties successful.");
+        final specialtyResponse = SpecialtyResponse.fromJson(response.data);
+        _logger.i(
+          "Response: ${specialtyResponse.response?.length} specialties",
+        );
+        return specialtyResponse;
+      }
+      return null;
+    } catch (e) {
+      _logger.e(
+        "❌ Exception during getSpecialties: ${_apiUtils.handleError(e)}",
       );
       return null;
     }

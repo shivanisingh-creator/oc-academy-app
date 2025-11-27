@@ -45,6 +45,7 @@ class ApiEndpoints {
   static const String getBanners = '/home/banner/getAll';
   static const String getGlobalPartners = '/home/globalPartners';
   static const String getTestimonials = '/home/testimonial/getAll';
+  static const String getSpecialties = '/home/oc/specialities?isHome=false';
 
   static const String hkAccessToken = 'b84512e6-f088-4a31-ac32-09674b9dfe14';
 }

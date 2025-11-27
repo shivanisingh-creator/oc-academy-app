@@ -114,13 +114,6 @@ class _MedicalAcademyScreenState extends State<MedicalAcademyScreen> {
         imageUrl: 'assets/images/mrcp.png',
       ),
     ];
-    final List<SpecialtyData> mockSpecialties = [
-      SpecialtyData(name: 'Cardiology', icon: Icons.favorite_border),
-      SpecialtyData(name: 'Pediatrics', icon: Icons.child_care_outlined),
-      SpecialtyData(name: 'Emergency', icon: Icons.flash_on_outlined),
-      SpecialtyData(name: 'General', icon: Icons.medical_services_outlined),
-      SpecialtyData(name: 'Neurology', icon: Icons.psychology_outlined),
-    ];
     final List<FeaturedProgramData> mockFeaturedCourses = [
       FeaturedProgramData(
         title: 'International PG Program in Emergency Medicine',
@@ -497,10 +490,7 @@ class _MedicalAcademyScreenState extends State<MedicalAcademyScreen> {
 
             BlogPostsSection(blogs: mockBlogs),
             const SizedBox(height: 10.0), // Added space here
-            ExploreBySpecialtySection(
-              specialties: mockSpecialties,
-              accentBlue: Color(0XFF3359A7),
-            ),
+            ExploreBySpecialtySection(accentBlue: accentBlue),
             const SizedBox(height: 10.0), // Added space here
             // Example of how it's used inside the FeaturedCoursesSection widget:
             Align(

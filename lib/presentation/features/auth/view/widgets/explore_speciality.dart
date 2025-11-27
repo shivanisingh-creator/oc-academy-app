@@ -1,17 +1,60 @@
 import 'package:flutter/material.dart';
+import 'package:oc_academy_app/data/models/home/specialty_response.dart';
+import 'package:oc_academy_app/data/repositories/home_repository.dart';
 
-class ExploreBySpecialtySection extends StatelessWidget {
-  final List<SpecialtyData> specialties;
+class ExploreBySpecialtySection extends StatefulWidget {
   final Color accentBlue;
 
-  const ExploreBySpecialtySection({
-    required this.specialties,
-    required this.accentBlue,
-    super.key,
-  });
+  const ExploreBySpecialtySection({required this.accentBlue, super.key});
+
+  @override
+  State<ExploreBySpecialtySection> createState() =>
+      _ExploreBySpecialtySectionState();
+}
+
+class _ExploreBySpecialtySectionState extends State<ExploreBySpecialtySection> {
+  final HomeRepository _homeRepository = HomeRepository();
+  List<Specialty> _specialties = [];
+  bool _isLoading = true;
+  int _selectedIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchSpecialties();
+  }
+
+  Future<void> _fetchSpecialties() async {
+    try {
+      final response = await _homeRepository.getSpecialties();
+      if (mounted) {
+        setState(() {
+          _specialties = response?.response ?? [];
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const SizedBox(
+        height: 120,
+        child: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (_specialties.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -27,20 +70,27 @@ class ExploreBySpecialtySection extends StatelessWidget {
             ),
           ),
         ),
-        
+
         // Horizontal Scrollable List of Pills
         SizedBox(
-          height: 120, // Height to accommodate the circle and the text label
+          height: 140, // Height to accommodate the circle and the text label
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            itemCount: specialties.length,
+            itemCount: _specialties.length,
             itemBuilder: (context, index) {
-              final specialty = specialties[index];
-              return SpecialtyPillItem( // <-- NOW USING THE NEW, SEPARATE CLASS
-                specialty: specialty,
-                accentColor: accentBlue,
-                isPillSelected: index == 0, // Mocking the first pill (Cardiology) as selected/active
+              final specialty = _specialties[index];
+              return GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _selectedIndex = index;
+                  });
+                },
+                child: SpecialtyPillItem(
+                  specialty: specialty,
+                  accentColor: widget.accentBlue,
+                  isPillSelected: index == _selectedIndex,
+                ),
               );
             },
           ),
@@ -52,7 +102,7 @@ class ExploreBySpecialtySection extends StatelessWidget {
 
 // NEW: Specialty Pill Item (The single, reusable item in the horizontal list)
 class SpecialtyPillItem extends StatelessWidget {
-  final SpecialtyData specialty;
+  final Specialty specialty;
   final Color accentColor;
   final bool isPillSelected;
 
@@ -66,46 +116,56 @@ class SpecialtyPillItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Determine the color and border based on the selection state
-    final Color iconColor = accentColor; // Changed: All icons are now the accent color.
-    final Color pillBackgroundColor = isPillSelected ? accentColor.withOpacity(0.1) : Colors.grey.shade100;
+    final Color iconColor =
+        accentColor; // Changed: All icons are now the accent color.
+    final Color pillBackgroundColor = isPillSelected
+        ? accentColor.withOpacity(0.1)
+        : Colors.grey.shade100;
 
     return Padding(
-      padding: const EdgeInsets.only(right: 20.0), // Changed: Increased spacing.
+      padding: const EdgeInsets.only(
+        right: 20.0,
+      ), // Changed: Increased spacing.
       child: Column(
         children: [
           // Circular Icon Container
           Container(
-            width: 80, // Changed: Made circle bigger.
-            height: 80, // Changed: Made circle bigger.
+            width: 90, // Changed: Made circle bigger.
+            height: 90, // Changed: Made circle bigger.
             decoration: BoxDecoration(
               color: pillBackgroundColor,
               shape: BoxShape.circle,
               // border property removed as per request.
             ),
-            child: Icon(
-              specialty.icon,
-              color: iconColor,
-              size: 30,
+            child: ClipOval(
+              child: Image.network(
+                specialty.specialityImageUrl ?? '',
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) =>
+                    Icon(Icons.local_hospital, color: iconColor, size: 30),
+              ),
             ),
           ),
           const SizedBox(height: 8),
           // Text Label
-          Text(
-            specialty.name,
-            style: TextStyle(
-              color: Colors.black,
-              fontSize: 12,
-              fontWeight: isPillSelected ? FontWeight.bold : FontWeight.normal,
+          SizedBox(
+            width: 80,
+            child: Text(
+              specialty.specialityName ?? '',
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: Colors.black,
+                fontSize: 12,
+                fontWeight: isPillSelected
+                    ? FontWeight.bold
+                    : FontWeight.normal,
+              ),
             ),
           ),
         ],
       ),
     );
   }
-}
-class SpecialtyData {
-  final String name;
-  final IconData icon;
-
-  SpecialtyData({required this.name, required this.icon});
 }

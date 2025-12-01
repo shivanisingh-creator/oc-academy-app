@@ -8,7 +8,7 @@ class ApiEndpoints {
 
   ///base url for the pre-prod
   static const String basePreProdUrl =
-      'https://stg-oca-commons-api.ocacademy.in/api';
+      'https://preprod-oca-commons-api.ocacademy.in/api';
 
   // --- NEW: Keycloak Base URLs ---
   static const String keycloakProdUrl = 'https://keycloak.ocacademy.in';
@@ -47,6 +47,7 @@ class ApiEndpoints {
   static const String getTestimonials = '/home/testimonial/getAll';
   static const String getSpecialties = '/home/oc/specialities?isHome=false';
   static const String getCourseOfferings = '/home/courseOfferings';
+  static const String getMostEnrolled = '/home/mostEnrolled';
 
   static const String hkAccessToken = 'b84512e6-f088-4a31-ac32-09674b9dfe14';
 }

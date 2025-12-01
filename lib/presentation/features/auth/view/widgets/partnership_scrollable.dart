@@ -94,14 +94,6 @@ class _PartnershipScrollerState extends State<PartnershipScroller> {
         // Title Section
         const Padding(
           padding: EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
-          child: Text(
-            'Our Esteemed Partnerships',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: Colors.black87,
-            ),
-          ),
         ),
 
         // Partnership Scroller Container

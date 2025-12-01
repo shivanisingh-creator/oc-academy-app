@@ -8,6 +8,7 @@ import 'package:oc_academy_app/data/models/home/global_partners_response.dart';
 import 'package:oc_academy_app/data/models/home/testimonial_response.dart';
 import 'package:oc_academy_app/data/models/home/specialty_response.dart';
 import 'package:oc_academy_app/data/models/home/course_offering_response.dart';
+import 'package:oc_academy_app/data/models/home/most_enrolled_response.dart';
 
 class HomeRepository {
   final ApiUtils _apiUtils = ApiUtils.instance;
@@ -42,8 +43,12 @@ class HomeRepository {
         return bannerResponse;
       }
       return null;
-    } catch (e) {
-      _logger.e("❌ Exception during getBanners: ${_apiUtils.handleError(e)}");
+    } catch (e, stackTrace) {
+      _logger.e(
+        "❌ Exception during getBanners: ${_apiUtils.handleError(e)}",
+        error: e,
+        stackTrace: stackTrace,
+      );
       return null;
     }
   }
@@ -76,9 +81,11 @@ class HomeRepository {
         return partnersResponse;
       }
       return null;
-    } catch (e) {
+    } catch (e, stackTrace) {
       _logger.e(
         "❌ Exception during getGlobalPartners: ${_apiUtils.handleError(e)}",
+        error: e,
+        stackTrace: stackTrace,
       );
       return null;
     }
@@ -114,9 +121,11 @@ class HomeRepository {
         return testimonialResponse;
       }
       return null;
-    } catch (e) {
+    } catch (e, stackTrace) {
       _logger.e(
         "❌ Exception during getTestimonials: ${_apiUtils.handleError(e)}",
+        error: e,
+        stackTrace: stackTrace,
       );
       return null;
     }
@@ -152,9 +161,11 @@ class HomeRepository {
         return specialtyResponse;
       }
       return null;
-    } catch (e) {
+    } catch (e, stackTrace) {
       _logger.e(
         "❌ Exception during getSpecialties: ${_apiUtils.handleError(e)}",
+        error: e,
+        stackTrace: stackTrace,
       );
       return null;
     }
@@ -192,9 +203,69 @@ class HomeRepository {
         return courseOfferingResponse;
       }
       return null;
-    } catch (e) {
+    } catch (e, stackTrace) {
       _logger.e(
         "❌ Exception during getCourseOfferings: ${_apiUtils.handleError(e)}",
+        error: e,
+        stackTrace: stackTrace,
+      );
+      return null;
+    }
+  }
+
+  Future<MostEnrolledResponse?> getMostEnrolledCourses({
+    required int type,
+    int size = 5,
+  }) async {
+    try {
+      final String? token = await _tokenStorage.getAccessToken();
+      if (token == null) {
+        _logger.e("❌ No access token found.");
+        return null;
+      }
+
+      // Get the saved API access token to use as hk-access-token
+      final String? hkAccessToken = await _tokenStorage.getApiAccessToken();
+
+      // Construct the correct URL for course-api
+      // Replace 'commons-api' with 'course-api' in the base URL
+      String baseUrl = _apiUtils.config.baseUrl;
+      String courseBaseUrl = baseUrl.replaceFirst('commons-api', 'course-api');
+
+      // Ensure no double slashes
+      if (courseBaseUrl.endsWith('/') &&
+          ApiEndpoints.getMostEnrolled.startsWith('/')) {
+        courseBaseUrl = courseBaseUrl.substring(0, courseBaseUrl.length - 1);
+      }
+
+      final String fullUrl = '$courseBaseUrl${ApiEndpoints.getMostEnrolled}';
+      _logger.i("Fetching Most Enrolled Courses from: $fullUrl");
+
+      final response = await _apiUtils.get(
+        url: fullUrl,
+        queryParameters: {'size': size, 'type': type},
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+            if (hkAccessToken != null) 'hk-access-token': hkAccessToken,
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        _logger.i("✅ Get Most Enrolled Courses (Type: $type) successful.");
+        final mostEnrolledResponse = MostEnrolledResponse.fromJson(
+          response.data,
+        );
+        _logger.i("Response: ${mostEnrolledResponse.response?.length} courses");
+        return mostEnrolledResponse;
+      }
+      return null;
+    } catch (e, stackTrace) {
+      _logger.e(
+        "❌ Exception during getMostEnrolledCourses: $e\n${_apiUtils.handleError(e)}",
+        error: e,
+        stackTrace: stackTrace,
       );
       return null;
     }

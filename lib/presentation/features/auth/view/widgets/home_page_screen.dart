@@ -11,10 +11,8 @@ import 'package:oc_academy_app/presentation/features/auth/view/widgets/referal_c
 import 'package:oc_academy_app/presentation/features/auth/view/widgets/testimonials_card.dart';
 import 'package:oc_academy_app/presentation/features/home/view/home_screen.dart';
 import 'package:oc_academy_app/presentation/global/widgets/courses_card.dart';
-
-void main() {
-  runApp(const MyApp());
-}
+import 'package:oc_academy_app/data/models/home/most_enrolled_response.dart';
+import 'package:oc_academy_app/presentation/features/home/widgets/trending_course_card.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -61,11 +59,15 @@ class _MedicalAcademyScreenState extends State<MedicalAcademyScreen> {
   List<banner_model.Banner> _banners = [];
   bool _isLoadingBanners = true;
   int _currentBannerIndex = 0;
+  List<MostEnrolledCourse> _fellowshipCourses = [];
+  List<MostEnrolledCourse> _certificationCourses = [];
+  bool _isLoadingTrending = true;
 
   @override
   void initState() {
     super.initState();
     _fetchBanners();
+    _fetchTrendingCourses();
   }
 
   Future<void> _fetchBanners() async {
@@ -85,6 +87,34 @@ class _MedicalAcademyScreenState extends State<MedicalAcademyScreen> {
       setState(() {
         _isLoadingBanners = false;
       });
+    }
+  }
+
+  Future<void> _fetchTrendingCourses() async {
+    try {
+      final fellowshipResponse = await _homeRepository.getMostEnrolledCourses(
+        type: 7,
+      );
+      final certificationResponse = await _homeRepository
+          .getMostEnrolledCourses(type: 1);
+
+      if (mounted) {
+        setState(() {
+          if (fellowshipResponse?.response != null) {
+            _fellowshipCourses = fellowshipResponse!.response!;
+          }
+          if (certificationResponse?.response != null) {
+            _certificationCourses = certificationResponse!.response!;
+          }
+          _isLoadingTrending = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoadingTrending = false;
+        });
+      }
     }
   }
 
@@ -507,22 +537,32 @@ class _MedicalAcademyScreenState extends State<MedicalAcademyScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 10.0), // Added space here
-
+            const SizedBox(height: 10.0),
             FeaturedCoursesSection(courses: mockFeaturedCourses),
             const SizedBox(height: 10.0),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Text(
+                  'Our Esteemed Partnerships',
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
             const PartnershipScroller(),
-            const SizedBox(height: 10.0),
+            const SizedBox(height: 20.0),
 
             DailyChallengeCard(
               title: "Daily Clinical Challenge",
               description:
                   "Test your knowledge and stay sharp with our daily questions.",
               buttonText: "Take the Challenge",
-              onButtonPressed: () {
-                // This is the action that runs when the user taps the button.
-                print("User navigated to the challenge screen.");
-              },
+              onButtonPressed: () {},
             ), // Added space here
             const SizedBox(height: 10.0),
             Align(
@@ -539,10 +579,25 @@ class _MedicalAcademyScreenState extends State<MedicalAcademyScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 10.0),
+            const SizedBox(height: 20.0),
 
-            FeaturedCoursesSection(courses: mockFeaturedCourses),
-            const SizedBox(height: 10.0),
+            if (_isLoadingTrending)
+              const Center(child: CircularProgressIndicator())
+            else if (_fellowshipCourses.isNotEmpty)
+              SizedBox(
+                height: 280,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  itemCount: _fellowshipCourses.length,
+                  itemBuilder: (context, index) {
+                    return TrendingCourseCard(
+                      course: _fellowshipCourses[index],
+                    );
+                  },
+                ),
+              ),
+            const SizedBox(height: 20.0),
             Align(
               alignment: Alignment.centerLeft,
               child: Padding(
@@ -557,11 +612,26 @@ class _MedicalAcademyScreenState extends State<MedicalAcademyScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 10.0),
-            FeaturedCoursesSection(courses: mockFeaturedCourses),
-            const SizedBox(height: 10.0),
+            const SizedBox(height: 20.0),
+            if (_isLoadingTrending)
+              const Center(child: CircularProgressIndicator())
+            else if (_certificationCourses.isNotEmpty)
+              SizedBox(
+                height: 280,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  itemCount: _certificationCourses.length,
+                  itemBuilder: (context, index) {
+                    return TrendingCourseCard(
+                      course: _certificationCourses[index],
+                    );
+                  },
+                ),
+              ),
+            const SizedBox(height: 20.0),
             TestimonialSlider(),
-            const SizedBox(height: 10.0),
+            const SizedBox(height: 20.0),
             ReferralCard(
               onTap: () {
                 ScaffoldMessenger.of(context).showSnackBar(

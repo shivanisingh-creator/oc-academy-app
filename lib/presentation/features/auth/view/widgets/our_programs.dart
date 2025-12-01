@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:oc_academy_app/data/models/home/course_offering_response.dart';
+import 'package:oc_academy_app/data/repositories/home_repository.dart';
 
 class ProgramCard extends StatelessWidget {
   final String imageUrl;
   final String title;
-  final String duration;
-  final String count;
+  final List<String> tags;
   final String description;
 
   const ProgramCard({
     required this.imageUrl,
     required this.title,
-    required this.duration,
-    required this.count,
+    required this.tags,
     required this.description,
     super.key,
   });
@@ -22,12 +22,15 @@ class ProgramCard extends StatelessWidget {
     const Color accentBlue = (Color(0XFF3359A7));
 
     return Container(
-      width: 260, 
+      width: 300,
       margin: const EdgeInsets.only(right: 16.0),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12.0),
-        border: Border.all(color: Colors.grey.shade300, width: 1), // Light grey border
+        border: Border.all(
+          color: Colors.grey.shade300,
+          width: 1,
+        ), // Light grey border
         boxShadow: [
           BoxShadow(
             color: Colors.grey.withOpacity(0.15),
@@ -42,22 +45,29 @@ class ProgramCard extends StatelessWidget {
         children: [
           // Image Section
           ClipRRect(
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(12.0)),
-            child: Image.asset(
-              // NOTE: Use a placeholder image since the actual assets are not available
+            borderRadius: const BorderRadius.vertical(
+              top: Radius.circular(12.0),
+            ),
+            child: Image.network(
               imageUrl,
               height: 140, // Fixed height for the image
               width: double.infinity,
               fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) => Container(
-                height: 140,
-                color: Colors.blueGrey.shade100,
-                alignment: Alignment.center,
-                child: const Text('Placeholder Image', style: TextStyle(color: Colors.black54)),
-              ),
+              errorBuilder: (context, error, stackTrace) {
+                debugPrint('Image load error for $imageUrl: $error');
+                return Container(
+                  height: 140,
+                  color: Colors.blueGrey.shade100,
+                  alignment: Alignment.center,
+                  child: const Text(
+                    'Placeholder Image',
+                    style: TextStyle(color: Colors.black54),
+                  ),
+                );
+              },
             ),
           ),
-          
+
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
@@ -74,16 +84,20 @@ class ProgramCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 12),
 
-                // Duration and Count Row
-                Row(
-                  children: [
-                    // Duration Column
-                    _DetailColumn(label: 'Duration', value: duration),
-                    const SizedBox(width: 20),
-                    // Count Column
-                    _DetailColumn(label: 'Courses', value: count),
-                  ],
-                ),
+                // Tags Row
+                if (tags.isNotEmpty)
+                  // Tags Row
+                  if (tags.isNotEmpty)
+                    Text(
+                      tags.join(" • "),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: Colors.black87,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
                 const SizedBox(height: 12),
 
                 // Description
@@ -91,10 +105,7 @@ class ProgramCard extends StatelessWidget {
                   description,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    color: Colors.black54,
-                    fontSize: 13,
-                  ),
+                  style: const TextStyle(color: Colors.black54, fontSize: 13),
                 ),
                 const SizedBox(height: 16),
 
@@ -115,7 +126,11 @@ class ProgramCard extends StatelessWidget {
                         ),
                       ),
                       SizedBox(width: 4),
-                      Icon(Icons.arrow_forward_ios, color: accentBlue, size: 14),
+                      Icon(
+                        Icons.arrow_forward_ios,
+                        color: accentBlue,
+                        size: 14,
+                      ),
                     ],
                   ),
                 ),
@@ -128,88 +143,69 @@ class ProgramCard extends StatelessWidget {
   }
 }
 
-// Helper widget for the detail columns (Duration, Courses)
-class _DetailColumn extends StatelessWidget {
-  final String label;
-  final String value;
-
-  const _DetailColumn({required this.label, required this.value});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          value,
-          style: const TextStyle(
-            color: Colors.black87,
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 2),
-        Text(
-          label,
-          style: const TextStyle(
-            color: Colors.grey,
-            fontSize: 12,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-
 // Container for the horizontally scrolling list of programs
-class ExploreProgramsSection extends StatelessWidget {
+class ExploreProgramsSection extends StatefulWidget {
   const ExploreProgramsSection({super.key});
 
   @override
+  State<ExploreProgramsSection> createState() => _ExploreProgramsSectionState();
+}
+
+class _ExploreProgramsSectionState extends State<ExploreProgramsSection> {
+  final HomeRepository _homeRepository = HomeRepository();
+  List<CourseOffering> _programs = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchPrograms();
+  }
+
+  Future<void> _fetchPrograms() async {
+    try {
+      final response = await _homeRepository.getCourseOfferings();
+      if (mounted) {
+        setState(() {
+          _programs = response?.response ?? [];
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    // Mock Data based on the image
-    final List<Map<String, String>> programs = [
-      {
-        'title': 'Certification Courses',
-        'duration': '4 months',
-        'count': '50+',
-        'description': 'Short-term upskilling in various medical specialties.',
-        // Mock image path. Please update this in your assets folder.
-        'imageUrl': 'assets/images/mrcp.png', 
-      },
-      {
-        'title': 'Post Graduation',
-        'duration': '12 months',
-        'count': '15+',
-        'description': 'Flexible, self-paced learning to advance their chosen career path.',
-        // Mock image path. Please update this in your assets folder.
-        'imageUrl': 'assets/images/mrcp.png',
-      },
-      {
-        'title': 'Diploma Programs',
-        'duration': '6 months',
-        'count': '10+',
-        'description': 'Gain a quick specialization in a medical field.',
-        // Mock image path. Please update this in your assets folder.
-        'imageUrl': 'assets/images/mrcp.png',
-      },
-    ];
+    if (_isLoading) {
+      return const SizedBox(
+        height: 350,
+        child: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (_programs.isEmpty) {
+      return const SizedBox.shrink();
+    }
 
     return SizedBox(
-      height: 350, // Sufficient height for the cards to display fully
+      height: 340, // Sufficient height for the cards to display fully
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
-        itemCount: programs.length,
+        itemCount: _programs.length,
         itemBuilder: (context, index) {
-          final program = programs[index];
+          final program = _programs[index];
           return ProgramCard(
-            imageUrl: program['imageUrl']!,
-            title: program['title']!,
-            duration: program['duration']!,
-            count: program['count']!,
-            description: program['description']!,
+            imageUrl: (program.media ?? '').replaceAll(' ', '%20'),
+            title: program.title ?? '',
+            tags: program.tags ?? [],
+            description: program.description ?? '',
           );
         },
       ),

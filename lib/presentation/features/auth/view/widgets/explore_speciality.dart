@@ -130,8 +130,8 @@ class SpecialtyPillItem extends StatelessWidget {
         children: [
           // Circular Icon Container
           Container(
-            width: 90, // Changed: Made circle bigger.
-            height: 90, // Changed: Made circle bigger.
+            width: 85, // Changed: Made circle bigger.
+            height: 85, // Changed: Made circle bigger.
             decoration: BoxDecoration(
               color: pillBackgroundColor,
               shape: BoxShape.circle,

@@ -13,6 +13,8 @@ import 'package:oc_academy_app/presentation/features/home/view/home_screen.dart'
 import 'package:oc_academy_app/presentation/global/widgets/courses_card.dart';
 import 'package:oc_academy_app/data/models/home/most_enrolled_response.dart';
 import 'package:oc_academy_app/presentation/features/home/widgets/trending_course_card.dart';
+import 'package:oc_academy_app/data/repositories/user_repository.dart';
+import 'package:flutter/services.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -62,12 +64,33 @@ class _MedicalAcademyScreenState extends State<MedicalAcademyScreen> {
   List<MostEnrolledCourse> _fellowshipCourses = [];
   List<MostEnrolledCourse> _certificationCourses = [];
   bool _isLoadingTrending = true;
+  final UserRepository _userRepository = UserRepository();
+  String? _referralCode;
+  int? _userId;
 
   @override
   void initState() {
     super.initState();
     _fetchBanners();
     _fetchTrendingCourses();
+    _fetchReferralData();
+  }
+
+  Future<void> _fetchReferralData() async {
+    try {
+      final code = await _homeRepository.getReferralCode();
+      final userLite = await _userRepository.getUserLite();
+      debugPrint("Referral Code: $code");
+      debugPrint("User ID: ${userLite?.response?.userId}");
+      if (mounted) {
+        setState(() {
+          _referralCode = code;
+          _userId = userLite?.response?.userId;
+        });
+      }
+    } catch (e) {
+      debugPrint("Error fetching referral data: $e");
+    }
   }
 
   Future<void> _fetchBanners() async {
@@ -634,13 +657,35 @@ class _MedicalAcademyScreenState extends State<MedicalAcademyScreen> {
             const SizedBox(height: 20.0),
             ReferralCard(
               onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text(
-                      'Referral card tapped! Navigating to referral page...',
+                if (_referralCode != null && _userId != null) {
+                  final String referralLink =
+                      "https://www.ocacademy.in/filters?referralCode=$_referralCode&utm_source=referralPage&refererId=$_userId";
+                  final String message =
+                      "Hi, I think OC Academy's specialized courses could enhance your medical career. Explore 100+ courses and get a 5% discount (up to ₹45,000). Let me know if you have questions! $referralLink";
+
+                  Clipboard.setData(ClipboardData(text: message));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Referral link copied to clipboard!'),
                     ),
-                  ),
-                );
+                  );
+                } else {
+                  String errorMsg = 'Fetching referral data... please wait.';
+                  if (_referralCode == null && _userId != null) {
+                    errorMsg = 'Could not fetch referral code.';
+                  } else if (_referralCode != null && _userId == null) {
+                    errorMsg = 'Could not fetch user ID.';
+                  } else if (_referralCode == null && _userId == null) {
+                    // Keep default message or say "Failed to load data" if enough time passed?
+                    // For now, let's assume it's still loading or failed both.
+                    // But if we want to be helpful:
+                    errorMsg = 'Referral data not available yet.';
+                  }
+
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text(errorMsg)));
+                }
               },
             ),
           ],

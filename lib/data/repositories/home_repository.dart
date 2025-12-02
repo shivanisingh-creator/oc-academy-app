@@ -270,4 +270,49 @@ class HomeRepository {
       return null;
     }
   }
+
+  Future<String?> getReferralCode() async {
+    try {
+      final String? token = await _tokenStorage.getAccessToken();
+      if (token == null) {
+        _logger.e("❌ No access token found.");
+        return null;
+      }
+
+      final String? hkAccessToken = await _tokenStorage.getApiAccessToken();
+
+      // Construct the correct URL for commons-api (default base URL)
+      String baseUrl = _apiUtils.config.baseUrl;
+      if (baseUrl.endsWith('/')) {
+        baseUrl = baseUrl.substring(0, baseUrl.length - 1);
+      }
+      final String fullUrl = '$baseUrl${ApiEndpoints.getReferralCode}';
+      _logger.i("Fetching Referral Code from: $fullUrl");
+
+      final response = await _apiUtils.get(
+        url: fullUrl,
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+            if (hkAccessToken != null) 'hk-access-token': hkAccessToken,
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        _logger.i("✅ Get Referral Code successful.");
+        final referralCode = response.data['response'] as String?;
+        _logger.i("Referral Code: $referralCode");
+        return referralCode;
+      }
+      return null;
+    } catch (e, stackTrace) {
+      _logger.e(
+        "❌ Exception during getReferralCode: $e\n${_apiUtils.handleError(e)}",
+        error: e,
+        stackTrace: stackTrace,
+      );
+      return null;
+    }
+  }
 }

@@ -48,6 +48,5 @@ class ApiEndpoints {
   static const String getSpecialties = '/home/oc/specialities?isHome=false';
   static const String getCourseOfferings = '/home/courseOfferings';
   static const String getMostEnrolled = '/home/mostEnrolled';
-
-  static const String hkAccessToken = 'b84512e6-f088-4a31-ac32-09674b9dfe14';
+  static const String getReferralCode = '/referral';
 }

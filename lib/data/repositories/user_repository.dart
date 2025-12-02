@@ -26,7 +26,7 @@ class UserRepository {
         options: Options(
           headers: {
             'Authorization': 'Bearer $token',
-            'hk-access-token': hkAccessToken,
+            if (hkAccessToken != null) 'hk-access-token': hkAccessToken,
           },
         ),
       );

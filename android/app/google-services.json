@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "447947152350",
+    "project_id": "oc-academy-app-new",
+    "storage_bucket": "oc-academy-app-new.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:447947152350:android:fe3ac292d03c57fcd51b4f",
+        "android_client_info": {
+          "package_name": "com.example.oc_academy_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "447947152350-5dm070th6hmhe96i8vjue5a33feacetu.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.oc_academy_app",
+            "certificate_hash": "0fe749491380a06fb1a0f5d5dc1ba7cf2ec2bc59"
+          }
+        },
+        {
+          "client_id": "447947152350-hneoraqjrje90aktto20i0n4dgrv3ep4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAmLCKODhry3XeuaexoXgUIiu8TjFc99ac"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "447947152350-hneoraqjrje90aktto20i0n4dgrv3ep4.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "447947152350-es17ei0c1ea3efv2imvtcld6mse2luab.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.ocAcademyApp"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

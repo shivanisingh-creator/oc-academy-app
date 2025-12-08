@@ -94,7 +94,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
         otp: _currentOtp,
         registrationSource: "webapp",
         isLead: false,
-        productType: 0,
+        productType: 1,
       );
       final response = await _authRepository.verifyOtp(request);
       if (!mounted) return;

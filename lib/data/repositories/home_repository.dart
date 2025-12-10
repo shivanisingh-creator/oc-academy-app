@@ -10,6 +10,7 @@ import 'package:oc_academy_app/data/models/home/specialty_response.dart';
 import 'package:oc_academy_app/data/models/home/course_offering_response.dart';
 import 'package:oc_academy_app/data/models/home/most_enrolled_response.dart';
 import 'package:oc_academy_app/data/models/user_courses/user_courses_response.dart';
+import 'package:oc_academy_app/data/models/user/user_lite_response.dart';
 
 class HomeRepository {
   final ApiUtils _apiUtils = ApiUtils.instance;
@@ -357,6 +358,51 @@ class HomeRepository {
     } catch (e, stackTrace) {
       _logger.e(
         "❌ Exception during getUserCourses: $e\n${_apiUtils.handleError(e)}",
+        error: e,
+        stackTrace: stackTrace,
+      );
+      return null;
+    }
+  }
+
+  Future<UserLiteResponse?> getUserLite() async {
+    try {
+      final String? token = await _tokenStorage.getAccessToken();
+      if (token == null) {
+        _logger.e("❌ No access token found.");
+        return null;
+      }
+      final String? hkAccessToken = await _tokenStorage.getApiAccessToken();
+
+      // Construct the correct URL for commons-api (default base URL)
+      String baseUrl = _apiUtils.config.baseUrl;
+      if (baseUrl.endsWith('/')) {
+        baseUrl = baseUrl.substring(0, baseUrl.length - 1);
+      }
+      final String fullUrl = '$baseUrl${ApiEndpoints.getUserLite}';
+
+      _logger.i("Fetching User Lite from: $fullUrl");
+
+      final response = await _apiUtils.get(
+        url: fullUrl,
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+            if (hkAccessToken != null) 'hk-access-token': hkAccessToken,
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        _logger.i("✅ Get User Lite successful.");
+        final userLiteResponse = UserLiteResponse.fromJson(response.data);
+        _logger.i("Response: ${userLiteResponse.response?.firstName}");
+        return userLiteResponse;
+      }
+      return null;
+    } catch (e, stackTrace) {
+      _logger.e(
+        "❌ Exception during getUserLite: $e\n${_apiUtils.handleError(e)}",
         error: e,
         stackTrace: stackTrace,
       );

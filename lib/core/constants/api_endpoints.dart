@@ -8,7 +8,7 @@ class ApiEndpoints {
 
   ///base url for the pre-prod
   static const String basePreProdUrl =
-      'https://preprod-oca-commons-api.ocacademy.in/api';
+      'https://preprodx-oca-commons-api.ocacademy.in/api';
 
   // --- NEW: Keycloak Base URLs ---
   static const String keycloakProdUrl = 'https://keycloak.ocacademy.in';

@@ -6,6 +6,7 @@ import 'package:oc_academy_app/presentation/features/auth/view/widgets/week_time
 import 'package:oc_academy_app/presentation/features/auth/view/widgets/weekline_activity_widget.dart';
 import 'package:oc_academy_app/data/repositories/home_repository.dart';
 import 'package:oc_academy_app/data/models/user_courses/user_courses_response.dart';
+import 'package:oc_academy_app/data/models/user/user_lite_response.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -18,6 +19,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
   final HomeRepository _homeRepository = HomeRepository();
   List<UserCourse> _myCourses = [];
   bool _isLoadingCourses = true;
+  bool _showVerificationCard = false;
+  bool _showLogbookCard = false;
 
   // Dummy data for weekly schedule (Keeping as is for now)
   final List<Map<String, dynamic>> _weeklySchedule = const [
@@ -54,22 +57,38 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   void initState() {
     super.initState();
-    _fetchUserCourses();
+    _fetchData();
   }
 
-  Future<void> _fetchUserCourses() async {
-    final response = await _homeRepository.getUserCourses();
-    if (mounted && response?.response?.pendingCourses != null) {
+  Future<void> _fetchData() async {
+    // Fetch User Courses
+    final coursesFuture = _homeRepository.getUserCourses();
+    // Fetch User Lite for permissions
+    final userLiteFuture = _homeRepository.getUserLite();
+
+    final results = await Future.wait([coursesFuture, userLiteFuture]);
+    final coursesResponse = results[0] as UserCoursesResponse?;
+    final userLiteResponse = results[1] as UserLiteResponse?;
+
+    if (mounted) {
       setState(() {
-        _myCourses = response!.response!.pendingCourses!;
+        // Handle Courses
+        if (coursesResponse?.response?.pendingCourses != null) {
+          _myCourses = coursesResponse!.response!.pendingCourses!;
+        }
         _isLoadingCourses = false;
+
+        // Handle User Lite Permissions
+        if (userLiteResponse?.response != null) {
+          final response = userLiteResponse!.response!;
+          // Verification Card Logic
+          _showVerificationCard = response.isDocVerificationReq == true;
+
+          // Logbook Card Logic (Check if 'LOGBOOK' is in productAccess)
+          _showLogbookCard =
+              response.productAccess?.contains('LOGBOOK') ?? false;
+        }
       });
-    } else {
-      if (mounted) {
-        setState(() {
-          _isLoadingCourses = false;
-        });
-      }
     }
   }
 
@@ -82,14 +101,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
           children: <Widget>[
             // 1. Get Verified Section
-            const VerificationCard(),
-
-            const SizedBox(height: 24.0),
+            if (_showVerificationCard) ...[
+              const VerificationCard(),
+              const SizedBox(height: 24.0),
+            ],
 
             // 2. Logbook Section
-            const LogbookCard(),
-
-            const SizedBox(height: 32.0),
+            if (_showLogbookCard) ...[
+              const LogbookCard(),
+              const SizedBox(height: 32.0),
+            ],
 
             // 3. My Courses Section Header
             const Text(

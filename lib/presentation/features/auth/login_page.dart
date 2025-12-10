@@ -62,6 +62,7 @@ class _LoginPageState extends State<LoginPage> {
     const Color logoPink = Color(0xFFEC407A); // Pink for the 'OC' logo
 
     return Scaffold(
+      backgroundColor: Colors.white,
       resizeToAvoidBottomInset:
           true, // Prevents keyboard from overflowing content
       body: Container(

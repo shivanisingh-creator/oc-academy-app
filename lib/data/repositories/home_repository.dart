@@ -9,6 +9,7 @@ import 'package:oc_academy_app/data/models/home/testimonial_response.dart';
 import 'package:oc_academy_app/data/models/home/specialty_response.dart';
 import 'package:oc_academy_app/data/models/home/course_offering_response.dart';
 import 'package:oc_academy_app/data/models/home/most_enrolled_response.dart';
+import 'package:oc_academy_app/data/models/user_courses/user_courses_response.dart';
 
 class HomeRepository {
   final ApiUtils _apiUtils = ApiUtils.instance;
@@ -309,6 +310,53 @@ class HomeRepository {
     } catch (e, stackTrace) {
       _logger.e(
         "❌ Exception during getReferralCode: $e\n${_apiUtils.handleError(e)}",
+        error: e,
+        stackTrace: stackTrace,
+      );
+      return null;
+    }
+  }
+
+  Future<UserCoursesResponse?> getUserCourses() async {
+    try {
+      final String? token = await _tokenStorage.getAccessToken();
+      if (token == null) {
+        _logger.e("❌ No access token found.");
+        return null;
+      }
+      final String? hkAccessToken = await _tokenStorage.getApiAccessToken();
+
+      // Needs 'course-api' instead of 'commons-api'
+      String baseUrl = _apiUtils.config.baseUrl;
+      String courseBaseUrl = baseUrl.replaceFirst('commons-api', 'course-api');
+      if (courseBaseUrl.endsWith('/')) {
+        courseBaseUrl = courseBaseUrl.substring(0, courseBaseUrl.length - 1);
+      }
+      final String fullUrl = '$courseBaseUrl${ApiEndpoints.getUserCourses}';
+      _logger.i("Fetching User Courses from: $fullUrl");
+
+      final response = await _apiUtils.get(
+        url: fullUrl,
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+            if (hkAccessToken != null) 'hk-access-token': hkAccessToken,
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        _logger.i("✅ Get User Courses successful.");
+        final userCoursesResponse = UserCoursesResponse.fromJson(response.data);
+        _logger.i(
+          "Response: ${userCoursesResponse.response?.pendingCourses?.length} pending courses",
+        );
+        return userCoursesResponse;
+      }
+      return null;
+    } catch (e, stackTrace) {
+      _logger.e(
+        "❌ Exception during getUserCourses: $e\n${_apiUtils.handleError(e)}",
         error: e,
         stackTrace: stackTrace,
       );

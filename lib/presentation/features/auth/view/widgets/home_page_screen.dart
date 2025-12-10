@@ -13,6 +13,7 @@ import 'package:oc_academy_app/presentation/features/home/view/home_screen.dart'
 import 'package:oc_academy_app/presentation/global/widgets/courses_card.dart';
 import 'package:oc_academy_app/data/models/home/most_enrolled_response.dart';
 import 'package:oc_academy_app/presentation/features/home/widgets/trending_course_card.dart';
+import 'package:oc_academy_app/presentation/features/home/view/dashboard_screen.dart';
 import 'package:oc_academy_app/data/repositories/user_repository.dart';
 import 'package:flutter/services.dart';
 
@@ -194,9 +195,16 @@ class _MedicalAcademyScreenState extends State<MedicalAcademyScreen> {
     ];
     int _selectedIndex = 0;
     void _onItemTapped(int index) {
-      setState(() {
-        _selectedIndex = index;
-      });
+      if (index == 2) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const DashboardScreen()),
+        );
+      } else {
+        setState(() {
+          _selectedIndex = index;
+        });
+      }
     }
 
     return Scaffold(
@@ -469,7 +477,12 @@ class _MedicalAcademyScreenState extends State<MedicalAcademyScreen> {
                       width: double.infinity,
                       child: ElevatedButton(
                         onPressed: () {
-                          // Handle button press
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const DashboardScreen(),
+                            ),
+                          );
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: accentBlue, // Button color

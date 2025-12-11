@@ -1,0 +1,62 @@
+import 'package:flutter/material.dart';
+import 'activity_timeline_item.dart'; // Import the reusable item widget
+
+class ActivityTimelineSection extends StatelessWidget {
+  const ActivityTimelineSection({super.key});
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Section Header
+        const Text(
+          'Activity Timeline',
+          style: TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.w700,
+            color: Colors.black87,
+          ),
+        ),
+        const SizedBox(height: 16.0),
+        
+        // Timeline List Container
+        Container(
+          padding: const EdgeInsets.all(16.0),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12.0),
+            border: Border.all(color: Colors.grey.shade300),
+            boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.2),
+            spreadRadius: 1,
+            blurRadius: 12,
+            offset: const Offset(0, 6), // Strong bottom shadow
+          ),
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 0,
+            blurRadius: 6,
+            offset: const Offset(0, 3),
+          ),
+        ],
+          ),
+          child: Column(
+            children: [
+              // Reusing the single ActivityTimelineItem widget
+              ..._timelineEvents.asMap().entries.map((entry) {
+                final index = entry.key;
+                final activity = entry.value;
+                return ActivityTimelineItem(
+                  activity: activity,
+                  // Important: Check if it's the last item
+                  isLast: index == _timelineEvents.length - 1,
+                );
+              }).toList(),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}

@@ -4,9 +4,11 @@ import 'package:oc_academy_app/presentation/features/auth/view/widgets/logbook_c
 import 'package:oc_academy_app/presentation/features/auth/view/widgets/verification_card.dart';
 import 'package:oc_academy_app/presentation/features/auth/view/widgets/week_timeline_header.dart';
 import 'package:oc_academy_app/presentation/features/auth/view/widgets/weekline_activity_widget.dart';
+import 'package:oc_academy_app/presentation/features/auth/view/widgets/activity_timeline_section.dart';
 import 'package:oc_academy_app/data/repositories/home_repository.dart';
 import 'package:oc_academy_app/data/models/user_courses/user_courses_response.dart';
 import 'package:oc_academy_app/data/models/user/user_lite_response.dart';
+import 'package:oc_academy_app/data/models/home/recent_activity.dart'; // New Import
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -20,7 +22,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
   List<UserCourse> _myCourses = [];
   bool _isLoadingCourses = true;
   bool _showVerificationCard = false;
+
   bool _showLogbookCard = false;
+  List<RecentActivity> _recentActivities = [];
+  bool _isLoadingActivities = true;
 
   // Dummy data for weekly schedule (Keeping as is for now)
   final List<Map<String, dynamic>> _weeklySchedule = const [
@@ -64,11 +69,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
     // Fetch User Courses
     final coursesFuture = _homeRepository.getUserCourses();
     // Fetch User Lite for permissions
+    // Fetch User Lite for permissions
     final userLiteFuture = _homeRepository.getUserLite();
+    // Fetch Recent Activity
+    final recentActivityFuture = _homeRepository.getRecentActivity();
 
-    final results = await Future.wait([coursesFuture, userLiteFuture]);
+    final results = await Future.wait([
+      coursesFuture,
+      userLiteFuture,
+      recentActivityFuture,
+    ]);
     final coursesResponse = results[0] as UserCoursesResponse?;
     final userLiteResponse = results[1] as UserLiteResponse?;
+    final recentActivities = results[2] as List<RecentActivity>?;
 
     if (mounted) {
       setState(() {
@@ -88,6 +101,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
           _showLogbookCard =
               response.productAccess?.contains('LOGBOOK') ?? false;
         }
+
+        // Handle Recent Activity
+        if (recentActivities != null) {
+          _recentActivities = recentActivities;
+        }
+        _isLoadingActivities = false;
       });
     }
   }
@@ -103,7 +122,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             // 1. Get Verified Section
             if (_showVerificationCard) ...[
               const VerificationCard(),
-              const SizedBox(height: 24.0),
+              const SizedBox(height: 16.0),
             ],
 
             // 2. Logbook Section
@@ -122,8 +141,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
             ),
             const SizedBox(height: 16.0),
-
-            // 4. My Courses Horizontal List
             SizedBox(
               height: 280, // Adjust height based on content
               child: _isLoadingCourses
@@ -135,15 +152,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       itemCount: _myCourses.length,
                       itemBuilder: (context, index) {
                         final course = _myCourses[index];
-                        // Determine color based on index for variety since API doesn't provide color
-                        final List<Color> colors = [
-                          Colors.redAccent,
-                          Colors.teal,
-                          Colors.purple,
-                          Colors.blue,
-                          Colors.orange,
-                        ];
-                        final color = colors[index % colors.length];
 
                         return CourseCard(
                           title: course.courseName ?? 'Unknown Course',
@@ -152,31 +160,52 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                   course.endDate!,
                                 ).toString().split(' ')[0]
                               : 'N/A', // Simple date formatting
-                          imageBackgroundColor: color,
+                          imageUrl: course
+                              .twoxThumbnailUrl, // Use 2x thumbnail from API
                         );
                       },
                     ),
             ),
 
-            const SizedBox(height: 32.0),
+            const SizedBox(height: 16.0),
 
-            // 5. Your Week Section Header
-            const Text(
-              'Your Week',
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.w700,
-                color: Colors.black87,
-              ),
+            // 5. Your Week Section Header with Navigation Arrows
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Your Week',
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.black87,
+                  ),
+                ),
+                Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.arrow_back_ios, size: 20),
+                      onPressed: () {
+                        // Navigate to previous week
+                        // This will be handled by the WeeklyTimelineHeader widget
+                      },
+                      color: const Color(0XFF3359A7),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.arrow_forward_ios, size: 20),
+                      onPressed: () {
+                        // Navigate to next week
+                        // This will be handled by the WeeklyTimelineHeader widget
+                      },
+                      color: const Color(0XFF3359A7),
+                    ),
+                  ],
+                ),
+              ],
             ),
             const SizedBox(height: 16.0),
-
-            // 6. Weekly Timeline Header
             const WeeklyTimelineHeader(),
-
             const SizedBox(height: 16.0),
-
-            // 7. Weekly Activities List
             ..._weeklySchedule.map((schedule) {
               final activities =
                   (schedule['activities'] as List<Map<String, dynamic>>)
@@ -195,8 +224,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 activities: activities,
               );
             }).toList(),
-
-            const SizedBox(height: 40.0),
+            if (_isLoadingActivities)
+              const Center(child: CircularProgressIndicator())
+            else if (_recentActivities.isNotEmpty)
+              ActivityTimelineSection(activities: _recentActivities),
           ],
         ),
       ),

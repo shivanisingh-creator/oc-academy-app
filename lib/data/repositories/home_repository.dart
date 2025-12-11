@@ -11,6 +11,7 @@ import 'package:oc_academy_app/data/models/home/course_offering_response.dart';
 import 'package:oc_academy_app/data/models/home/most_enrolled_response.dart';
 import 'package:oc_academy_app/data/models/user_courses/user_courses_response.dart';
 import 'package:oc_academy_app/data/models/user/user_lite_response.dart';
+import 'package:oc_academy_app/data/models/home/recent_activity.dart';
 
 class HomeRepository {
   final ApiUtils _apiUtils = ApiUtils.instance;
@@ -403,6 +404,58 @@ class HomeRepository {
     } catch (e, stackTrace) {
       _logger.e(
         "❌ Exception during getUserLite: $e\n${_apiUtils.handleError(e)}",
+        error: e,
+        stackTrace: stackTrace,
+      );
+      return null;
+    }
+  }
+
+  Future<List<RecentActivity>?> getRecentActivity({
+    int pageNumber = 0,
+    int pageSize = 5,
+  }) async {
+    try {
+      final String? token = await _tokenStorage.getAccessToken();
+      if (token == null) {
+        _logger.e("❌ No access token found.");
+        return null;
+      }
+      final String? hkAccessToken = await _tokenStorage.getApiAccessToken();
+
+      // Needs 'course-api' instead of 'commons-api'
+      String baseUrl = _apiUtils.config.baseUrl;
+      String courseBaseUrl = baseUrl.replaceFirst('commons-api', 'course-api');
+      if (courseBaseUrl.endsWith('/')) {
+        courseBaseUrl = courseBaseUrl.substring(0, courseBaseUrl.length - 1);
+      }
+      final String fullUrl = '$courseBaseUrl${ApiEndpoints.getRecentActivity}';
+      _logger.i("Fetching Recent Activity from: $fullUrl");
+
+      final response = await _apiUtils.get(
+        url: fullUrl,
+        queryParameters: {'pageNumber': pageNumber, 'pageSize': pageSize},
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+            if (hkAccessToken != null) 'hk-access-token': hkAccessToken,
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        _logger.i("✅ Get Recent Activity successful.");
+        final List<dynamic> data = response.data['response'] ?? [];
+        final recentActivities = data
+            .map((e) => RecentActivity.fromJson(e))
+            .toList();
+        _logger.i("Response: ${recentActivities.length} recent activities");
+        return recentActivities;
+      }
+      return null;
+    } catch (e, stackTrace) {
+      _logger.e(
+        "❌ Exception during getRecentActivity: $e\n${_apiUtils.handleError(e)}",
         error: e,
         stackTrace: stackTrace,
       );

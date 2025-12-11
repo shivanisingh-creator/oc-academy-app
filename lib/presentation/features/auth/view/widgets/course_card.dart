@@ -3,13 +3,13 @@ import 'package:flutter/material.dart';
 class CourseCard extends StatelessWidget {
   final String title;
   final String batchDate;
-  final Color imageBackgroundColor; // To simulate the placeholder image
+  final String? imageUrl; // Image URL from API
 
   const CourseCard({
     super.key,
     required this.title,
     required this.batchDate,
-    required this.imageBackgroundColor,
+    this.imageUrl,
   });
 
   @override
@@ -20,11 +20,18 @@ class CourseCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12.0),
+        border: Border.all(color: Colors.grey.withOpacity(0.2), width: 1),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.grey.withOpacity(0.2),
             spreadRadius: 1,
-            blurRadius: 5,
+            blurRadius: 12,
+            offset: const Offset(0, 6), // Strong bottom shadow
+          ),
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 0,
+            blurRadius: 6,
             offset: const Offset(0, 3),
           ),
         ],
@@ -32,22 +39,53 @@ class CourseCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Image Placeholder Area
+          // Image Area
           Container(
             height: 100,
             decoration: BoxDecoration(
-              color: imageBackgroundColor,
+              color: Colors.grey.shade200,
               borderRadius: const BorderRadius.vertical(
                 top: Radius.circular(12.0),
               ),
-              // You would use an Image.network or Image.asset here
             ),
-            child: Center(
-              child: Icon(
-                Icons.medical_services_outlined,
-                size: 50,
-                color: Colors.white.withOpacity(0.8),
+            child: ClipRRect(
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(12.0),
               ),
+              child: imageUrl != null && imageUrl!.isNotEmpty
+                  ? Image.network(
+                      imageUrl!,
+                      width: double.infinity,
+                      height: 100,
+                      fit: BoxFit.cover,
+                      loadingBuilder: (context, child, loadingProgress) {
+                        if (loadingProgress == null) return child;
+                        return Center(
+                          child: CircularProgressIndicator(
+                            value: loadingProgress.expectedTotalBytes != null
+                                ? loadingProgress.cumulativeBytesLoaded /
+                                      loadingProgress.expectedTotalBytes!
+                                : null,
+                          ),
+                        );
+                      },
+                      errorBuilder: (context, error, stackTrace) {
+                        return Center(
+                          child: Icon(
+                            Icons.medical_services_outlined,
+                            size: 50,
+                            color: Colors.grey.shade400,
+                          ),
+                        );
+                      },
+                    )
+                  : Center(
+                      child: Icon(
+                        Icons.medical_services_outlined,
+                        size: 50,
+                        color: Colors.grey.shade400,
+                      ),
+                    ),
             ),
           ),
           Padding(

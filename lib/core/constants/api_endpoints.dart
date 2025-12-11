@@ -41,6 +41,7 @@ class ApiEndpoints {
   static const String signupLoginGoogle = '/auth/google/login';
   static const String getUserLite = '/auth/getUserLite';
   static const String getUserCourses = '/home/userCourses';
+  static const String getRecentActivity = '/dashboard/getRecentActivity';
 
   ///Home APIs
   static const String getBanners = '/home/banner/getAll';

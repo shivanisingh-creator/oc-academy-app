@@ -2,15 +2,13 @@ import 'package:flutter/material.dart';
 
 // Data model for a single timeline event
 class TimelineActivity {
-  final String status;
-  final String name;
+  final String title;
   final String date;
   final String course;
-  final Color courseColor; // To differentiate the course line color
+  final Color courseColor;
 
   TimelineActivity({
-    required this.status,
-    required this.name,
+    required this.title,
     required this.date,
     required this.course,
     required this.courseColor,
@@ -29,30 +27,29 @@ class ActivityTimelineItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // IntrinsicHeight ensures the timeline line column matches the height of the content row.
     return IntrinsicHeight(
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Timeline Line and Dot
+          // 1. Timeline Line and Dot Column
           Column(
             children: [
-              // The dot
+              // The dot (Timeline Marker)
               Container(
                 width: 12,
                 height: 12,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: activity.courseColor,
-                  border: Border.all(
-                    color: Colors.white,
-                    width: 2,
-                  ), // Gives a nice effect
+                  border: Border.all(color: Colors.white, width: 2),
                 ),
               ),
               // The line
               Expanded(
                 child: Container(
                   width: 2,
+                  // The line is transparent for the last item, otherwise it uses the course color
                   color: isLast
                       ? Colors.transparent
                       : activity.courseColor.withOpacity(0.5),
@@ -62,22 +59,22 @@ class ActivityTimelineItem extends StatelessWidget {
           ),
           const SizedBox(width: 16.0),
 
-          // Activity Content
+          // 2. Activity Content Column
           Expanded(
             child: Padding(
-              padding: EdgeInsets.only(
-                bottom: isLast ? 0 : 20.0,
-              ), // Padding between items
+              // Add padding to create space between this item and the next
+              padding: EdgeInsets.only(bottom: isLast ? 0 : 20.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Title and Date
+                  // Title and Date (aligned left and right)
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Expanded(
                         child: Text(
-                          '${activity.status.isNotEmpty ? "${activity.status[0].toUpperCase()}${activity.status.substring(1)}" : ""}: ${activity.name}',
+                          activity.title,
                           style: const TextStyle(
                             fontWeight: FontWeight.w600,
                             fontSize: 16,
@@ -87,6 +84,7 @@ class ActivityTimelineItem extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
+                      const SizedBox(width: 8),
                       Text(
                         activity.date,
                         style: TextStyle(
@@ -103,9 +101,6 @@ class ActivityTimelineItem extends StatelessWidget {
                     activity.course,
                     style: TextStyle(fontSize: 14, color: Colors.grey.shade700),
                   ),
-
-                  // Optional: A divider for extra separation if needed
-                  // const SizedBox(height: 8.0),
                 ],
               ),
             ),

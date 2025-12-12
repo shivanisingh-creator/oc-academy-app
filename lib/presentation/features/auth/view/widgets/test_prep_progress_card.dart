@@ -11,16 +11,15 @@ class TestPrepProgressCard extends StatefulWidget {
 }
 
 class _TestPrepProgressCardState extends State<TestPrepProgressCard> {
+  // If null, "Overall Progress" is selected.
+  // If not null, the specific subject is selected.
   DetailedProgress? _selectedDetail;
 
   @override
   void initState() {
     super.initState();
-    // Default to the first detailed progress item if available
-    if (widget.data.detailedProgress != null &&
-        widget.data.detailedProgress!.isNotEmpty) {
-      _selectedDetail = widget.data.detailedProgress!.first;
-    }
+    // Default to "Overall Progress" (null)
+    _selectedDetail = null;
   }
 
   // Helper method to format/display duration string directly from API
@@ -69,6 +68,120 @@ class _TestPrepProgressCardState extends State<TestPrepProgressCard> {
     );
   }
 
+  // Custom Vertical Bar Chart Widget
+  Widget _buildBarChart() {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 16.0),
+      height: 300, // Fixed height for the chart area
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          // Y-Axis Labels
+          Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: const [
+              Text('100%', style: TextStyle(color: Colors.grey, fontSize: 14)),
+              Text('75%', style: TextStyle(color: Colors.grey, fontSize: 14)),
+              Text('50%', style: TextStyle(color: Colors.grey, fontSize: 14)),
+              Text('25%', style: TextStyle(color: Colors.grey, fontSize: 14)),
+              Text('0%', style: TextStyle(color: Colors.grey, fontSize: 14)),
+            ],
+          ),
+          const SizedBox(width: 12),
+          // Vertical Divider
+          Container(width: 1, color: Colors.grey[300]),
+          const SizedBox(width: 12),
+          // Bars
+          Expanded(
+            child: widget.data.detailedProgress!.isEmpty
+                ? const Center(child: Text("No Data"))
+                : LayoutBuilder(
+                    builder: (context, constraints) {
+                      // Calculate width per bar to fit all
+                      final barWidth =
+                          (constraints.maxWidth /
+                                  widget.data.detailedProgress!.length)
+                              .clamp(10.0, 40.0); // Min 10, Max 40 width
+
+                      return Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: widget.data.detailedProgress!.map((detail) {
+                          // Safe percent calculation
+                          final double percent =
+                              ((detail.progressPercent ?? 0) / 100.0).clamp(
+                                0.0,
+                                1.0,
+                              );
+
+                          return InkWell(
+                            onTap: () {
+                              setState(() {
+                                _selectedDetail = detail;
+                              });
+                            },
+                            child: Tooltip(
+                              message:
+                                  "${detail.name}\n${detail.progressPercent}%",
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  // The Bar
+                                  Container(
+                                    width: barWidth,
+                                    height:
+                                        (constraints.maxHeight * 0.9) *
+                                        percent, // Scale height, leave room for labels if needed
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFF285698),
+                                      borderRadius: const BorderRadius.vertical(
+                                        top: Radius.circular(4),
+                                      ),
+                                    ),
+                                  ),
+                                  // Underline/Axis marker
+                                  Container(
+                                    height: 1,
+                                    width: barWidth + 10,
+                                    color: Color(0xFF285698),
+                                    margin: const EdgeInsets.only(top: 2),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      );
+                    },
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Widget for the Detailed View (Stats)
+  Widget _buildDetailStats() {
+    final progressValue = _selectedDetail?.progress ?? '0/0';
+    final timeSpentValue = _formatDuration(_selectedDetail?.totalTimeSpent);
+
+    return Row(
+      children: [
+        _buildStatBox(
+          icon: Icons.checklist,
+          value: progressValue,
+          label: _selectedDetail?.progressTitle ?? 'Module Progress',
+        ),
+        const SizedBox(width: 16),
+        _buildStatBox(
+          icon: Icons.access_time,
+          value: timeSpentValue,
+          label: 'Total Time Spent',
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     // If no details, maybe don't render or handle gracefully?
@@ -76,26 +189,15 @@ class _TestPrepProgressCardState extends State<TestPrepProgressCard> {
     // the top level progress or just return empty.
     if (widget.data.detailedProgress == null ||
         widget.data.detailedProgress!.isEmpty) {
-      // Only if no detailed progress, we fallback to showing generic info?
-      // But user said "in that card the dropdown will be respective 'detailedProgress' name"
-      // So this widget relies on detailedProgress being present.
       return const SizedBox.shrink();
     }
-
-    // Ensure selected is valid
-    if (_selectedDetail == null && widget.data.detailedProgress!.isNotEmpty) {
-      _selectedDetail = widget.data.detailedProgress!.first;
-    }
-
-    final progressValue = _selectedDetail?.progress ?? '0/0';
-    final timeSpentValue = _formatDuration(_selectedDetail?.totalTimeSpent);
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Section Title (The Course Name, e.g. "MRCP - Part 1")
+          // Section Title
           Padding(
             padding: const EdgeInsets.only(bottom: 8.0),
             child: Text(
@@ -132,19 +234,19 @@ class _TestPrepProgressCardState extends State<TestPrepProgressCard> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Dropdown (Detailed Progress Items)
+                // Dropdown (Overall Progress + Detailed Progress Items)
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 12.0,
                     vertical: 2.0,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.grey[100],
+                    color: Colors.white,
                     border: Border.all(color: Colors.grey.withOpacity(0.3)),
                     borderRadius: BorderRadius.circular(8.0),
                   ),
                   child: DropdownButtonHideUnderline(
-                    child: DropdownButton<DetailedProgress>(
+                    child: DropdownButton<DetailedProgress?>(
                       value: _selectedDetail,
                       isExpanded: true,
                       isDense: true,
@@ -152,26 +254,40 @@ class _TestPrepProgressCardState extends State<TestPrepProgressCard> {
                         Icons.keyboard_arrow_down,
                         color: Colors.blue,
                       ),
-                      items: widget.data.detailedProgress!.map((detail) {
-                        return DropdownMenuItem<DetailedProgress>(
-                          value: detail,
+                      // Prepare Items List
+                      items: [
+                        // 1. Overall Progress Item
+                        const DropdownMenuItem<DetailedProgress?>(
+                          value: null,
                           child: Text(
-                            detail.name ?? '',
-                            style: const TextStyle(
+                            "Overall Progress",
+                            style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
                               color: Colors.black87,
-                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                        );
-                      }).toList(),
+                        ),
+                        // 2. Map detailed items
+                        ...widget.data.detailedProgress!.map((detail) {
+                          return DropdownMenuItem<DetailedProgress?>(
+                            value: detail,
+                            child: Text(
+                              detail.name ?? '',
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.black87,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          );
+                        }),
+                      ],
                       onChanged: (value) {
-                        if (value != null) {
-                          setState(() {
-                            _selectedDetail = value;
-                          });
-                        }
+                        setState(() {
+                          _selectedDetail = value;
+                        });
                       },
                     ),
                   ),
@@ -179,23 +295,20 @@ class _TestPrepProgressCardState extends State<TestPrepProgressCard> {
 
                 const SizedBox(height: 16),
 
-                // Stats Row
-                Row(
-                  children: [
-                    _buildStatBox(
-                      icon: Icons.checklist,
-                      value: progressValue,
-                      label:
-                          _selectedDetail?.progressTitle ?? 'Module Progress',
-                    ),
-                    const SizedBox(width: 16),
-                    _buildStatBox(
-                      icon: Icons.access_time,
-                      value: timeSpentValue,
-                      label: 'Total Time Spent',
-                    ),
-                  ],
-                ),
+                // Content: Graph OR Detail Stats based on selection
+                _selectedDetail == null
+                    ? Column(
+                        children: [
+                          _buildBarChart(),
+                          const SizedBox(height: 8),
+                          const Text(
+                            "Click/Hover over a bar to see subject/module name and progress",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(fontSize: 12, color: Colors.grey),
+                          ),
+                        ],
+                      )
+                    : _buildDetailStats(),
               ],
             ),
           ),

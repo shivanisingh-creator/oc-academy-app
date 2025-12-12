@@ -12,6 +12,7 @@ import 'package:oc_academy_app/data/models/home/most_enrolled_response.dart';
 import 'package:oc_academy_app/data/models/user_courses/user_courses_response.dart';
 import 'package:oc_academy_app/data/models/user/user_lite_response.dart';
 import 'package:oc_academy_app/data/models/home/recent_activity.dart';
+import 'package:oc_academy_app/data/models/home/course_progress_response.dart';
 
 class HomeRepository {
   final ApiUtils _apiUtils = ApiUtils.instance;
@@ -456,6 +457,62 @@ class HomeRepository {
     } catch (e, stackTrace) {
       _logger.e(
         "❌ Exception during getRecentActivity: $e\n${_apiUtils.handleError(e)}",
+        error: e,
+        stackTrace: stackTrace,
+      );
+      return null;
+    }
+  }
+
+  Future<CourseProgressResponse?> getCourseProgress() async {
+    try {
+      final String? token = await _tokenStorage.getAccessToken();
+      if (token == null) {
+        _logger.e("❌ No access token found.");
+        return null;
+      }
+      final String? hkAccessToken = await _tokenStorage.getApiAccessToken();
+
+      // Needs 'course-api' if it follows the same pattern, but let's check
+      // Users request said "/api/dashboard/courseProgress".
+      // Assuming it's part of the dashboard API, likely 'course-api' or 'commons-api'.
+      // Given previous context, dashboard usually goes to 'course-api' or similar if it's course related.
+      // However, typical dashboard endpoints might be on a specific service.
+      // Let's assume standard behavior: use base URL unless we know otherwise.
+      // But looking at other methods:
+      // getUserCourses -> course-api
+      // getRecentActivity -> course-api
+      // getMostEnrolled -> course-api
+      // getUserLite -> commons-api
+      // "courseProgress" sounds like course-api.
+
+      String baseUrl = _apiUtils.config.baseUrl;
+      String courseBaseUrl = baseUrl.replaceFirst('commons-api', 'course-api');
+      if (courseBaseUrl.endsWith('/')) {
+        courseBaseUrl = courseBaseUrl.substring(0, courseBaseUrl.length - 1);
+      }
+      final String fullUrl = '$courseBaseUrl${ApiEndpoints.getCourseProgress}';
+
+      _logger.i("Fetching Course Progress from: $fullUrl");
+
+      final response = await _apiUtils.get(
+        url: fullUrl,
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+            if (hkAccessToken != null) 'hk-access-token': hkAccessToken,
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        _logger.i("✅ Get Course Progress successful.");
+        return CourseProgressResponse.fromJson(response.data);
+      }
+      return null;
+    } catch (e, stackTrace) {
+      _logger.e(
+        "❌ Exception during getCourseProgress: $e\n${_apiUtils.handleError(e)}",
         error: e,
         stackTrace: stackTrace,
       );

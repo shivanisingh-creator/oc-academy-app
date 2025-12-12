@@ -42,6 +42,7 @@ class ApiEndpoints {
   static const String getUserLite = '/auth/getUserLite';
   static const String getUserCourses = '/home/userCourses';
   static const String getRecentActivity = '/dashboard/getRecentActivity';
+  static const String getCourseProgress = '/dashboard/courseProgress';
 
   ///Home APIs
   static const String getBanners = '/home/banner/getAll';

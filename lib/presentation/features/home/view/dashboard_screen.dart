@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:oc_academy_app/presentation/features/auth/view/widgets/course_card.dart';
+import 'package:oc_academy_app/presentation/features/auth/view/widgets/course_progress_card.dart';
 import 'package:oc_academy_app/presentation/features/auth/view/widgets/logbook_card.dart';
+
 import 'package:oc_academy_app/presentation/features/auth/view/widgets/verification_card.dart';
 import 'package:oc_academy_app/presentation/features/auth/view/widgets/week_timeline_header.dart';
 import 'package:oc_academy_app/presentation/features/auth/view/widgets/weekline_activity_widget.dart';
@@ -8,7 +10,8 @@ import 'package:oc_academy_app/presentation/features/auth/view/widgets/activity_
 import 'package:oc_academy_app/data/repositories/home_repository.dart';
 import 'package:oc_academy_app/data/models/user_courses/user_courses_response.dart';
 import 'package:oc_academy_app/data/models/user/user_lite_response.dart';
-import 'package:oc_academy_app/data/models/home/recent_activity.dart'; // New Import
+import 'package:oc_academy_app/data/models/home/recent_activity.dart';
+import 'package:oc_academy_app/data/models/home/course_progress_response.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -26,6 +29,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
   bool _showLogbookCard = false;
   List<RecentActivity> _recentActivities = [];
   bool _isLoadingActivities = true;
+
+  // Course Progress Data from API
+  List<CourseCategory> _courseCategories = [];
 
   // Dummy data for weekly schedule (Keeping as is for now)
   final List<Map<String, dynamic>> _weeklySchedule = const [
@@ -69,19 +75,22 @@ class _DashboardScreenState extends State<DashboardScreen> {
     // Fetch User Courses
     final coursesFuture = _homeRepository.getUserCourses();
     // Fetch User Lite for permissions
-    // Fetch User Lite for permissions
     final userLiteFuture = _homeRepository.getUserLite();
     // Fetch Recent Activity
     final recentActivityFuture = _homeRepository.getRecentActivity();
+    // Fetch Course Progress (Certifications, IPGP, etc)
+    final courseProgressFuture = _homeRepository.getCourseProgress();
 
     final results = await Future.wait([
       coursesFuture,
       userLiteFuture,
       recentActivityFuture,
+      courseProgressFuture,
     ]);
     final coursesResponse = results[0] as UserCoursesResponse?;
     final userLiteResponse = results[1] as UserLiteResponse?;
     final recentActivities = results[2] as List<RecentActivity>?;
+    final courseProgressResponse = results[3] as CourseProgressResponse?;
 
     if (mounted) {
       setState(() {
@@ -107,6 +116,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
           _recentActivities = recentActivities;
         }
         _isLoadingActivities = false;
+
+        // Handle Course Progress (Certifications etc.)
+        if (courseProgressResponse?.response != null) {
+          _courseCategories = courseProgressResponse!.response!;
+        }
       });
     }
   }
@@ -187,7 +201,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       icon: const Icon(Icons.arrow_back_ios, size: 20),
                       onPressed: () {
                         // Navigate to previous week
-                        // This will be handled by the WeeklyTimelineHeader widget
                       },
                       color: const Color(0XFF3359A7),
                     ),
@@ -195,7 +208,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       icon: const Icon(Icons.arrow_forward_ios, size: 20),
                       onPressed: () {
                         // Navigate to next week
-                        // This will be handled by the WeeklyTimelineHeader widget
                       },
                       color: const Color(0XFF3359A7),
                     ),
@@ -228,18 +240,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
               const Center(child: CircularProgressIndicator())
             else if (_recentActivities.isNotEmpty)
               ActivityTimelineSection(activities: _recentActivities),
+
+            const SizedBox(height: 16.0),
+
+            // Certifications/Program Sections powered by API
+            ..._courseCategories.map((category) {
+              return CertificationProgressCard(category: category);
+            }).toList(),
           ],
         ),
       ),
     );
   }
-}
-
-void main() {
-  runApp(
-    const MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: DashboardScreen(),
-    ),
-  );
 }

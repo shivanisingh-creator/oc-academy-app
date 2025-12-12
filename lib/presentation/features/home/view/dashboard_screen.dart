@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:oc_academy_app/presentation/features/auth/view/widgets/course_card.dart';
 import 'package:oc_academy_app/presentation/features/auth/view/widgets/course_progress_card.dart';
+import 'package:oc_academy_app/presentation/features/auth/view/widgets/test_prep_progress_card.dart';
 import 'package:oc_academy_app/presentation/features/auth/view/widgets/logbook_card.dart';
 
 import 'package:oc_academy_app/presentation/features/auth/view/widgets/verification_card.dart';
@@ -244,8 +245,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
             const SizedBox(height: 16.0),
 
             // Certifications/Program Sections powered by API
-            ..._courseCategories.map((category) {
-              return CertificationProgressCard(category: category);
+            ..._courseCategories.expand((category) {
+              // Special handling for Test Prep (Type 9)
+              if (category.courseType == 9) {
+                if (category.courseProgressDetail != null) {
+                  return category.courseProgressDetail!.map((detail) {
+                    return TestPrepProgressCard(data: detail);
+                  });
+                }
+                return <Widget>[];
+              } else {
+                // Default handling (Certifications, IPGP)
+                return [CertificationProgressCard(category: category)];
+              }
             }).toList(),
           ],
         ),

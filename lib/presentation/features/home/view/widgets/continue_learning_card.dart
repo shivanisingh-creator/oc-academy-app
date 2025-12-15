@@ -58,7 +58,6 @@ class ContinueLearningCard extends StatelessWidget {
       // is removed to focus only on the card as seen in the image.
       width: double.infinity,
       decoration: BoxDecoration(
-        
         borderRadius: BorderRadius.circular(16.0),
         boxShadow: [
           BoxShadow(
@@ -78,7 +77,7 @@ class ContinueLearningCard extends StatelessWidget {
         children: <Widget>[
           // Section 1: Title and Subtitle
           Padding(
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+            padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -95,7 +94,7 @@ class ContinueLearningCard extends StatelessWidget {
                   'Jump back into your learning journey.',
                   style: TextStyle(color: Colors.white70, fontSize: 14),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 20),
               ],
             ),
           ),
@@ -171,11 +170,11 @@ class ContinueLearningCard extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: 16), // Space before the button
+          const SizedBox(height: 24), // Space before the button
           // Section 3: The Button (Matches the white button)
           Container(
             width: double.infinity,
-            height: 50, // A standard button height
+            height: 60, // A standard button height
             margin: const EdgeInsets.all(16.0), // Padding around the button
             child: TextButton(
               style: TextButton.styleFrom(
@@ -184,7 +183,7 @@ class ContinueLearningCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(10.0),
                 ),
                 padding: const EdgeInsets.symmetric(
-                  vertical: 12.0,
+                  vertical: 16.0,
                   horizontal: 20.0,
                 ),
               ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:oc_academy_app/presentation/features/auth/view/widgets/weekline_activity_widget.dart';
 import 'package:oc_academy_app/presentation/features/home/view/widgets/continue_learning_card.dart';
 
 import 'package:oc_academy_app/presentation/features/auth/view/widgets/course_card.dart';
@@ -109,7 +110,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
             else if (_recentActivities.isNotEmpty)
               ContinueLearningCard(activity: _recentActivities.first),
             const SizedBox(height: 16.0), // Add some spacing after it
-
             // 1. Get Verified Section
             if (_showVerificationCard) ...[
               const VerificationCard(),
@@ -193,9 +193,23 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ],
             ),
             const SizedBox(height: 16.0),
-            const WeeklyTimelineHeader(),
-
-
+            const SizedBox(height: 16.0),
+            // Weekly Activity Section
+            if (_recentActivities.isNotEmpty)
+              WeeklyActivityCard(
+                courseTitle: _recentActivities
+                    .first
+                    .courseName, // Use the course name from the first activity
+                activities: _recentActivities.map((activity) {
+                  return WeeklyActivity(
+                    number: activity.id,
+                    title: activity.name,
+                    tag: activity.status,
+                    tagColor:
+                        Colors.blue, // Default color for now, could be dynamic
+                  );
+                }).toList(),
+              ),
             const SizedBox(height: 16.0),
 
             // Certifications/Program Sections powered by API

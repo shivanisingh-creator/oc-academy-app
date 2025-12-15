@@ -105,8 +105,6 @@ class _TestPrepProgressCardState extends State<TestPrepProgressCard> {
                 ? const Center(child: Text("No Data"))
                 : LayoutBuilder(
                     builder: (context, constraints) {
-                      final dataLength = widget.data.detailedProgress!.length;
-
                       // FIX: Calculate width per bar to fit all.
                       // If dataLength is small, the calculated width will be large,
                       // but constraints.maxWidth prevents it from causing an overflow.
@@ -336,7 +334,9 @@ class _TestPrepProgressCardState extends State<TestPrepProgressCard> {
                             child: Text(
                               "Course Progress",
                               style: TextStyle(
-                                  fontWeight: FontWeight.bold, fontSize: 16),
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
                             ),
                           ),
                           _buildBarChart(),
@@ -344,7 +344,9 @@ class _TestPrepProgressCardState extends State<TestPrepProgressCard> {
                           const Text(
                             "Subjects",
                             style: TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 12),
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                            ),
                           ),
                           const SizedBox(height: 8),
                           const Text(

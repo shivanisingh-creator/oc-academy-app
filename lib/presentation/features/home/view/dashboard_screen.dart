@@ -6,7 +6,7 @@ import 'package:oc_academy_app/presentation/features/auth/view/widgets/logbook_c
 
 import 'package:oc_academy_app/presentation/features/auth/view/widgets/verification_card.dart';
 import 'package:oc_academy_app/presentation/features/auth/view/widgets/week_timeline_header.dart';
-import 'package:oc_academy_app/presentation/features/auth/view/widgets/weekline_activity_widget.dart';
+
 import 'package:oc_academy_app/presentation/features/auth/view/widgets/activity_timeline_section.dart';
 import 'package:oc_academy_app/data/repositories/home_repository.dart';
 import 'package:oc_academy_app/data/models/user_courses/user_courses_response.dart';
@@ -33,38 +33,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   // Course Progress Data from API
   List<CourseCategory> _courseCategories = [];
-
-  // Dummy data for weekly schedule (Keeping as is for now)
-  final List<Map<String, dynamic>> _weeklySchedule = const [
-    {
-      'course': 'Certification Course in Cardiac Anaesthesia',
-      'activities': [
-        {
-          'number': 1,
-          'title': 'Live Class: Introduction to Cardiac Anatomy',
-          'tag': 'Live Class',
-          'color': Colors.redAccent,
-        },
-        {
-          'number': 2,
-          'title': 'Quiz: Week 1 Assessment',
-          'tag': 'Quiz',
-          'color': Colors.orange,
-        },
-      ],
-    },
-    {
-      'course': 'Clinical Course in Advanced Trauma Life Support',
-      'activities': [
-        {
-          'number': 1,
-          'title': 'Reading: Trauma Protocols',
-          'tag': 'Reading',
-          'color': Colors.blue,
-        },
-      ],
-    },
-  ];
 
   @override
   void initState() {
@@ -219,24 +187,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             const SizedBox(height: 16.0),
             const WeeklyTimelineHeader(),
             const SizedBox(height: 16.0),
-            ..._weeklySchedule.map((schedule) {
-              final activities =
-                  (schedule['activities'] as List<Map<String, dynamic>>)
-                      .map(
-                        (act) => WeeklyActivity(
-                          number: act['number'],
-                          title: act['title'],
-                          tag: act['tag'],
-                          tagColor: act['color'],
-                        ),
-                      )
-                      .toList();
 
-              return WeeklyActivityCard(
-                courseTitle: schedule['course'],
-                activities: activities,
-              );
-            }).toList(),
             if (_isLoadingActivities)
               const Center(child: CircularProgressIndicator())
             else if (_recentActivities.isNotEmpty)

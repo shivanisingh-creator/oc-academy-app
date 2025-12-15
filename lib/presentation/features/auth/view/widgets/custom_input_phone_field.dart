@@ -1,5 +1,6 @@
 import 'package:country_code_picker/country_code_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class CustomPhoneInputField extends StatefulWidget {
   final TextEditingController controller;
@@ -56,10 +57,7 @@ class _CustomPhoneInputFieldState extends State<CustomPhoneInputField> {
                 showOnlyCountryWhenClosed: false,
                 showFlagDialog: true,
                 alignLeft: false,
-                textStyle: const TextStyle(
-                  fontSize: 16,
-                  color: Colors.black87,
-                ),
+                textStyle: const TextStyle(fontSize: 16, color: Colors.black87),
                 dialogTextStyle: const TextStyle(
                   fontSize: 16,
                   color: Colors.black87,
@@ -73,19 +71,24 @@ class _CustomPhoneInputFieldState extends State<CustomPhoneInputField> {
                   controller: widget.controller,
                   readOnly: widget.readOnly,
                   keyboardType: TextInputType.phone,
+                  inputFormatters: [
+                    FilteringTextInputFormatter.digitsOnly, // Only allow digits
+                    LengthLimitingTextInputFormatter(10), // Max 10 digits
+                  ],
                   decoration: InputDecoration(
                     hintText: '82354-02876', // Example number as hint
                     hintStyle: const TextStyle(color: Colors.grey),
                     border: InputBorder.none, // Hide default border
                     contentPadding: const EdgeInsets.symmetric(vertical: 14),
                     suffixIcon: widget.isValid
-                        ? const Icon(Icons.check_circle, color: Colors.green, size: 20)
+                        ? const Icon(
+                            Icons.check_circle,
+                            color: Colors.green,
+                            size: 20,
+                          )
                         : null,
                   ),
-                  style: const TextStyle(
-                    fontSize: 16,
-                    color: Colors.black87,
-                  ),
+                  style: const TextStyle(fontSize: 16, color: Colors.black87),
                 ),
               ),
             ],

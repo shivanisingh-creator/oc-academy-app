@@ -1,6 +1,7 @@
 class ApiEndpoints {
   ///base url for the prod
-  static const String baseProdUrl = 'https://oca-commons-api.ocacademy.in/api';
+  static const String baseProdUrl =
+      'https://preprod-oca-commons-api.ocacademy.in/api';
 
   ///base url for the staging
   static const String baseStagingUrl =
@@ -8,17 +9,17 @@ class ApiEndpoints {
 
   ///base url for the pre-prod
   static const String basePreProdUrl =
-      'https://preprodx-oca-commons-api.ocacademy.in/api';
+      'https://preprod-oca-commons-api.ocacademy.in/api/';
 
   // --- NEW: Keycloak Base URLs ---
   static const String keycloakProdUrl = 'https://keycloak.ocacademy.in';
   static const String keycloakPreProdUrl =
-      'https://pre-prod-keycloak.ocacademy.in';
+      'https://preprod-keycloak.ocacademy.in/';
   static const String keycloakStagingUrl = 'https://stg-keycloak.ocacademy.in';
 
   // --- NEW: Keycloak Realm Names ---
   static const String keycloakProdRealm = 'prod-ocacademy';
-  static const String keycloakPreProdRealm = 'preprod-ocacademy';
+  static const String keycloakPreProdRealm = 'stg-ocacademy';
   static const String keycloakStagingRealm = 'stg-ocacademy';
 
   // --- NEW: Keycloak Client IDs ---
@@ -30,7 +31,7 @@ class ApiEndpoints {
   static const String keycloakProdClientSecret =
       'Eik0J5noiLWCqvLTzBxCkuEc0LAXBMNy';
   static const String keycloakPreProdClientSecret =
-      'YRwwmADpGd5lvvHPsMOWbqwJrlaZWwnd';
+      'Eik0J5noiLWCqvLTzBxCkuEc0LAXBMNy';
   static const String keycloakStagingClientSecret =
       'SMA9xI3AVIwfVAWiXS7DMbEYi339ZxAs';
 

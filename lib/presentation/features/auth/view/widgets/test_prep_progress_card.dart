@@ -33,6 +33,8 @@ class _TestPrepProgressCardState extends State<TestPrepProgressCard> {
     required String value,
     required String label,
   }) {
+    // FIX: Using Expanded here ensures the two stat boxes in _buildDetailStats
+    // divide the available space equally, preventing horizontal overflow.
     return Expanded(
       child: Container(
         padding: const EdgeInsets.all(16.0),
@@ -54,6 +56,9 @@ class _TestPrepProgressCardState extends State<TestPrepProgressCard> {
                     fontWeight: FontWeight.bold,
                     color: Color(0XFF3359A7),
                   ),
+                  // FIX: Ensure value text doesn't overflow the small stat box
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
@@ -61,6 +66,8 @@ class _TestPrepProgressCardState extends State<TestPrepProgressCard> {
             Text(
               label,
               style: const TextStyle(fontSize: 12, color: Colors.grey),
+              maxLines: 1, // FIX: Ensure label doesn't wrap/overflow vertically
+              overflow: TextOverflow.ellipsis,
             ),
           ],
         ),
@@ -76,7 +83,7 @@ class _TestPrepProgressCardState extends State<TestPrepProgressCard> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          // Y-Axis Labels
+          // Y-Axis Labels (These have a fixed, non-expanding width)
           Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: const [
@@ -87,70 +94,100 @@ class _TestPrepProgressCardState extends State<TestPrepProgressCard> {
               Text('0%', style: TextStyle(color: Colors.grey, fontSize: 14)),
             ],
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 8), // Reduced gap slightly
           // Vertical Divider
           Container(width: 1, color: Colors.grey[300]),
-          const SizedBox(width: 12),
-          // Bars
+          const SizedBox(width: 8), // Reduced gap slightly
+          // Bars (This is the most critical part to use Expanded)
+          // FIX: Expanded ensures the bar chart area uses all REMAINING space.
           Expanded(
             child: widget.data.detailedProgress!.isEmpty
                 ? const Center(child: Text("No Data"))
                 : LayoutBuilder(
                     builder: (context, constraints) {
-                      // Calculate width per bar to fit all
+                      final dataLength = widget.data.detailedProgress!.length;
+
+                      // FIX: Calculate width per bar to fit all.
+                      // If dataLength is small, the calculated width will be large,
+                      // but constraints.maxWidth prevents it from causing an overflow.
                       final barWidth =
                           (constraints.maxWidth /
-                                  widget.data.detailedProgress!.length)
+                                  (dataLength *
+                                      2)) // Use * 2 to account for spacing
                               .clamp(10.0, 40.0); // Min 10, Max 40 width
 
-                      return Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: widget.data.detailedProgress!.map((detail) {
-                          // Safe percent calculation
-                          final double percent =
-                              ((detail.progressPercent ?? 0) / 100.0).clamp(
-                                0.0,
-                                1.0,
-                              );
+                      return SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        // FIX: Added SingleChildScrollView to allow bars to scroll
+                        // if the number of subjects exceeds screen width.
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment
+                              .start, // Align to start for scrolling
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: widget.data.detailedProgress!.map((detail) {
+                            final double percent =
+                                ((detail.progressPercent ?? 0) / 100.0).clamp(
+                                  0.0,
+                                  1.0,
+                                );
 
-                          return InkWell(
-                            onTap: () {
-                              setState(() {
-                                _selectedDetail = detail;
-                              });
-                            },
-                            child: Tooltip(
-                              message:
-                                  "${detail.name}\n${detail.progressPercent}%",
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  // The Bar
-                                  Container(
-                                    width: barWidth,
-                                    height:
-                                        (constraints.maxHeight * 0.9) *
-                                        percent, // Scale height, leave room for labels if needed
-                                    decoration: BoxDecoration(
-                                      color: const Color(0xFF285698),
-                                      borderRadius: const BorderRadius.vertical(
-                                        top: Radius.circular(4),
+                            return Padding(
+                              padding: const EdgeInsets.only(
+                                right: 16.0,
+                              ), // Space between bars
+                              child: InkWell(
+                                onTap: () {
+                                  setState(() {
+                                    _selectedDetail = detail;
+                                  });
+                                },
+                                child: Tooltip(
+                                  message:
+                                      "${detail.name}\n${detail.progressPercent}%",
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: [
+                                      // The Bar
+                                      Container(
+                                        width: barWidth,
+                                        height:
+                                            (constraints.maxHeight * 0.9) *
+                                            percent,
+                                        decoration: const BoxDecoration(
+                                          color: Color(0xFF285698),
+                                          borderRadius: BorderRadius.vertical(
+                                            top: Radius.circular(4),
+                                          ),
+                                        ),
                                       ),
-                                    ),
+                                      // X-Axis Label/Marker
+                                      Container(
+                                        height: 1,
+                                        width: barWidth,
+                                        color: const Color(0xFF285698),
+                                        margin: const EdgeInsets.only(top: 2),
+                                      ),
+                                      // FIX: Added X-Axis label for bars
+                                      SizedBox(
+                                        width: barWidth + 10,
+                                        child: Text(
+                                          detail.name ?? '',
+                                          textAlign: TextAlign.center,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: const TextStyle(
+                                            fontSize: 10,
+                                            color: Colors.grey,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                  // Underline/Axis marker
-                                  Container(
-                                    height: 1,
-                                    width: barWidth + 10,
-                                    color: Color(0xFF285698),
-                                    margin: const EdgeInsets.only(top: 2),
-                                  ),
-                                ],
+                                ),
                               ),
-                            ),
-                          );
-                        }).toList(),
+                            );
+                          }).toList(),
+                        ),
                       );
                     },
                   ),
@@ -165,6 +202,8 @@ class _TestPrepProgressCardState extends State<TestPrepProgressCard> {
     final progressValue = _selectedDetail?.progress ?? '0/0';
     final timeSpentValue = _formatDuration(_selectedDetail?.totalTimeSpent);
 
+    // This Row is where the overflow was also likely happening.
+    // The use of Expanded inside _buildStatBox corrects this.
     return Row(
       children: [
         _buildStatBox(
@@ -184,9 +223,6 @@ class _TestPrepProgressCardState extends State<TestPrepProgressCard> {
 
   @override
   Widget build(BuildContext context) {
-    // If no details, maybe don't render or handle gracefully?
-    // For now, let's assume if there's no detailedProgress, we might show
-    // the top level progress or just return empty.
     if (widget.data.detailedProgress == null ||
         widget.data.detailedProgress!.isEmpty) {
       return const SizedBox.shrink();
@@ -234,7 +270,7 @@ class _TestPrepProgressCardState extends State<TestPrepProgressCard> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Dropdown (Overall Progress + Detailed Progress Items)
+                // Dropdown (No layout changes needed here)
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 12.0,

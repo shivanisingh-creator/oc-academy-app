@@ -82,7 +82,9 @@ class CustomBottomNavBar extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 12,
                     fontFamily: 'Inter',
-                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                    fontWeight: isSelected
+                        ? FontWeight.w600
+                        : FontWeight.normal,
                     color: isSelected ? activeColor : inactiveColor,
                   ),
                 ),
@@ -120,9 +122,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Home'),
-      ),
+      appBar: AppBar(title: const Text('Home')),
       body: _screens[_selectedIndex],
       bottomNavigationBar: CustomBottomNavBar(
         items: const [

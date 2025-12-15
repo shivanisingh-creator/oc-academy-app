@@ -129,16 +129,13 @@ class AuthRepository {
         return null;
       }
 
-      // Get the saved API access token to use as hk-access-token
-      final String? hkAccessToken = await _tokenStorage.getApiAccessToken();
-
       final response = await _apiUtils.post(
         url: ApiEndpoints.createProfile,
         data: request.toJson(),
         options: Options(
           headers: {
             'Authorization': 'Bearer $token',
-            'hk-access-token': hkAccessToken,
+            'hk-access-token': request.preAccessToken,
           },
         ),
       );

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:oc_academy_app/presentation/features/home/view/widgets/continue_learning_card.dart';
+
 import 'package:oc_academy_app/presentation/features/auth/view/widgets/course_card.dart';
 import 'package:oc_academy_app/presentation/features/auth/view/widgets/course_progress_card.dart';
 import 'package:oc_academy_app/presentation/features/auth/view/widgets/test_prep_progress_card.dart';
@@ -7,7 +9,6 @@ import 'package:oc_academy_app/presentation/features/auth/view/widgets/logbook_c
 import 'package:oc_academy_app/presentation/features/auth/view/widgets/verification_card.dart';
 import 'package:oc_academy_app/presentation/features/auth/view/widgets/week_timeline_header.dart';
 
-import 'package:oc_academy_app/presentation/features/auth/view/widgets/activity_timeline_section.dart';
 import 'package:oc_academy_app/data/repositories/home_repository.dart';
 import 'package:oc_academy_app/data/models/user_courses/user_courses_response.dart';
 import 'package:oc_academy_app/data/models/user/user_lite_response.dart';
@@ -191,7 +192,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             if (_isLoadingActivities)
               const Center(child: CircularProgressIndicator())
             else if (_recentActivities.isNotEmpty)
-              ActivityTimelineSection(activities: _recentActivities),
+              ContinueLearningCard(activity: _recentActivities.first),
 
             const SizedBox(height: 16.0),
 

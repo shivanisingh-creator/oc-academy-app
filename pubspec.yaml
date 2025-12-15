@@ -26,10 +26,11 @@ dependencies:
   shared_preferences: ^2.2.3
   dartz: ^0.10.1
   connectivity_plus: ^6.0.3 # Use the latest version
-  pinput: 6.0.0 
+  pinput: ^6.0.1
   country_code_picker: ^3.0.0 # Add this line
   firebase_messaging: ^15.0.1
   device_info_plus: ^10.1.0
+  timeago: ^3.6.1
   
   google_sign_in: ^6.0.0
 

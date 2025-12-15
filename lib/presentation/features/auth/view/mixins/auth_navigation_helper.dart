@@ -1,7 +1,7 @@
+import 'package:oc_academy_app/core/constants/route_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:oc_academy_app/core/utils/storage.dart';
 import 'package:oc_academy_app/presentation/features/auth/view/signup_screen.dart';
-import 'package:oc_academy_app/presentation/features/auth/view/widgets/home_page_screen.dart';
 import 'package:oc_academy_app/data/repositories/user_repository.dart';
 
 class AuthNavigationHelper {
@@ -37,10 +37,7 @@ class AuthNavigationHelper {
         await userRepository.getUserLite();
 
         if (!context.mounted) return;
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const MyApp()),
-        );
+        Navigator.pushReplacementNamed(context, RouteConstants.home);
       }
     }
   }

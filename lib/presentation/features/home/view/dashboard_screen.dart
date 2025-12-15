@@ -103,6 +103,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
         child: ListView(
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
           children: <Widget>[
+            // CONTINUE LEARNING Section moved to top
+            if (_isLoadingActivities)
+              const Center(child: CircularProgressIndicator())
+            else if (_recentActivities.isNotEmpty)
+              ContinueLearningCard(activity: _recentActivities.first),
+            const SizedBox(height: 16.0), // Add some spacing after it
+
             // 1. Get Verified Section
             if (_showVerificationCard) ...[
               const VerificationCard(),
@@ -187,12 +194,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
             const SizedBox(height: 16.0),
             const WeeklyTimelineHeader(),
-            const SizedBox(height: 16.0),
 
-            if (_isLoadingActivities)
-              const Center(child: CircularProgressIndicator())
-            else if (_recentActivities.isNotEmpty)
-              ContinueLearningCard(activity: _recentActivities.first),
 
             const SizedBox(height: 16.0),
 

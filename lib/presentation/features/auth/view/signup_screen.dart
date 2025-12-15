@@ -73,6 +73,12 @@ class _SignupScreenState extends State<SignupScreen> {
       _logger.i("Fetched ${response.professions.length} professions.");
       setState(() {
         _professionsList = response.professions;
+        // Set 'Doctor' as default if available
+        final doctorProfession = _professionsList.firstWhere(
+          (p) => p.name == 'Doctor',
+          orElse: () => _professionsList.first, // Fallback to first if Doctor not found
+        );
+        _selectedProfession = doctorProfession;
         _isLoadingProfessions = false;
         _hasError = false;
       });

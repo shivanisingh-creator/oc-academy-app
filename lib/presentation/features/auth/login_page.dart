@@ -169,7 +169,6 @@ class _LoginPageState extends State<LoginPage> {
                                 color: Colors.black87,
                               ),
                             ),
-                            Icon(Icons.arrow_drop_down, color: Colors.grey),
                           ],
                         ),
                       ),

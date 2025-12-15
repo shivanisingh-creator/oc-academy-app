@@ -110,11 +110,7 @@ class _TestPrepProgressCardState extends State<TestPrepProgressCard> {
                       // FIX: Calculate width per bar to fit all.
                       // If dataLength is small, the calculated width will be large,
                       // but constraints.maxWidth prevents it from causing an overflow.
-                      final barWidth =
-                          (constraints.maxWidth /
-                                  (dataLength *
-                                      2)) // Use * 2 to account for spacing
-                              .clamp(10.0, 40.0); // Min 10, Max 40 width
+                      final barWidth = 60.0; // Fixed width for readability
 
                       return SingleChildScrollView(
                         scrollDirection: Axis.horizontal,
@@ -169,7 +165,7 @@ class _TestPrepProgressCardState extends State<TestPrepProgressCard> {
                                       ),
                                       // FIX: Added X-Axis label for bars
                                       SizedBox(
-                                        width: barWidth + 10,
+                                        width: barWidth,
                                         child: Text(
                                           detail.name ?? '',
                                           textAlign: TextAlign.center,
@@ -177,7 +173,7 @@ class _TestPrepProgressCardState extends State<TestPrepProgressCard> {
                                           overflow: TextOverflow.ellipsis,
                                           style: const TextStyle(
                                             fontSize: 10,
-                                            color: Colors.grey,
+                                            color: Color(0xFF285698),
                                           ),
                                         ),
                                       ),
@@ -335,7 +331,21 @@ class _TestPrepProgressCardState extends State<TestPrepProgressCard> {
                 _selectedDetail == null
                     ? Column(
                         children: [
+                          const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 8.0),
+                            child: Text(
+                              "Course Progress",
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 16),
+                            ),
+                          ),
                           _buildBarChart(),
+                          const SizedBox(height: 8),
+                          const Text(
+                            "Subjects",
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 12),
+                          ),
                           const SizedBox(height: 8),
                           const Text(
                             "Click/Hover over a bar to see subject/module name and progress",

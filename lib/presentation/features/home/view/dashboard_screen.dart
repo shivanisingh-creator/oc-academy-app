@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:oc_academy_app/presentation/features/auth/view/widgets/week_timeline_header.dart';
 import 'package:oc_academy_app/presentation/features/auth/view/widgets/weekline_activity_widget.dart';
 import 'package:oc_academy_app/presentation/features/home/view/widgets/continue_learning_card.dart';
 
@@ -8,7 +9,6 @@ import 'package:oc_academy_app/presentation/features/auth/view/widgets/test_prep
 import 'package:oc_academy_app/presentation/features/auth/view/widgets/logbook_card.dart';
 
 import 'package:oc_academy_app/presentation/features/auth/view/widgets/verification_card.dart';
-import 'package:oc_academy_app/presentation/features/auth/view/widgets/week_timeline_header.dart';
 
 import 'package:oc_academy_app/data/repositories/home_repository.dart';
 import 'package:oc_academy_app/data/models/user_courses/user_courses_response.dart';
@@ -193,6 +193,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ],
             ),
             const SizedBox(height: 16.0),
+            const WeeklyTimelineHeader(),
             const SizedBox(height: 16.0),
             // Weekly Activity Section
             if (_recentActivities.isNotEmpty)
@@ -206,7 +207,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     title: activity.name,
                     tag: activity.status,
                     tagColor:
-                        Colors.blue, // Default color for now, could be dynamic
+                        Color(0XFF3359A7), // Default color for now, could be dynamic
                   );
                 }).toList(),
               ),

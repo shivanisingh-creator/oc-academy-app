@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class CustomLabeledTextField extends StatelessWidget {
   final String label;
@@ -9,6 +10,7 @@ class CustomLabeledTextField extends StatelessWidget {
   final Widget? suffixIcon;
   final int? maxLines;
   final bool readOnly;
+  final List<TextInputFormatter>? inputFormatters;
 
   const CustomLabeledTextField({
     super.key,
@@ -20,6 +22,7 @@ class CustomLabeledTextField extends StatelessWidget {
     this.suffixIcon,
     this.maxLines = 1,
     this.readOnly = false,
+    this.inputFormatters,
   });
 
   @override
@@ -42,6 +45,7 @@ class CustomLabeledTextField extends StatelessWidget {
           obscureText: obscureText,
           maxLines: maxLines,
           readOnly: readOnly,
+          inputFormatters: inputFormatters,
           decoration: InputDecoration(
             hintText: hintText,
             hintStyle: const TextStyle(color: Colors.grey),

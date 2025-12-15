@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'dart:async';
 import 'package:oc_academy_app/data/models/auth/verify_otp_request.dart';
 import 'package:oc_academy_app/data/repositories/login_repository.dart';
@@ -15,8 +16,10 @@ const int resendTimeout = 60; // 60 seconds
 class OtpVerificationScreen extends StatefulWidget {
   // The phone number passed from the previous screen
   final String phoneNumber;
+  final AuthRepository? authRepository;
 
-  const OtpVerificationScreen({super.key, required this.phoneNumber});
+  const OtpVerificationScreen(
+      {super.key, required this.phoneNumber, this.authRepository});
 
   @override
   State<OtpVerificationScreen> createState() => _OtpVerificationScreenState();
@@ -27,7 +30,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
   // We only need one controller and one focus node for Pinput
   final TextEditingController _pinController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
-  final AuthRepository _authRepository = AuthRepository();
+  late final AuthRepository _authRepository;
   final GlobalKey _pinPutKey = GlobalKey();
 
   // State to hold the countdown timer
@@ -43,6 +46,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
   @override
   void initState() {
     super.initState();
+    _authRepository = widget.authRepository ?? AuthRepository();
 
     // Start the resend timer
     _startTimer();
@@ -72,9 +76,21 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
     });
   }
 
-  void _onResendOtp() {
+  void _onResendOtp() async {
     if (_canResend) {
       // print('OTP Resent to ${widget.phoneNumber}');
+      final response =
+          await _authRepository.signupLoginMobile(widget.phoneNumber);
+
+      if (response != null) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('OTP Resent Successfully!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
 
       // Clear the current OTP input using the single controller
       _pinController.clear();
@@ -241,6 +257,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                   controller: _pinController,
                   focusNode: _focusNode,
                   keyboardType: TextInputType.number,
+                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
 
                   // Crucial for enabling platform-level autofill
                   autofocus: true,

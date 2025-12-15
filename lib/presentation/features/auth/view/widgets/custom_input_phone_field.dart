@@ -76,7 +76,7 @@ class _CustomPhoneInputFieldState extends State<CustomPhoneInputField> {
                     LengthLimitingTextInputFormatter(10), // Max 10 digits
                   ],
                   decoration: InputDecoration(
-                    hintText: '82354-02876', // Example number as hint
+                    hintText: 'Enter phone number', // Example number as hint
                     hintStyle: const TextStyle(color: Colors.grey),
                     border: InputBorder.none, // Hide default border
                     contentPadding: const EdgeInsets.symmetric(vertical: 14),

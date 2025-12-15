@@ -1,8 +1,13 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:logger/logger.dart';
+import 'package:oc_academy_app/core/constants/route_constants.dart';
 import 'package:oc_academy_app/core/utils/storage.dart';
 import 'package:oc_academy_app/data/models/auth/create_profile_request.dart';
+import 'package:oc_academy_app/data/models/profession_response.dart';
 import 'package:oc_academy_app/data/repositories/login_repository.dart';
+import 'package:oc_academy_app/data/repositories/profession_repository.dart';
 import 'package:oc_academy_app/presentation/features/auth/view/widgets/custom_checkbox_list.dart';
 import 'package:oc_academy_app/presentation/features/auth/view/widgets/custom_input_phone_field.dart';
 import 'package:oc_academy_app/presentation/features/auth/view/widgets/custom_phone_field.dart';
@@ -32,14 +37,16 @@ class _SignupScreenState extends State<SignupScreen> {
   final TextEditingController _emailController = TextEditingController();
 
   final AuthRepository _authRepository = AuthRepository();
+  final ProfessionRepository _professionRepository = ProfessionRepository();
   final TokenStorage _tokenStorage = TokenStorage();
+  final Logger _logger = Logger();
 
   // State for dropdown and checkbox
-  String? _selectedProfession;
+  Profession? _selectedProfession;
   bool _agreedToTerms = false;
-
-  // List of professions for the dropdown
-  final List<String> _professions = ['Doctor', 'Engineer', 'Teacher', 'Other'];
+  List<Profession> _professionsList = [];
+  bool _isLoadingProfessions = true;
+  bool _hasError = false;
 
   // Example state for phone number validation (for the checkmark)
   bool _isPhoneNumberValid = false;
@@ -49,10 +56,38 @@ class _SignupScreenState extends State<SignupScreen> {
     super.initState();
     _phoneController.text = widget.phoneNumber;
     _phoneController.addListener(_validatePhoneNumber);
+    _fetchProfessions();
 
     // Prefill email if provided (from Google Sign-In)
     if (widget.email != null && widget.email!.isNotEmpty) {
       _emailController.text = widget.email!;
+    }
+  }
+
+  void _fetchProfessions() async {
+    setState(() {
+      _isLoadingProfessions = true;
+    });
+    final response = await _professionRepository.getProfessions();
+    if (response != null) {
+      _logger.i("Fetched ${response.professions.length} professions.");
+      setState(() {
+        _professionsList = response.professions;
+        _isLoadingProfessions = false;
+        _hasError = false;
+      });
+    } else {
+      _logger.w("Get Professions returned null.");
+      setState(() {
+        _isLoadingProfessions = false;
+        _hasError = true;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Failed to load professions. Please try again.'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 
@@ -85,10 +120,9 @@ class _SignupScreenState extends State<SignupScreen> {
         email: _emailController.text,
         registrationSource: "webapp",
         preAccessToken: widget.preAccessToken,
-        professionId:
-            _professions.indexOf(_selectedProfession!) +
-            1, // Assuming 1-based indexing for profession IDs
-        title: _selectedProfession == 'Doctor'
+        professionId: _selectedProfession!
+            .id, // Assuming 1-based indexing for profession IDs
+        title: _selectedProfession?.name == 'Doctor'
             ? 'Dr.'
             : '', // Example: Set title based on profession
       );
@@ -129,13 +163,17 @@ class _SignupScreenState extends State<SignupScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final professionItems = _professionsList.map((p) => p.name).toList();
+    _logger.i("Building dropdown with items: $professionItems");
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
+        // ... other imports ...
         leading: IconButton(
           icon: const Icon(Icons.close, color: Colors.black54),
           onPressed: () {
-            Navigator.of(context).pop();
+            Navigator.of(context).pushReplacementNamed(RouteConstants.login);
           },
         ),
         backgroundColor: Colors.white,
@@ -158,17 +196,31 @@ class _SignupScreenState extends State<SignupScreen> {
             const SizedBox(height: 30),
 
             // Profession Dropdown
-            CustomDropdownField(
-              label: 'Profession*',
-              value: _selectedProfession,
-              items: _professions,
-              onChanged: (String? newValue) {
-                setState(() {
-                  _selectedProfession = newValue;
-                });
-              },
-              hintText: 'Select your profession',
-            ),
+            _hasError
+                ? Row(
+                    children: [
+                      const Text('Failed to load professions'),
+                      IconButton(
+                        icon: const Icon(Icons.refresh),
+                        onPressed: _fetchProfessions,
+                      ),
+                    ],
+                  )
+                : CustomDropdownField(
+                    label: 'Profession*',
+                    value: _selectedProfession?.name,
+                    items: professionItems,
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        _selectedProfession = _professionsList.firstWhere(
+                          (p) => p.name == newValue,
+                        );
+                      });
+                    },
+                    hintText: _isLoadingProfessions
+                        ? 'Loading...'
+                        : 'Select your profession',
+                  ),
             const SizedBox(height: 20),
 
             // First Name and Last Name
@@ -179,6 +231,9 @@ class _SignupScreenState extends State<SignupScreen> {
                     label: 'First Name*',
                     hintText: 'Enter first name',
                     controller: _firstNameController,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z]')),
+                    ],
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -187,6 +242,9 @@ class _SignupScreenState extends State<SignupScreen> {
                     label: 'Last Name*',
                     hintText: 'Enter last name',
                     controller: _lastNameController,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z]')),
+                    ],
                   ),
                 ),
               ],
@@ -195,7 +253,6 @@ class _SignupScreenState extends State<SignupScreen> {
 
             // Phone Number Field
             CustomPhoneInputField(
-              label: 'Phone Number',
               controller: _phoneController,
               isValid: _isPhoneNumberValid,
               readOnly: widget.phoneNumber.isNotEmpty,

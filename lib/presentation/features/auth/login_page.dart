@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+// Import this package for input formatters
+import 'package:flutter/services.dart';
 import 'package:logger/logger.dart';
 import 'package:oc_academy_app/app/app_config.dart';
 import 'package:oc_academy_app/data/models/auth/signup_login_google_request.dart';
@@ -177,6 +179,14 @@ class _LoginPageState extends State<LoginPage> {
                         child: TextFormField(
                           controller: _phoneNumberController,
                           keyboardType: TextInputType.phone,
+                          // --- START OF REQUIRED CHANGES ---
+                          inputFormatters: [
+                            // 1. Limit length to 10 digits
+                            LengthLimitingTextInputFormatter(10),
+                            // 2. Only allow digits (no alphabets, special chars, or spaces)
+                            FilteringTextInputFormatter.digitsOnly,
+                          ],
+                          // --- END OF REQUIRED CHANGES ---
                           decoration: const InputDecoration(
                             hintText: 'Enter your phone number',
                             hintStyle: TextStyle(color: Colors.grey),
@@ -197,11 +207,12 @@ class _LoginPageState extends State<LoginPage> {
                 // Send OTP Button
                 ElevatedButton(
                   onPressed: () async {
-                    if (_phoneNumberController.text.length < 10) {
+                    // Trimming the text before checking length is a good practice
+                    if (_phoneNumberController.text.trim().length < 10) {
                       ErrorTooltip.show(
                         context,
                         _phoneFieldKey,
-                        "Oops! Invalid number",
+                        "Oops! Invalid number. Must be 10 digits.",
                       );
                       return;
                     }
@@ -211,7 +222,7 @@ class _LoginPageState extends State<LoginPage> {
                       clientSecret: widget.config.keycloakClientSecret,
                     );
                     final response = await _authRepository.signupLoginMobile(
-                      _phoneNumberController.text,
+                      _phoneNumberController.text.trim(), // Use trim() here too
                     );
                     if (response != null && response.response == "OTP sent") {
                       if (mounted) {
@@ -219,7 +230,7 @@ class _LoginPageState extends State<LoginPage> {
                           context,
                           MaterialPageRoute(
                             builder: (context) => OtpVerificationScreen(
-                              phoneNumber: _phoneNumberController.text,
+                              phoneNumber: _phoneNumberController.text.trim(),
                             ),
                           ),
                         );

@@ -10,7 +10,7 @@ import 'package:oc_academy_app/presentation/features/auth/view/widgets/partnersh
 import 'package:oc_academy_app/presentation/features/auth/view/widgets/referal_card.dart';
 import 'package:oc_academy_app/presentation/features/auth/view/widgets/testimonials_card.dart';
 import 'package:oc_academy_app/presentation/features/home/view/home_screen.dart';
-import 'package:oc_academy_app/presentation/features/home/view/widgets/profile_screen.dart';
+import 'package:oc_academy_app/presentation/features/home/view/profile_screen.dart';
 import 'package:oc_academy_app/presentation/global/widgets/courses_card.dart';
 import 'package:oc_academy_app/data/models/home/most_enrolled_response.dart';
 import 'package:oc_academy_app/presentation/features/home/widgets/trending_course_card.dart';

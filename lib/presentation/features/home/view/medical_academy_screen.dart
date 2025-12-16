@@ -10,6 +10,7 @@ import 'package:oc_academy_app/presentation/features/auth/view/widgets/partnersh
 import 'package:oc_academy_app/presentation/features/auth/view/widgets/referal_card.dart';
 import 'package:oc_academy_app/presentation/features/auth/view/widgets/testimonials_card.dart';
 import 'package:oc_academy_app/presentation/features/home/view/home_screen.dart';
+import 'package:oc_academy_app/presentation/features/home/view/widgets/profile_screen.dart';
 import 'package:oc_academy_app/presentation/global/widgets/courses_card.dart';
 import 'package:oc_academy_app/data/models/home/most_enrolled_response.dart';
 import 'package:oc_academy_app/presentation/features/home/widgets/trending_course_card.dart';
@@ -49,6 +50,14 @@ class FeaturedCoursesSection extends StatelessWidget {
 }
 
 class _MedicalAcademyScreenState extends State<MedicalAcademyScreen> {
+  // final List<Widget> _pages = [
+  //   const HomeScreen(),
+  //   const Center(child: Text('Explore Screen')), // Placeholder
+  //   const DashboardScreen(),
+  //   const Center(child: Text('Blog Screen')), // Placeholder
+  //   const ProfileScreen(),
+  // ];
+
   final HomeRepository _homeRepository = HomeRepository();
   List<banner_model.Banner> _banners = [];
   bool _isLoadingBanners = true;
@@ -63,6 +72,7 @@ class _MedicalAcademyScreenState extends State<MedicalAcademyScreen> {
   bool _isLoadingActivities = true;
   List<BlogPostResponse> _blogs = [];
   bool _isLoadingBlogs = true;
+
 
   @override
   void initState() {
@@ -213,11 +223,16 @@ class _MedicalAcademyScreenState extends State<MedicalAcademyScreen> {
       NavItem(label: "Profile", icon: Icons.person_outlined),
     ];
     int _selectedIndex = 0;
-    void _onItemTapped(int index) {
+    void onItemTapped(int index) {
       if (index == 2) {
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => const DashboardScreen()),
+        );
+      } else if (index == 4) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const ProfileScreen()),
         );
       } else {
         setState(() {
@@ -231,7 +246,7 @@ class _MedicalAcademyScreenState extends State<MedicalAcademyScreen> {
       bottomNavigationBar: CustomBottomNavBar(
         items: navItems,
         selectedIndex: _selectedIndex,
-        onItemSelected: _onItemTapped,
+        onItemSelected: onItemTapped,
         // Optional: you can pass activeColor/inactiveColor here if needed
       ),
       body: SingleChildScrollView(

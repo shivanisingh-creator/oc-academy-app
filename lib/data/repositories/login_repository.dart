@@ -17,6 +17,44 @@ class AuthRepository {
   final TokenStorage _tokenStorage = TokenStorage();
   final Logger _logger = Logger();
 
+  Future<void> logout() async {
+    try {
+      final String? token = await _tokenStorage.getAccessToken();
+      final String? apiToken = await _tokenStorage.getApiAccessToken();
+
+      if (token == null) {
+        _logger.e("❌ No access token found.");
+        // Still clear local storage just in case
+        await _tokenStorage.deleteAccessToken();
+        await _tokenStorage.deleteApiAccessToken();
+        return;
+      }
+
+      await _apiUtils.get(
+        url: ApiEndpoints.logout,
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+            'hk-access-token': apiToken,
+          },
+        ),
+      );
+
+      await _tokenStorage.deleteAccessToken();
+      await _tokenStorage.deleteApiAccessToken();
+      _logger.i("✅ User logged out successfully.");
+    } catch (e) {
+      _logger.e(
+        "❌ Exception during logout: ${_apiUtils.handleError(e)}",
+      );
+      // Still clear local storage even if API call fails
+      await _tokenStorage.deleteAccessToken();
+      await _tokenStorage.deleteApiAccessToken();
+      // Rethrow the exception to be handled by the BLoC
+      rethrow;
+    }
+  }
+
   Future<SignupLoginGoogleResponse?> signInWithGoogle(
     SignupLoginGoogleRequest request,
   ) async {
@@ -85,6 +123,7 @@ class AuthRepository {
       }
       return null;
     } catch (e) {
+      
       _logger.e(
         "❌ Exception during signupLoginMobile: ${_apiUtils.handleError(e)}",
       );

@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 
 class CustomCheckboxTile extends StatelessWidget {
   final bool value;
-  final ValueChanged<bool?> onChanged;
+  final ValueChanged<bool?>? onChanged;
   final Widget title;
 
   const CustomCheckboxTile({
     super.key,
     required this.value,
-    required this.onChanged,
+    this.onChanged,
     required this.title,
   });
 

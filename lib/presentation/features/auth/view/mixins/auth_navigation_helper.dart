@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:oc_academy_app/core/utils/storage.dart';
 import 'package:oc_academy_app/presentation/features/auth/view/signup_screen.dart';
 import 'package:oc_academy_app/data/repositories/user_repository.dart';
+import 'package:oc_academy_app/app/app_config.dart';
 
 class AuthNavigationHelper {
   static Future<void> handleLoginSuccess({
@@ -12,6 +13,7 @@ class AuthNavigationHelper {
     String? preAccessToken,
     required String phoneNumber,
     String? email,
+    required AppConfig config,
   }) async {
     final TokenStorage tokenStorage = TokenStorage();
 
@@ -24,6 +26,7 @@ class AuthNavigationHelper {
               phoneNumber: email != null && email.isNotEmpty ? "" : phoneNumber,
               preAccessToken: preAccessToken,
               email: email,
+              config: config,
             ),
           ),
         );

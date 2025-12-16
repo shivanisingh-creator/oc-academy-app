@@ -2,27 +2,32 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:logger/logger.dart';
-import 'package:oc_academy_app/core/constants/route_constants.dart';
 import 'package:oc_academy_app/core/utils/storage.dart';
 import 'package:oc_academy_app/data/models/auth/create_profile_request.dart';
 import 'package:oc_academy_app/data/models/profession_response.dart';
 import 'package:oc_academy_app/data/repositories/login_repository.dart';
 import 'package:oc_academy_app/data/repositories/profession_repository.dart';
+import 'package:oc_academy_app/presentation/features/auth/login_page.dart';
 import 'package:oc_academy_app/presentation/features/auth/view/widgets/custom_checkbox_list.dart';
 import 'package:oc_academy_app/presentation/features/auth/view/widgets/custom_input_phone_field.dart';
 import 'package:oc_academy_app/presentation/features/auth/view/widgets/custom_phone_field.dart';
 import 'package:oc_academy_app/presentation/features/auth/view/widgets/custom_text_field.dart';
 import 'package:oc_academy_app/presentation/features/home/view/medical_academy_screen.dart';
 
+import 'package:oc_academy_app/app/app_config.dart';
+
 class SignupScreen extends StatefulWidget {
   final String phoneNumber;
   final String preAccessToken;
   final String? email;
+  final AppConfig config;
+
   const SignupScreen({
     super.key,
     required this.phoneNumber,
     required this.preAccessToken,
     this.email,
+    required this.config,
   });
 
   @override
@@ -51,11 +56,20 @@ class _SignupScreenState extends State<SignupScreen> {
   // Example state for phone number validation (for the checkmark)
   bool _isPhoneNumberValid = false;
 
+  void _onFieldChanged() {
+    setState(() {
+      // Re-evaluate form validity
+    });
+  }
+
   @override
   void initState() {
     super.initState();
     _phoneController.text = widget.phoneNumber;
     _phoneController.addListener(_validatePhoneNumber);
+    _firstNameController.addListener(_onFieldChanged);
+    _lastNameController.addListener(_onFieldChanged);
+    _emailController.addListener(_onFieldChanged);
     _fetchProfessions();
 
     // Prefill email if provided (from Google Sign-In)
@@ -76,7 +90,8 @@ class _SignupScreenState extends State<SignupScreen> {
         // Set 'Doctor' as default if available
         final doctorProfession = _professionsList.firstWhere(
           (p) => p.name == 'Doctor',
-          orElse: () => _professionsList.first, // Fallback to first if Doctor not found
+          orElse: () =>
+              _professionsList.first, // Fallback to first if Doctor not found
         );
         _selectedProfession = doctorProfession;
         _isLoadingProfessions = false;
@@ -99,6 +114,10 @@ class _SignupScreenState extends State<SignupScreen> {
 
   @override
   void dispose() {
+    _firstNameController.removeListener(_onFieldChanged);
+    _lastNameController.removeListener(_onFieldChanged);
+    _emailController.removeListener(_onFieldChanged);
+    _phoneController.removeListener(_validatePhoneNumber);
     _firstNameController.dispose();
     _lastNameController.dispose();
     _phoneController.dispose();
@@ -167,6 +186,14 @@ class _SignupScreenState extends State<SignupScreen> {
         _agreedToTerms;
   }
 
+  bool _areTextFieldsFilled() {
+    return _selectedProfession != null &&
+        _firstNameController.text.isNotEmpty &&
+        _lastNameController.text.isNotEmpty &&
+        _phoneController.text.isNotEmpty &&
+        _emailController.text.isNotEmpty;
+  }
+
   @override
   Widget build(BuildContext context) {
     final professionItems = _professionsList.map((p) => p.name).toList();
@@ -174,23 +201,17 @@ class _SignupScreenState extends State<SignupScreen> {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        // ... other imports ...
-        leading: IconButton(
-          icon: const Icon(Icons.close, color: Colors.black54),
-          onPressed: () {
-            Navigator.of(context).pushReplacementNamed(RouteConstants.login);
-          },
-        ),
-        backgroundColor: Colors.white,
-        elevation: 0,
-      ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 10.0),
+        padding: const EdgeInsets.only(
+          left: 24.0,
+          right: 24.0,
+          top: 90.0,
+          bottom: 30.0,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+
           children: <Widget>[
-            // Header
             const Text(
               'Sign up and start learning',
               style: TextStyle(
@@ -278,11 +299,13 @@ class _SignupScreenState extends State<SignupScreen> {
             // Terms and Privacy Checkbox
             CustomCheckboxTile(
               value: _agreedToTerms,
-              onChanged: (bool? newValue) {
-                setState(() {
-                  _agreedToTerms = newValue ?? false;
-                });
-              },
+              onChanged: _areTextFieldsFilled()
+                  ? (bool? newValue) {
+                      setState(() {
+                        _agreedToTerms = newValue ?? false;
+                      });
+                    }
+                  : null,
               title: RichText(
                 text: const TextSpan(
                   style: TextStyle(fontSize: 14, color: Colors.black87),
@@ -360,8 +383,12 @@ class _SignupScreenState extends State<SignupScreen> {
                       // onTap for navigation (e.g., Navigator.push for LoginScreen)
                       recognizer: TapGestureRecognizer()
                         ..onTap = () {
-                          print('Navigate to Login Screen');
-                          // Example: Navigator.of(context).push(MaterialPageRoute(builder: (context) => LoginScreen()));
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  LoginPage(config: widget.config),
+                            ),
+                          );
                         },
                     ),
                   ],

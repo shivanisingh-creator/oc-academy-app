@@ -230,6 +230,7 @@ class _LoginPageState extends State<LoginPage> {
                           MaterialPageRoute(
                             builder: (context) => OtpVerificationScreen(
                               phoneNumber: _phoneNumberController.text.trim(),
+                              config: widget.config,
                             ),
                           ),
                         );
@@ -309,6 +310,7 @@ class _LoginPageState extends State<LoginPage> {
                           preAccessToken: response.response!.preAccessToken,
                           phoneNumber: response.response!.mobileNumber ?? "",
                           email: response.response!.email,
+                          config: widget.config,
                         );
                       } else {
                         Logger().e('Google Sign-In failed');

@@ -6,6 +6,7 @@ import 'package:oc_academy_app/data/repositories/login_repository.dart';
 import 'package:pinput/pinput.dart'; // Import the pinput package
 import 'package:oc_academy_app/core/utils/error_tooltip.dart';
 import 'package:oc_academy_app/presentation/features/auth/view/mixins/auth_navigation_helper.dart';
+import 'package:oc_academy_app/app/app_config.dart';
 
 // Constants for styling
 const Color primaryBlue = Color(0XFF3359A7);
@@ -17,9 +18,14 @@ class OtpVerificationScreen extends StatefulWidget {
   // The phone number passed from the previous screen
   final String phoneNumber;
   final AuthRepository? authRepository;
+  final AppConfig config;
 
-  const OtpVerificationScreen(
-      {super.key, required this.phoneNumber, this.authRepository});
+  const OtpVerificationScreen({
+    super.key,
+    required this.phoneNumber,
+    this.authRepository,
+    required this.config,
+  });
 
   @override
   State<OtpVerificationScreen> createState() => _OtpVerificationScreenState();
@@ -79,8 +85,9 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
   void _onResendOtp() async {
     if (_canResend) {
       // print('OTP Resent to ${widget.phoneNumber}');
-      final response =
-          await _authRepository.signupLoginMobile(widget.phoneNumber);
+      final response = await _authRepository.signupLoginMobile(
+        widget.phoneNumber,
+      );
 
       if (response != null) {
         if (!mounted) return;
@@ -146,6 +153,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
             accessToken: response.response!.accessToken,
             preAccessToken: response.response!.preAccessToken,
             phoneNumber: widget.phoneNumber,
+            config: widget.config,
           );
         }
       } else {

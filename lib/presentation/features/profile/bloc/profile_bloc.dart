@@ -29,10 +29,12 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     on<LogoutEvent>((event, emit) async {
       try {
         await authRepository.logout();
-        emit(LogoutSuccess());
       } catch (e) {
-        emit(ProfileError(message: e.toString()));
+        // Log the error but proceed with logout from the app's perspective
+        // as local tokens would have been cleared by authRepository.logout()
+        print('Error during logout API call: $e');
       }
+      emit(LogoutSuccess());
     });
   }
 }

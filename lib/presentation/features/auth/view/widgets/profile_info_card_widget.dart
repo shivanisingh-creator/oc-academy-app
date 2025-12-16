@@ -55,40 +55,31 @@ class _ProfileInfoCardState extends State<ProfileInfoCard> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              InkWell(
-                onTap: () {
-                  if (widget.expandedContent != null) {
-                    setState(() {
-                      _isExpanded = !_isExpanded;
-                    });
-                  }
-                },
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      widget.title,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF2D3142),
-                      ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    widget.title,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF2D3142),
                     ),
-                    Row(
-                      children: [
-                        if (widget.expandedContent != null)
-                          Icon(
-                            _isExpanded
-                                ? Icons.keyboard_arrow_down
-                                : Icons.arrow_forward_ios,
-                            size: 16,
-                            color: Colors.grey,
-                          ),
-                        if (widget.actions != null) ...widget.actions!,
-                      ],
-                    ),
-                  ],
-                ),
+                  ),
+                  Row(
+                    children: [
+                      if (widget.expandedContent != null)
+                        Icon(
+                          _isExpanded
+                              ? Icons.keyboard_arrow_down
+                              : Icons.arrow_forward_ios,
+                          size: 16,
+                          color: Colors.grey,
+                        ),
+                      if (widget.actions != null) ...widget.actions!,
+                    ],
+                  ),
+                ],
               ),
               if (widget.subtitle != null) ...[
                 const SizedBox(height: 4),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:oc_academy_app/core/constants/route_constants.dart';
 import 'package:oc_academy_app/data/models/home/banner_response.dart'
     as banner_model;
 import 'package:oc_academy_app/data/repositories/home_repository.dart';
@@ -10,7 +11,6 @@ import 'package:oc_academy_app/presentation/features/auth/view/widgets/partnersh
 import 'package:oc_academy_app/presentation/features/auth/view/widgets/referal_card.dart';
 import 'package:oc_academy_app/presentation/features/auth/view/widgets/testimonials_card.dart';
 import 'package:oc_academy_app/presentation/features/home/view/home_screen.dart';
-import 'package:oc_academy_app/presentation/features/home/view/profile_screen.dart';
 import 'package:oc_academy_app/presentation/global/widgets/courses_card.dart';
 import 'package:oc_academy_app/data/models/home/most_enrolled_response.dart';
 import 'package:oc_academy_app/presentation/features/home/widgets/trending_course_card.dart';
@@ -230,10 +230,7 @@ class _MedicalAcademyScreenState extends State<MedicalAcademyScreen> {
           MaterialPageRoute(builder: (context) => const DashboardScreen()),
         );
       } else if (index == 4) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const ProfileScreen()),
-        );
+        Navigator.pushNamed(context, RouteConstants.profile);
       } else {
         setState(() {
           _selectedIndex = index;

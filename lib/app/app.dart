@@ -3,6 +3,7 @@ import 'package:oc_academy_app/core/constants/route_constants.dart';
 import 'package:oc_academy_app/presentation/features/auth/login_page.dart';
 import 'package:oc_academy_app/app/app_config.dart'; // Import AppConfig
 import 'package:oc_academy_app/presentation/features/home/view/medical_academy_screen.dart'; // Import MedicalAcademyScreen
+import 'package:oc_academy_app/presentation/features/profile/view/profile_screen.dart';
 
 class App extends StatelessWidget {
   final AppConfig config; // Add AppConfig as a field
@@ -15,6 +16,7 @@ class App extends StatelessWidget {
       routes: {
         RouteConstants.login: (context) => LoginPage(config: config),
         RouteConstants.home: (context) => const MedicalAcademyScreen(),
+        RouteConstants.profile: (context) => const ProfileScreen(),
       },
     );
   }

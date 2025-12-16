@@ -12,7 +12,7 @@ import 'package:oc_academy_app/presentation/features/auth/view/widgets/custom_ch
 import 'package:oc_academy_app/presentation/features/auth/view/widgets/custom_input_phone_field.dart';
 import 'package:oc_academy_app/presentation/features/auth/view/widgets/custom_phone_field.dart';
 import 'package:oc_academy_app/presentation/features/auth/view/widgets/custom_text_field.dart';
-import 'package:oc_academy_app/presentation/features/auth/view/widgets/home_page_screen.dart';
+import 'package:oc_academy_app/presentation/features/home/view/medical_academy_screen.dart';
 
 class SignupScreen extends StatefulWidget {
   final String phoneNumber;
@@ -138,7 +138,7 @@ class _SignupScreenState extends State<SignupScreen> {
         await _tokenStorage.saveApiAccessToken(response.response!.accessToken!);
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const MyApp()),
+          MaterialPageRoute(builder: (context) => const MedicalAcademyScreen()),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(

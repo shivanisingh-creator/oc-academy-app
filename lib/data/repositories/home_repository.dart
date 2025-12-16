@@ -12,12 +12,52 @@ import 'package:oc_academy_app/data/models/home/most_enrolled_response.dart';
 import 'package:oc_academy_app/data/models/user_courses/user_courses_response.dart';
 import 'package:oc_academy_app/data/models/user/user_lite_response.dart';
 import 'package:oc_academy_app/data/models/home/recent_activity.dart';
+import 'package:oc_academy_app/data/models/blog/blog_post_response.dart';
 import 'package:oc_academy_app/data/models/home/course_progress_response.dart';
 
 class HomeRepository {
   final ApiUtils _apiUtils = ApiUtils.instance;
   final TokenStorage _tokenStorage = TokenStorage();
   final Logger _logger = Logger();
+
+  Future<List<BlogPostResponse>?> getBlogPosts({
+    int page = 1,
+    int perPage = 10,
+  }) async {
+    try {
+      final Dio dio = Dio(); // Use a new Dio instance for external API
+      final response = await dio.get(
+        'https://blog.ocacademy.in/wp-json/wp/v2/posts',
+        queryParameters: {
+          'page': page,
+          'per_page': perPage,
+          'orderby': 'date',
+          'order': 'desc',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        _logger.i("✅ Get Blog Posts successful.");
+        final List<dynamic> data = response.data;
+        return data.map((json) => BlogPostResponse.fromJson(json)).toList();
+      }
+      return null;
+    } on DioException catch (e) {
+      _logger.e(
+        "❌ DioException during getBlogPosts: ${e.message}",
+        error: e,
+        stackTrace: e.stackTrace,
+      );
+      return null;
+    } catch (e, stackTrace) {
+      _logger.e(
+        "❌ Exception during getBlogPosts: $e",
+        error: e,
+        stackTrace: stackTrace,
+      );
+      return null;
+    }
+  }
 
   Future<BannerResponse?> getBanners() async {
     try {

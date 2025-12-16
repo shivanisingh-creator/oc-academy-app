@@ -18,8 +18,7 @@ import 'package:oc_academy_app/data/repositories/user_repository.dart';
 import 'package:flutter/services.dart';
 import 'package:oc_academy_app/presentation/features/home/view/widgets/continue_learning_card.dart';
 import 'package:oc_academy_app/data/models/home/recent_activity.dart';
-
-
+import 'package:oc_academy_app/data/models/blog/blog_post_response.dart';
 
 class MedicalAcademyScreen extends StatefulWidget {
   const MedicalAcademyScreen({super.key});
@@ -62,6 +61,8 @@ class _MedicalAcademyScreenState extends State<MedicalAcademyScreen> {
   int? _userId;
   List<RecentActivity> _recentActivities = [];
   bool _isLoadingActivities = true;
+  List<BlogPostResponse> _blogs = [];
+  bool _isLoadingBlogs = true;
 
   @override
   void initState() {
@@ -70,6 +71,28 @@ class _MedicalAcademyScreenState extends State<MedicalAcademyScreen> {
     _fetchTrendingCourses();
     _fetchReferralData();
     _fetchRecentActivities();
+    _fetchBlogs();
+  }
+
+  Future<void> _fetchBlogs() async {
+    try {
+      final response = await _homeRepository.getBlogPosts();
+      if (mounted) {
+        setState(() {
+          if (response != null) {
+            _blogs = response;
+          }
+          _isLoadingBlogs = false;
+        });
+      }
+    } catch (e) {
+      debugPrint("Error fetching blogs: $e");
+      if (mounted) {
+        setState(() {
+          _isLoadingBlogs = false;
+        });
+      }
+    }
   }
 
   Future<void> _fetchRecentActivities() async {
@@ -161,29 +184,9 @@ class _MedicalAcademyScreenState extends State<MedicalAcademyScreen> {
   @override
   Widget build(BuildContext context) {
     // A dark primary color to match the app bar/background
-    const Color primaryDark = Color(0xFF1A237E);
     // A distinct blue for the button
     const Color accentBlue = (Color(0XFF3359A7));
-    final List<BlogData> mockBlogs = [
-      BlogData(
-        category: 'PEDIATRICS',
-        title: 'Navigating the Challenges of Modern Pediatrics',
-        readTime: '5 min read',
-        imageUrl: 'assets/images/mrcp.png',
-      ),
-      BlogData(
-        category: 'CARDIOLOGY',
-        title: 'The Future of Cardiology: AI and Predictive Analytics',
-        readTime: '8 min read',
-        imageUrl: 'assets/images/mrcp.png',
-      ),
-      BlogData(
-        category: 'CARDIOLOGY',
-        title: 'The Future of Cardiology: AI and Predictive Analytics',
-        readTime: '8 min read',
-        imageUrl: 'assets/images/mrcp.png',
-      ),
-    ];
+
     final List<FeaturedProgramData> mockFeaturedCourses = [
       FeaturedProgramData(
         title: 'International PG Program in Emergency Medicine',
@@ -442,7 +445,15 @@ class _MedicalAcademyScreenState extends State<MedicalAcademyScreen> {
             ),
             const SizedBox(height: 10.0), // Added space here
 
-            BlogPostsSection(blogs: mockBlogs),
+            if (_isLoadingBlogs)
+              const Center(child: CircularProgressIndicator())
+            else if (_blogs.isNotEmpty)
+              BlogPostsSection(blogs: _blogs)
+            else
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16.0),
+                child: Text("No blog posts available"),
+              ),
             const SizedBox(height: 10.0), // Added space here
             ExploreBySpecialtySection(accentBlue: accentBlue),
             const SizedBox(height: 10.0), // Added space here

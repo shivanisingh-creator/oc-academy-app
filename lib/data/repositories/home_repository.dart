@@ -61,23 +61,8 @@ class HomeRepository {
 
   Future<BannerResponse?> getBanners() async {
     try {
-      final String? token = await _tokenStorage.getAccessToken();
-      if (token == null) {
-        _logger.e("❌ No access token found.");
-        return null;
-      }
-
-      // Get the saved API access token to use as hk-access-token
-      final String? hkAccessToken = await _tokenStorage.getApiAccessToken();
-
       final response = await _apiUtils.get(
         url: ApiEndpoints.getBanners,
-        options: Options(
-          headers: {
-            'Authorization': 'Bearer $token',
-            if (hkAccessToken != null) 'hk-access-token': hkAccessToken,
-          },
-        ),
       );
 
       if (response.statusCode == 200) {
@@ -99,23 +84,8 @@ class HomeRepository {
 
   Future<GlobalPartnersResponse?> getGlobalPartners() async {
     try {
-      final String? token = await _tokenStorage.getAccessToken();
-      if (token == null) {
-        _logger.e("❌ No access token found.");
-        return null;
-      }
-
-      // Get the saved API access token to use as hk-access-token
-      final String? hkAccessToken = await _tokenStorage.getApiAccessToken();
-
       final response = await _apiUtils.get(
         url: ApiEndpoints.getGlobalPartners,
-        options: Options(
-          headers: {
-            'Authorization': 'Bearer $token',
-            if (hkAccessToken != null) 'hk-access-token': hkAccessToken,
-          },
-        ),
       );
 
       if (response.statusCode == 200) {

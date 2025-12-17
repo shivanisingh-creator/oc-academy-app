@@ -1,4 +1,3 @@
-import 'package:dio/dio.dart';
 import 'package:logger/logger.dart';
 import 'package:oc_academy_app/core/constants/api_endpoints.dart';
 import 'package:oc_academy_app/core/utils/helpers/api_utils.dart';
@@ -20,7 +19,6 @@ class AuthRepository {
   Future<void> logout() async {
     try {
       final String? token = await _tokenStorage.getAccessToken();
-      final String? apiToken = await _tokenStorage.getApiAccessToken();
 
       if (token == null) {
         _logger.e("❌ No access token found.");
@@ -32,12 +30,6 @@ class AuthRepository {
 
       await _apiUtils.get(
         url: ApiEndpoints.logout,
-        options: Options(
-          headers: {
-            'Authorization': 'Bearer $token',
-            'hk-access-token': apiToken,
-          },
-        ),
       );
 
       await _tokenStorage.deleteAccessToken();
@@ -68,7 +60,6 @@ class AuthRepository {
       final response = await _apiUtils.post(
         url: ApiEndpoints.signupLoginGoogle,
         data: request.toJson(),
-        options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
 
       if (response.statusCode == 200) {
@@ -110,7 +101,6 @@ class AuthRepository {
 
           /// TODO: Handle this properly
         },
-        options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
 
       if (response.statusCode == 200) {
@@ -142,7 +132,6 @@ class AuthRepository {
       final response = await _apiUtils.post(
         url: ApiEndpoints.verifyOtp,
         data: request.toJson(),
-        options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
 
       if (response.statusCode == 200) {
@@ -171,12 +160,6 @@ class AuthRepository {
       final response = await _apiUtils.post(
         url: ApiEndpoints.createProfile,
         data: request.toJson(),
-        options: Options(
-          headers: {
-            'Authorization': 'Bearer $token',
-            'hk-access-token': request.preAccessToken,
-          },
-        ),
       );
 
       if (response.statusCode == 200) {

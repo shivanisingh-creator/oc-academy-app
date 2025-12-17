@@ -7,6 +7,7 @@ import 'package:oc_academy_app/app/app_config.dart';
 import 'package:oc_academy_app/data/models/auth/signup_login_google_request.dart';
 import 'package:oc_academy_app/data/repositories/login_repository.dart';
 import 'package:oc_academy_app/domain/entities/keycloak_service.dart';
+import 'package:oc_academy_app/core/utils/storage.dart';
 import 'package:oc_academy_app/domain/entities/auth/google_auth_service.dart';
 import 'package:oc_academy_app/presentation/features/auth/view/widgets/otp_verification_screen.dart';
 import 'package:oc_academy_app/core/utils/error_tooltip.dart';
@@ -216,7 +217,10 @@ class _LoginPageState extends State<LoginPage> {
                       return;
                     }
                     // Fetch a fresh Keycloak token
-                    await KeycloakService().getKeycloakToken(
+                    await KeycloakService(
+                      config: widget.config,
+                      tokenStorage: TokenStorage(),
+                    ).getKeycloakToken(
                       clientId: widget.config.keycloakClientId,
                       clientSecret: widget.config.keycloakClientSecret,
                     );
@@ -280,7 +284,10 @@ class _LoginPageState extends State<LoginPage> {
                   onPressed: () async {
                     // print('Continue with Google');
 
-                    await KeycloakService().getKeycloakToken(
+                    await KeycloakService(
+                      config: widget.config,
+                      tokenStorage: TokenStorage(),
+                    ).getKeycloakToken(
                       clientId: widget.config.keycloakClientId,
                       clientSecret: widget.config.keycloakClientSecret,
                     );

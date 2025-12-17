@@ -2,36 +2,45 @@
 
 import 'package:dio/dio.dart';
 import 'package:oc_academy_app/app/app_config.dart';
+import 'package:oc_academy_app/core/utils/helpers/auth_interceptor.dart';
+import 'package:oc_academy_app/core/utils/storage.dart';
+import 'package:logger/logger.dart';
+import 'package:oc_academy_app/domain/entities/keycloak_service.dart';
 
 class ApiUtils {
   final Dio _dio;
   final AppConfig _config;
+  final TokenStorage _tokenStorage;
+  final Logger _logger;
+  final KeycloakService _keycloakService;
 
   // 🚨 FIX: Add a public getter to expose the configuration 🚨
   // This allows external classes (like KeycloakService) to access the environment settings.
-  AppConfig get config => _config; 
+  AppConfig get config => _config;
 
   // 1. Private Constructor: Only callable internally
-  ApiUtils._internal(this._config) 
+  ApiUtils._internal(this._config, this._tokenStorage, this._logger, this._keycloakService)
       : _dio = Dio(BaseOptions(
           baseUrl: _config.baseUrl, // Base URL is dynamically loaded from config
           connectTimeout: const Duration(seconds: 10),
           receiveTimeout: const Duration(seconds: 10),
           // You could add an AuthInterceptor here using _config.apiKey
-        ));
+        )) {
+    _dio.interceptors.add(AuthInterceptor(_tokenStorage, _logger, _keycloakService, _config));
+  }
 
   // 2. Static Instance Holder (nullable until initialized)
   static ApiUtils? _instance;
 
   // 3. Initialization Method: Called once in main()
-  static void initialize(AppConfig config) {
-    _instance ??= ApiUtils._internal(config);
+  static void initialize(AppConfig config, TokenStorage tokenStorage, Logger logger, KeycloakService keycloakService) {
+    _instance ??= ApiUtils._internal(config, tokenStorage, logger, keycloakService);
   }
 
   // 4. Singleton Getter: Used everywhere in the app
   static ApiUtils get instance {
     if (_instance == null) {
-      throw Exception("ApiUtils must be initialized by calling ApiUtils.initialize(config) in main()");
+      throw Exception("ApiUtils must be initialized by calling ApiUtils.initialize(config, tokenStorage, logger, keycloakService) in main()");
     }
     return _instance!;
   }
@@ -89,6 +98,3 @@ class ApiUtils {
     return message;
   }
 }
-
-// Global instance to match your previous structure:
-final apiUtils = ApiUtils.instance;

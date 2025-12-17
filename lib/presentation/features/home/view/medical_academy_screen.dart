@@ -50,14 +50,6 @@ class FeaturedCoursesSection extends StatelessWidget {
 }
 
 class _MedicalAcademyScreenState extends State<MedicalAcademyScreen> {
-  // final List<Widget> _pages = [
-  //   const HomeScreen(),
-  //   const Center(child: Text('Explore Screen')), // Placeholder
-  //   const DashboardScreen(),
-  //   const Center(child: Text('Blog Screen')), // Placeholder
-  //   const ProfileScreen(),
-  // ];
-
   final HomeRepository _homeRepository = HomeRepository();
   List<banner_model.Banner> _banners = [];
   bool _isLoadingBanners = true;

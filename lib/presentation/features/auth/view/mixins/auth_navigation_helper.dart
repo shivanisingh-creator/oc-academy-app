@@ -40,7 +40,11 @@ class AuthNavigationHelper {
         await userRepository.getUserLite();
 
         if (!context.mounted) return;
-        Navigator.pushReplacementNamed(context, RouteConstants.home);
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          RouteConstants.home,
+          (route) => false,
+        );
       }
     }
   }

@@ -99,7 +99,6 @@ class _LoginPageState extends State<LoginPage> {
                       SvgPicture.asset(
                         "assets/images/oc_academy.svg",
                         height: 100,
-                        color: logoPink,
                       ),
                     ],
                   ),

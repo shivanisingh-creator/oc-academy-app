@@ -6,6 +6,8 @@ class GoogleAuthService {
   final Logger _logger = Logger();
   Future<String?> signIn() async {
     try {
+      // Force account selection by clearing any previous session
+      await _googleSignIn.signOut();
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
       if (googleUser == null) {
         return null;
@@ -18,6 +20,7 @@ class GoogleAuthService {
       return null;
     }
   }
+
   Future<void> signOut() async {
     try {
       await _googleSignIn.signOut();

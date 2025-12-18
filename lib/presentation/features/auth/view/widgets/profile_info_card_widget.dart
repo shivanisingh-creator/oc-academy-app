@@ -8,6 +8,8 @@ class ProfileInfoCard extends StatefulWidget {
   final VoidCallback? onTap;
   final Widget? expandedContent;
 
+  final bool initiallyExpanded;
+
   const ProfileInfoCard({
     super.key,
     required this.title,
@@ -16,6 +18,7 @@ class ProfileInfoCard extends StatefulWidget {
     this.actions,
     this.onTap,
     this.expandedContent,
+    this.initiallyExpanded = false,
   });
 
   @override
@@ -23,7 +26,13 @@ class ProfileInfoCard extends StatefulWidget {
 }
 
 class _ProfileInfoCardState extends State<ProfileInfoCard> {
-  bool _isExpanded = false;
+  late bool _isExpanded;
+
+  @override
+  void initState() {
+    super.initState();
+    _isExpanded = widget.initiallyExpanded;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +50,8 @@ class _ProfileInfoCardState extends State<ProfileInfoCard> {
         ],
       ),
       child: InkWell(
-        onTap: widget.onTap ??
+        onTap:
+            widget.onTap ??
             () {
               if (widget.expandedContent != null) {
                 setState(() {
@@ -95,7 +105,7 @@ class _ProfileInfoCardState extends State<ProfileInfoCard> {
               if (_isExpanded && widget.expandedContent != null) ...[
                 const SizedBox(height: 12),
                 widget.expandedContent!,
-              ]
+              ],
             ],
           ),
         ),

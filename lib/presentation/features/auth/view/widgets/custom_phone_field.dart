@@ -21,15 +21,17 @@ class CustomDropdownField extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
-            color: Colors.black87,
+        if (label.isNotEmpty) ...[
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+              color: Colors.black87,
+            ),
           ),
-        ),
-        const SizedBox(height: 8),
+          const SizedBox(height: 8),
+        ],
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
           decoration: BoxDecoration(
@@ -41,17 +43,14 @@ class CustomDropdownField extends StatelessWidget {
             child: DropdownButton<String>(
               value: value,
               hint: Text(hintText, style: const TextStyle(color: Colors.grey)),
-              icon: const Icon(Icons.keyboard_arrow_down, color: Colors.black87),
-              isExpanded: true,
-              style: const TextStyle(
-                fontSize: 16,
+              icon: const Icon(
+                Icons.keyboard_arrow_down,
                 color: Colors.black87,
               ),
+              isExpanded: true,
+              style: const TextStyle(fontSize: 16, color: Colors.black87),
               items: items.map<DropdownMenuItem<String>>((String item) {
-                return DropdownMenuItem<String>(
-                  value: item,
-                  child: Text(item),
-                );
+                return DropdownMenuItem<String>(value: item, child: Text(item));
               }).toList(),
               onChanged: onChanged,
             ),

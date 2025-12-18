@@ -41,6 +41,7 @@ class ApiEndpoints {
   static const String createProfile = '/auth/createProfile';
   static const String signupLoginGoogle = '/auth/google/login';
   static const String getUserLite = '/auth/getUserLite';
+  static const String updateProfile = '/profile/update';
   static const String logout = '/auth/user/logout';
   static const String getUserCourses = '/home/userCourses';
   static const String getRecentActivity = '/dashboard/getRecentActivity';

@@ -6,6 +6,8 @@ import 'package:oc_academy_app/data/repositories/login_repository.dart';
 import 'package:oc_academy_app/presentation/features/auth/view/widgets/profile_info_card_widget.dart';
 import 'package:oc_academy_app/presentation/features/profile/bloc/profile_bloc.dart';
 
+import 'package:oc_academy_app/data/repositories/user_repository.dart';
+
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
@@ -20,6 +22,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       create: (context) => ProfileBloc(
         homeRepository: HomeRepository(),
         authRepository: AuthRepository(),
+        userRepository: UserRepository(),
       )..add(FetchProfileData()),
       child: Scaffold(
         backgroundColor: const Color(0xFFF8F9FB), // Light grey background
@@ -42,9 +45,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 (route) => false,
               );
             } else if (state is ProfileError) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(state.message)),
-              );
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(SnackBar(content: Text(state.message)));
             }
           },
           child: BlocBuilder<ProfileBloc, ProfileState>(
@@ -67,16 +70,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             ? Text(
                                 "${user?.firstName?[0] ?? ''}${user?.lastName?[0] ?? ''}",
                                 style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 32,
-                                    fontWeight: FontWeight.bold),
+                                  color: Colors.white,
+                                  fontSize: 32,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               )
                             : null,
                       ),
                       const SizedBox(height: 12),
-                      Text(user?.fullName ?? 'Dr. ABC',
-                          style: const TextStyle(
-                              fontSize: 22, fontWeight: FontWeight.bold)),
+                      Text(
+                        user?.fullName ?? 'Dr. ABC',
+                        style: const TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                       const SizedBox(height: 16),
 
                       // Verification Banner
@@ -84,7 +92,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         Container(
                           margin: const EdgeInsets.symmetric(horizontal: 20),
                           padding: const EdgeInsets.symmetric(
-                              vertical: 12, horizontal: 16),
+                            vertical: 12,
+                            horizontal: 16,
+                          ),
                           decoration: BoxDecoration(
                             color: const Color(0xFFFFF9C4), // Light Yellow
                             borderRadius: BorderRadius.circular(12),
@@ -93,8 +103,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             "Verification is required. Get Profile Verification",
                             textAlign: TextAlign.center,
                             style: TextStyle(
-                                color: Color(0xFF856404),
-                                fontWeight: FontWeight.w500),
+                              color: Color(0xFF856404),
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
                         ),
                       const SizedBox(height: 20),
@@ -103,26 +114,38 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ProfileInfoCard(
                         title: "Personal Details",
                         actions: const [
-                          Icon(Icons.edit_outlined,
-                              size: 20, color: Colors.grey),
+                          Icon(
+                            Icons.edit_outlined,
+                            size: 20,
+                            color: Colors.grey,
+                          ),
                           SizedBox(width: 12),
-                          Icon(Icons.camera_alt_outlined,
-                              size: 20, color: Colors.grey),
+                          Icon(
+                            Icons.camera_alt_outlined,
+                            size: 20,
+                            color: Colors.grey,
+                          ),
                         ],
                         content: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(user?.fullName ?? 'Dr. ABC',
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.w500)),
+                            Text(
+                              user?.fullName ?? 'Dr. ABC',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
                             Text(user?.mobileNumber ?? '+91 9800122899'),
                             Row(
                               children: [
                                 Text(user?.email ?? 'aa@docademy.com'),
                                 const SizedBox(width: 8),
                                 if (user?.isEmailVerified == true)
-                                  const Icon(Icons.check_circle,
-                                      color: Colors.green, size: 16),
+                                  const Icon(
+                                    Icons.check_circle,
+                                    color: Colors.green,
+                                    size: 16,
+                                  ),
                               ],
                             ),
                           ],
@@ -134,8 +157,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         title: "Medical Details",
                         subtitle: "Qualifications, specialty and more",
                         actions: const [
-                          Icon(Icons.arrow_forward_ios,
-                              size: 16, color: Colors.grey)
+                          Icon(
+                            Icons.arrow_forward_ios,
+                            size: 16,
+                            color: Colors.grey,
+                          ),
                         ],
                         onTap: () {},
                       ),
@@ -144,8 +170,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ProfileInfoCard(
                         title: "Billing Address",
                         actions: const [
-                          Icon(Icons.edit_outlined,
-                              size: 20, color: Colors.grey)
+                          Icon(
+                            Icons.edit_outlined,
+                            size: 20,
+                            color: Colors.grey,
+                          ),
                         ],
                         content: Text(
                           user?.location ??
@@ -158,7 +187,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ProfileInfoCard(
                         title: "Logout",
                         actions: const [
-                          Icon(Icons.logout, color: Colors.redAccent)
+                          Icon(Icons.logout, color: Colors.redAccent),
                         ],
                         onTap: () {
                           context.read<ProfileBloc>().add(LogoutEvent());

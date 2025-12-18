@@ -4,14 +4,21 @@ import 'package:oc_academy_app/data/models/user/user_lite_response.dart';
 import 'package:oc_academy_app/data/repositories/home_repository.dart';
 import 'package:oc_academy_app/data/repositories/login_repository.dart';
 
+import 'package:oc_academy_app/data/repositories/user_repository.dart';
+
 part 'profile_event.dart';
 part 'profile_state.dart';
 
 class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   final HomeRepository homeRepository;
   final AuthRepository authRepository;
+  final UserRepository userRepository;
 
-  ProfileBloc({required this.homeRepository, required this.authRepository}) : super(ProfileInitial()) {
+  ProfileBloc({
+    required this.homeRepository,
+    required this.authRepository,
+    required this.userRepository,
+  }) : super(ProfileInitial()) {
     on<FetchProfileData>((event, emit) async {
       emit(ProfileLoading());
       try {

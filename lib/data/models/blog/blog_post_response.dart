@@ -9,6 +9,7 @@ class BlogPostResponse {
   final String? estimatedReadingTime; // Extracted from yoast_head_json
   final Map<String, dynamic>? yoastHeadJson;
   final List<String> class_list;
+  final String? featuredMediaUrl;
 
   BlogPostResponse({
     required this.id,
@@ -21,9 +22,17 @@ class BlogPostResponse {
     this.estimatedReadingTime,
     this.yoastHeadJson,
     required this.class_list,
+    this.featuredMediaUrl,
   });
 
   factory BlogPostResponse.fromJson(Map<String, dynamic> json) {
+    String? mediaUrl;
+    if (json['_embedded'] != null &&
+        json['_embedded']['wp:featuredmedia'] != null &&
+        (json['_embedded']['wp:featuredmedia'] as List).isNotEmpty) {
+      mediaUrl = json['_embedded']['wp:featuredmedia'][0]['source_url'];
+    }
+
     return BlogPostResponse(
       id: json['id'],
       date: json['date'],
@@ -38,6 +47,7 @@ class BlogPostResponse {
       class_list: json['class_list'] != null
           ? List<String>.from(json['class_list'])
           : [],
+      featuredMediaUrl: mediaUrl,
     );
   }
 }

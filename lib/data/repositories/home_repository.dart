@@ -33,6 +33,7 @@ class HomeRepository {
           'per_page': perPage,
           'orderby': 'date',
           'order': 'desc',
+          '_embed': 'true',
         },
       );
 
@@ -61,9 +62,7 @@ class HomeRepository {
 
   Future<BannerResponse?> getBanners() async {
     try {
-      final response = await _apiUtils.get(
-        url: ApiEndpoints.getBanners,
-      );
+      final response = await _apiUtils.get(url: ApiEndpoints.getBanners);
 
       if (response.statusCode == 200) {
         _logger.i("✅ Get Banners successful.");
@@ -84,9 +83,7 @@ class HomeRepository {
 
   Future<GlobalPartnersResponse?> getGlobalPartners() async {
     try {
-      final response = await _apiUtils.get(
-        url: ApiEndpoints.getGlobalPartners,
-      );
+      final response = await _apiUtils.get(url: ApiEndpoints.getGlobalPartners);
 
       if (response.statusCode == 200) {
         _logger.i("✅ Get Global Partners successful.");

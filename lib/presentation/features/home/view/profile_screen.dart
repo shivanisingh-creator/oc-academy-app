@@ -187,7 +187,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ProfileInfoCard(
                         title: "Logout",
                         actions: const [
-                          Icon(Icons.logout, color: Colors.redAccent),
+                          Icon(Icons.logout, color: Color(0XFF3359A7)),
                         ],
                         onTap: () {
                           context.read<ProfileBloc>().add(LogoutEvent());

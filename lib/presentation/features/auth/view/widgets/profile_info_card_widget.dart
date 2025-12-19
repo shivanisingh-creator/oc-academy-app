@@ -59,6 +59,8 @@ class _ProfileInfoCardState extends State<ProfileInfoCard> {
                 });
               }
             },
+        splashColor: Theme.of(context).primaryColor.withOpacity(0.1),
+        highlightColor: Theme.of(context).primaryColor.withOpacity(0.05),
         borderRadius: BorderRadius.circular(16),
         child: Padding(
           padding: const EdgeInsets.all(16.0),

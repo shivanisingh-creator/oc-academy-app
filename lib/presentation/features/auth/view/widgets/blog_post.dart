@@ -10,7 +10,7 @@ class BlogPostsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 300, // Approximate height for the horizontally scrolling cards
+      height: 340, // Increased height to accommodate the "Read Here" button
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         itemCount: blogs.length,
@@ -158,42 +158,72 @@ class BlogCard extends StatelessWidget {
             ),
 
             // Content
-            Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Category
-                  Text(
-                    category.toUpperCase(),
-                    style: const TextStyle(
-                      color: Colors.blueGrey,
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 0.5,
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Category
+                    Text(
+                      category.toUpperCase(),
+                      style: const TextStyle(
+                        color: Colors.blueGrey,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 0.5,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 8),
+                    const SizedBox(height: 8),
 
-                  // Title
-                  Text(
-                    blog.title.rendered,
-                    maxLines: 3,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: Colors.black,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
+                    // Title
+                    Text(
+                      blog.title.rendered,
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: Colors.black,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 8),
+                    const SizedBox(height: 8),
 
-                  // Read Time
-                  Text(
-                    readTime,
-                    style: const TextStyle(color: Colors.black54, fontSize: 13),
-                  ),
-                ],
+                    // Read Time
+                    Text(
+                      readTime,
+                      style: const TextStyle(
+                        color: Colors.black54,
+                        fontSize: 13,
+                      ),
+                    ),
+                    const Spacer(), // Pushes the button to the bottom
+                    // Read Here Button
+                    SizedBox(
+                      width: double.infinity,
+                      height: 36,
+                      child: ElevatedButton(
+                        onPressed: () => _launchUrl(blog.link),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0XFF3359A7),
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          padding: EdgeInsets.zero,
+                        ),
+                        child: const Text(
+                          'Read Here',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ],

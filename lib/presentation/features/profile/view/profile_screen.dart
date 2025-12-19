@@ -8,6 +8,7 @@ import 'package:oc_academy_app/data/repositories/user_repository.dart';
 import 'package:oc_academy_app/data/models/user/billing_address_response.dart';
 import 'package:oc_academy_app/presentation/features/profile/bloc/profile_bloc.dart';
 import 'package:oc_academy_app/data/models/home/specialty_response.dart';
+import 'package:oc_academy_app/core/utils/helpers/dialog_helper.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -482,10 +483,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ProfileInfoCard(
                       title: "Logout",
                       actions: const [
-                        Icon(Icons.logout, color: Colors.redAccent),
+                        Icon(Icons.logout, color: Color(0XFF3359A7)),
                       ],
                       onTap: () {
-                        context.read<ProfileBloc>().add(LogoutEvent());
+                        DialogHelper.showConfirmationDialog(
+                          context: context,
+                          title: 'Exit',
+                          content: 'Are you sure you want to exit?',
+                          confirmText: 'Yes',
+                          cancelText: 'No',
+                          onConfirm: () {
+                            context.read<ProfileBloc>().add(LogoutEvent());
+                          },
+                        );
                       },
                     ),
                     const SizedBox(height: 30),

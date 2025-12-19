@@ -5,6 +5,7 @@ import 'package:oc_academy_app/core/constants/api_endpoints.dart';
 import 'package:oc_academy_app/core/utils/helpers/api_utils.dart';
 import 'package:oc_academy_app/core/utils/storage.dart';
 import 'package:oc_academy_app/data/models/user/user_lite_response.dart';
+import 'package:oc_academy_app/data/models/user/billing_address_response.dart';
 
 class UserRepository {
   final ApiUtils _apiUtils = ApiUtils.instance;
@@ -24,6 +25,49 @@ class UserRepository {
       return null;
     } catch (e) {
       _logger.e("❌ Exception during getUserLite: ${_apiUtils.handleError(e)}");
+      return null;
+    }
+  }
+
+  Future<BillingAddressResponse?> getBillingAddress() async {
+    try {
+      final String? token = await _tokenStorage.getAccessToken();
+      if (token == null) {
+        _logger.e("❌ No access token found.");
+        return null;
+      }
+      final String? hkAccessToken = await _tokenStorage.getApiAccessToken();
+
+      // Needs 'course-api' instead of 'commons-api'
+      String baseUrl = _apiUtils.config.baseUrl;
+      String courseBaseUrl = baseUrl.replaceFirst('commons-api', 'course-api');
+      if (courseBaseUrl.endsWith('/')) {
+        courseBaseUrl = courseBaseUrl.substring(0, courseBaseUrl.length - 1);
+      }
+      final String fullUrl = '$courseBaseUrl${ApiEndpoints.getBillingAddress}';
+      _logger.i("Fetching Billing Address from: $fullUrl");
+
+      final response = await _apiUtils.get(
+        url: fullUrl,
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+            if (hkAccessToken != null) 'hk-access-token': hkAccessToken,
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        _logger.i("✅ Get Billing Address successful.");
+        return BillingAddressResponse.fromJson(response.data);
+      }
+      return null;
+    } catch (e, stackTrace) {
+      _logger.e(
+        "❌ Exception during getBillingAddress: $e\n${_apiUtils.handleError(e)}",
+        error: e,
+        stackTrace: stackTrace,
+      );
       return null;
     }
   }

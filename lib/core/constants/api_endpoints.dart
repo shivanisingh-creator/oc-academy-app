@@ -56,4 +56,5 @@ class ApiEndpoints {
   static const String getMostEnrolled = '/home/mostEnrolled';
   static const String getReferralCode = '/referral';
   static const String getProfessions = '/meta/profession';
+  static const String getBillingAddress = '/invoice/getBillingAddress';
 }

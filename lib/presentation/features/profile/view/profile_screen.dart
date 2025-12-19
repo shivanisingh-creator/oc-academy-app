@@ -5,6 +5,7 @@ import 'package:oc_academy_app/data/repositories/home_repository.dart';
 import 'package:oc_academy_app/presentation/features/auth/view/widgets/profile_info_card_widget.dart';
 import 'package:oc_academy_app/presentation/features/auth/view/widgets/custom_phone_field.dart';
 import 'package:oc_academy_app/data/repositories/user_repository.dart';
+import 'package:oc_academy_app/data/models/user/billing_address_response.dart';
 import 'package:oc_academy_app/presentation/features/profile/bloc/profile_bloc.dart';
 import 'package:oc_academy_app/data/models/home/specialty_response.dart';
 
@@ -23,11 +24,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool _isUpdating = false;
   bool _isEditingName = false;
   final TextEditingController _nameController = TextEditingController();
+  BillingAddress? _billingAddress;
+  bool _isLoadingBilling = true;
 
   @override
   void initState() {
     super.initState();
     _fetchSpecialties();
+    _fetchBillingAddress();
   }
 
   @override
@@ -50,6 +54,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
       if (mounted) {
         setState(() {
           _isLoadingSpecialties = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _fetchBillingAddress() async {
+    try {
+      final response = await UserRepository().getBillingAddress();
+      if (mounted) {
+        setState(() {
+          _billingAddress = response?.response;
+          _isLoadingBilling = false;
+        });
+      }
+    } catch (e) {
+      debugPrint("Error fetching billing address: $e");
+      if (mounted) {
+        setState(() {
+          _isLoadingBilling = false;
         });
       }
     }
@@ -443,11 +466,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       actions: const [
                         Icon(Icons.edit_outlined, size: 20, color: Colors.grey),
                       ],
-                      content: Text(
-                        user?.location ??
-                            "Home\n123, MG Road, Indiranagar,\nBangalore, Karnataka - 560038\nIndia",
-                        style: const TextStyle(height: 1.5),
-                      ),
+                      content: _isLoadingBilling
+                          ? const Center(child: CircularProgressIndicator())
+                          : Text(
+                              (_billingAddress != null &&
+                                      _billingAddress!.fullAddress.isNotEmpty)
+                                  ? _billingAddress!.fullAddress
+                                  : (user?.location ??
+                                        "Home\n123, MG Road, Indiranagar,\nBangalore, Karnataka - 560038\nIndia"),
+                              style: const TextStyle(height: 1.5),
+                            ),
                     ),
 
                     // 5. Logout Card

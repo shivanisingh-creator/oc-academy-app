@@ -1,6 +1,7 @@
 // lib/config/app_config.dart
 
 import 'package:oc_academy_app/core/constants/api_endpoints.dart';
+import 'package:oc_academy_app/core/constants/legal_urls.dart';
 
 enum Environment { production, preprod, staging }
 
@@ -14,6 +15,8 @@ class AppConfig {
   final String keycloakRealm;
   final String keycloakClientId;
   final String keycloakClientSecret;
+  final String termsOfUseUrl;
+  final String privacyPolicyUrl;
   // ---------------------------
 
   // Define static Keycloak paths (these are constant across all Keycloak servers)
@@ -29,6 +32,8 @@ class AppConfig {
     required this.keycloakRealm,
     required this.keycloakClientId,
     required this.keycloakClientSecret,
+    required this.termsOfUseUrl,
+    required this.privacyPolicyUrl,
   });
 
   // Factory method to initialize config based on a passed environment string
@@ -55,7 +60,9 @@ class AppConfig {
       keycloakBaseUrl = ApiEndpoints.keycloakProdUrl,
       keycloakRealm = ApiEndpoints.keycloakProdRealm,
       keycloakClientId = ApiEndpoints.keycloakProdClientId,
-      keycloakClientSecret = ApiEndpoints.keycloakProdClientSecret;
+      keycloakClientSecret = ApiEndpoints.keycloakProdClientSecret,
+      termsOfUseUrl = LegalUrls.prodTermsOfUse,
+      privacyPolicyUrl = LegalUrls.prodPrivacyPolicy;
 
   // Private constructor for Pre-Production
   AppConfig._preprod()
@@ -66,7 +73,9 @@ class AppConfig {
       keycloakBaseUrl = ApiEndpoints.keycloakPreProdUrl,
       keycloakRealm = ApiEndpoints.keycloakPreProdRealm,
       keycloakClientId = ApiEndpoints.keycloakPreProdClientId,
-      keycloakClientSecret = ApiEndpoints.keycloakPreProdClientSecret;
+      keycloakClientSecret = ApiEndpoints.keycloakPreProdClientSecret,
+      termsOfUseUrl = LegalUrls.preprodTermsOfUse,
+      privacyPolicyUrl = LegalUrls.preprodPrivacyPolicy;
 
   // Private constructor for Staging (Default)
   AppConfig._staging()
@@ -79,5 +88,7 @@ class AppConfig {
       keycloakRealm = ApiEndpoints.keycloakStagingRealm,
       keycloakClientId = ApiEndpoints.keycloakStagingClientId,
       keycloakClientSecret =
-          ApiEndpoints.keycloakStagingClientSecret; // e.g., stg-ocacademy
+          ApiEndpoints.keycloakStagingClientSecret, // e.g., stg-ocacademy
+      termsOfUseUrl = LegalUrls.stagingTermsOfUse,
+      privacyPolicyUrl = LegalUrls.stagingPrivacyPolicy;
 }

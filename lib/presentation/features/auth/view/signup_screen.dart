@@ -13,6 +13,7 @@ import 'package:oc_academy_app/presentation/features/auth/view/widgets/custom_in
 import 'package:oc_academy_app/presentation/features/auth/view/widgets/custom_phone_field.dart';
 import 'package:oc_academy_app/presentation/features/auth/view/widgets/custom_text_field.dart';
 import 'package:oc_academy_app/presentation/features/home/view/medical_academy_screen.dart';
+import 'package:oc_academy_app/core/utils/helpers/url_helper.dart';
 
 import 'package:oc_academy_app/app/app_config.dart';
 
@@ -307,24 +308,36 @@ class _SignupScreenState extends State<SignupScreen> {
                     }
                   : null,
               title: RichText(
-                text: const TextSpan(
+                text: TextSpan(
                   style: TextStyle(fontSize: 14, color: Colors.black87),
                   children: <TextSpan>[
                     TextSpan(text: 'I agree to '),
                     TextSpan(
                       text: 'terms of use',
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: Color(0XFF3359A7),
                         fontWeight: FontWeight.bold,
                       ),
+                      recognizer: TapGestureRecognizer()
+                        ..onTap = () {
+                          UrlHelper.launchUrlString(
+                            widget.config.termsOfUseUrl,
+                          );
+                        },
                     ),
-                    TextSpan(text: ' and '),
+                    const TextSpan(text: ' and '),
                     TextSpan(
                       text: 'privacy policy.',
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: Color(0XFF3359A7),
                         fontWeight: FontWeight.bold,
                       ),
+                      recognizer: TapGestureRecognizer()
+                        ..onTap = () {
+                          UrlHelper.launchUrlString(
+                            widget.config.privacyPolicyUrl,
+                          );
+                        },
                     ),
                   ],
                 ),

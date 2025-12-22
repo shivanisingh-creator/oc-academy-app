@@ -13,6 +13,8 @@ import 'package:oc_academy_app/presentation/features/auth/view/widgets/otp_verif
 import 'package:oc_academy_app/core/utils/error_tooltip.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:oc_academy_app/presentation/features/auth/view/mixins/auth_navigation_helper.dart';
+import 'package:oc_academy_app/core/utils/helpers/url_helper.dart';
+import 'package:flutter/gestures.dart';
 import 'dart:io';
 
 class LoginPage extends StatefulWidget {
@@ -380,7 +382,12 @@ class _LoginPageState extends State<LoginPage> {
                           fontWeight: FontWeight.bold,
                           decoration: TextDecoration.underline,
                         ),
-                        // Action: Navigate to Terms
+                        recognizer: TapGestureRecognizer()
+                          ..onTap = () {
+                            UrlHelper.launchUrlString(
+                              widget.config.termsOfUseUrl,
+                            );
+                          },
                       ),
                       const TextSpan(text: ' and '),
                       TextSpan(
@@ -390,7 +397,12 @@ class _LoginPageState extends State<LoginPage> {
                           fontWeight: FontWeight.bold,
                           decoration: TextDecoration.underline,
                         ),
-                        // Action: Navigate to Privacy
+                        recognizer: TapGestureRecognizer()
+                          ..onTap = () {
+                            UrlHelper.launchUrlString(
+                              widget.config.privacyPolicyUrl,
+                            );
+                          },
                       ),
                       const TextSpan(text: '.'),
                     ],

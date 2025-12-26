@@ -7,6 +7,7 @@ class CustomPhoneInputField extends StatefulWidget {
   final String label;
   final bool isValid; // To control the checkmark visibility
   final bool readOnly;
+  final bool onlyIndia;
 
   const CustomPhoneInputField({
     super.key,
@@ -14,6 +15,7 @@ class CustomPhoneInputField extends StatefulWidget {
     this.label = 'Phone Number',
     this.isValid = false,
     this.readOnly = false,
+    this.onlyIndia = false,
   });
 
   @override
@@ -21,8 +23,6 @@ class CustomPhoneInputField extends StatefulWidget {
 }
 
 class _CustomPhoneInputFieldState extends State<CustomPhoneInputField> {
-  String _selectedCountryCode = '+91'; // Default to India
-
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -47,16 +47,17 @@ class _CustomPhoneInputFieldState extends State<CustomPhoneInputField> {
             children: [
               CountryCodePicker(
                 onChanged: (CountryCode countryCode) {
-                  setState(() {
-                    _selectedCountryCode = countryCode.dialCode!;
-                  });
+                  // If we need to bubble this up, we would add a callback to the widget
                 },
                 initialSelection: 'IN', // Initial country selection
-                favorite: const ['+91', 'IN'], // Show India at the top
                 showCountryOnly: false,
                 showOnlyCountryWhenClosed: false,
                 showFlagDialog: true,
                 alignLeft: false,
+                enabled: !widget.readOnly, // Disable when read-only
+                countryFilter: widget.onlyIndia
+                    ? const ['IN']
+                    : null, // Conditional filter
                 textStyle: const TextStyle(fontSize: 16, color: Colors.black87),
                 dialogTextStyle: const TextStyle(
                   fontSize: 16,

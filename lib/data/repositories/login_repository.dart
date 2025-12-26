@@ -28,17 +28,13 @@ class AuthRepository {
         return;
       }
 
-      await _apiUtils.get(
-        url: ApiEndpoints.logout,
-      );
+      await _apiUtils.get(url: ApiEndpoints.logout);
 
       await _tokenStorage.deleteAccessToken();
       await _tokenStorage.deleteApiAccessToken();
       _logger.i("✅ User logged out successfully.");
     } catch (e) {
-      _logger.e(
-        "❌ Exception during logout: ${_apiUtils.handleError(e)}",
-      );
+      _logger.e("❌ Exception during logout: ${_apiUtils.handleError(e)}");
       // Still clear local storage even if API call fails
       await _tokenStorage.deleteAccessToken();
       await _tokenStorage.deleteApiAccessToken();
@@ -113,7 +109,6 @@ class AuthRepository {
       }
       return null;
     } catch (e) {
-      
       _logger.e(
         "❌ Exception during signupLoginMobile: ${_apiUtils.handleError(e)}",
       );
@@ -172,10 +167,9 @@ class AuthRepository {
       }
       return null;
     } catch (e) {
-      _logger.e(
-        "❌ Exception during createProfile: ${_apiUtils.handleError(e)}",
-      );
-      return null;
+      final errorMessage = _apiUtils.handleError(e);
+      _logger.e("❌ Exception during createProfile: $errorMessage");
+      throw errorMessage;
     }
   }
 }

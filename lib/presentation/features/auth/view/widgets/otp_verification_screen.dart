@@ -7,6 +7,8 @@ import 'package:pinput/pinput.dart'; // Import the pinput package
 import 'package:oc_academy_app/core/utils/error_tooltip.dart';
 import 'package:oc_academy_app/presentation/features/auth/view/mixins/auth_navigation_helper.dart';
 import 'package:oc_academy_app/app/app_config.dart';
+import 'package:oc_academy_app/core/utils/helpers/snackbar_utils.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 
 // Constants for styling
 const Color primaryBlue = Color(0XFF3359A7);
@@ -84,6 +86,13 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
 
   void _onResendOtp() async {
     if (_canResend) {
+      final connectivityResult = await (Connectivity().checkConnectivity());
+      if (connectivityResult.contains(ConnectivityResult.none)) {
+        if (mounted) {
+          SnackBarUtils.showError(context, "internet is not connected");
+        }
+        return;
+      }
       // print('OTP Resent to ${widget.phoneNumber}');
       final response = await _authRepository.signupLoginMobile(
         widget.phoneNumber,
@@ -91,12 +100,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
 
       if (response != null) {
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('OTP Resent Successfully!'),
-            backgroundColor: Colors.green,
-          ),
-        );
+        SnackBarUtils.showSuccess(context, 'OTP Resent Successfully!');
       }
 
       // Clear the current OTP input using the single controller
@@ -108,6 +112,13 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
 
   void _onSubmit() async {
     if (_currentOtp.length == otpLength) {
+      final connectivityResult = await (Connectivity().checkConnectivity());
+      if (connectivityResult.contains(ConnectivityResult.none)) {
+        if (mounted) {
+          SnackBarUtils.showError(context, "internet is not connected");
+        }
+        return;
+      }
       // print('OTP Submitted: ${_currentOtp}');
       final request = VerifyOtpRequest(
         currentDevice: "device name",
@@ -123,33 +134,25 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
       if (!mounted) return;
       if (response != null) {
         if (response.response?.status == 'FAILED') {
-          // Parse attempts left from the message
-          final message = response.response?.message ?? '';
-          final RegExp exp = RegExp(r'(\d+)\sAttempts Left');
-          final Match? match = exp.firstMatch(message);
-          int attemptsLeft = 0;
-          if (match != null && match.groupCount >= 1) {
-            attemptsLeft = int.tryParse(match.group(1)!) ?? 0;
-          }
+          // Simplified error message as per request
+          ErrorTooltip.show(context, _pinPutKey, 'Incorrect otp');
 
-          ErrorTooltip.show(
-            context,
-            _pinPutKey,
-            '$message. You have $attemptsLeft attempts left.',
-          );
-          if (attemptsLeft == 0) {
-            if (!mounted) return;
-            setState(() {
-              _canResend = true;
-            });
-          }
+          // Still need to handle any other failure logic if necessary
+          // But we DON'T enable resend here anymore
         } else if (response.response?.isNewUser == true ||
             (response.response?.isNewUser == false &&
                 response.response?.accessToken != null)) {
           if (!mounted) return;
+          final bool isNewUser = response.response?.isNewUser ?? false;
+          SnackBarUtils.showSuccess(
+            context,
+            isNewUser
+                ? "Please complete signup to continue"
+                : "logged in successfully",
+          );
           await AuthNavigationHelper.handleLoginSuccess(
             context: context,
-            isNewUser: response.response!.isNewUser ?? false,
+            isNewUser: isNewUser,
             accessToken: response.response!.accessToken,
             preAccessToken: response.response!.preAccessToken,
             phoneNumber: widget.phoneNumber,
@@ -208,7 +211,10 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black87),
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () {
+            ErrorTooltip.hide();
+            Navigator.of(context).pop();
+          },
         ),
         backgroundColor: whiteBackground,
         elevation: 0,
@@ -323,9 +329,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
 
                 // Submit Button
                 ElevatedButton(
-                  onPressed: isOtpComplete
-                      ? (_canResend ? _onResendOtp : _onSubmit)
-                      : null,
+                  onPressed: isOtpComplete ? _onSubmit : null,
                   style:
                       ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 16),
@@ -344,9 +348,9 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                               return primaryBlue;
                             }),
                       ),
-                  child: Text(
-                    _canResend ? 'Resend OTP' : 'Submit',
-                    style: const TextStyle(
+                  child: const Text(
+                    'Submit',
+                    style: TextStyle(
                       color: Colors.white,
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -358,6 +362,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                 // Change Phone Number Button
                 OutlinedButton(
                   onPressed: () {
+                    ErrorTooltip.hide();
                     Navigator.of(context).pop();
                   },
                   style: OutlinedButton.styleFrom(

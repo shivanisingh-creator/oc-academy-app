@@ -14,6 +14,8 @@ import 'package:oc_academy_app/core/utils/error_tooltip.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:oc_academy_app/presentation/features/auth/view/mixins/auth_navigation_helper.dart';
 import 'package:oc_academy_app/core/utils/helpers/url_helper.dart';
+import 'package:oc_academy_app/core/utils/helpers/snackbar_utils.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/gestures.dart';
 import 'dart:io';
 
@@ -218,6 +220,21 @@ class _LoginPageState extends State<LoginPage> {
                       return;
                     }
                     // Fetch a fresh Keycloak token
+                    // Fetch a fresh Keycloak token
+                    // Check for internet connectivity
+                    final connectivityResult = await (Connectivity()
+                        .checkConnectivity());
+                    if (connectivityResult.contains(ConnectivityResult.none)) {
+                      if (context.mounted) {
+                        SnackBarUtils.showError(
+                          context,
+                          "internet is not connected",
+                        );
+                      }
+                      return;
+                    }
+
+                    // Fetch a fresh Keycloak token
                     await KeycloakService(
                       config: widget.config,
                       tokenStorage: TokenStorage(),
@@ -230,6 +247,10 @@ class _LoginPageState extends State<LoginPage> {
                     );
                     if (response != null && response.response == "OTP sent") {
                       if (mounted) {
+                        SnackBarUtils.showSuccess(
+                          context,
+                          "user otp sent successfully",
+                        );
                         Navigator.push(
                           context,
                           MaterialPageRoute(

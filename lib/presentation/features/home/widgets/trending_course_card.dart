@@ -60,17 +60,20 @@ class TrendingCourseCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 // Course Title
-                Text(
-                  course.name ?? 'Unknown Course',
-                  style: const TextStyle(
-                    color: Colors.black,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
+                SizedBox(
+                  height: 40.0,
+                  child: Text(
+                    course.name ?? 'Unknown Course',
+                    style: const TextStyle(
+                      color: Colors.black,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 14.0),
 
                 // Accreditation Badge (if certifiers exist)
                 if (course.certifiers != null && course.certifiers!.isNotEmpty)

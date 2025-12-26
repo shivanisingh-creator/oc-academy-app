@@ -10,6 +10,9 @@ import 'package:oc_academy_app/presentation/features/profile/bloc/profile_bloc.d
 import 'package:oc_academy_app/data/models/home/specialty_response.dart';
 import 'package:oc_academy_app/core/utils/helpers/dialog_helper.dart';
 
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
+
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
@@ -23,10 +26,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
   List<Specialty> _specialties = [];
   bool _isLoadingSpecialties = true;
   bool _isUpdating = false;
+
   bool _isEditingName = false;
-  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _firstNameController = TextEditingController();
+  final TextEditingController _lastNameController = TextEditingController();
+  File? _selectedImage;
   BillingAddress? _billingAddress;
   bool _isLoadingBilling = true;
+
+  DateTime? _lastUpdateTime;
 
   @override
   void initState() {
@@ -37,7 +45,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   void dispose() {
-    _nameController.dispose();
+    _firstNameController.dispose();
+    _lastNameController.dispose();
     super.dispose();
   }
 
@@ -79,28 +88,45 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
+  Future<void> _pickImage() async {
+    try {
+      final ImagePicker picker = ImagePicker();
+      final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+      if (image != null) {
+        setState(() {
+          _selectedImage = File(image.path);
+        });
+        await _handleProfileUpdate();
+      }
+    } catch (e) {
+      debugPrint("Error picking image: $e");
+    }
+  }
+
   Future<void> _handleProfileUpdate() async {
     setState(() {
       _isUpdating = true;
     });
 
     try {
-      final success = await UserRepository().updateProfileDetails(
-        fullName: _nameController.text,
+      final userResponse = await UserRepository().updateProfileAndFetch(
+        fullName: "${_firstNameController.text} ${_lastNameController.text}",
         qualification: _selectedQualification,
         specialitiesOfInterestIds: _selectedSpecialtyIds,
+        profilePicPath: _selectedImage?.path,
       );
 
       if (mounted) {
-        if (success) {
+        if (userResponse != null) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Profile updated successfully!')),
           );
           setState(() {
             _isEditingName = false;
+            _lastUpdateTime = DateTime.now(); // Mark the update time
           });
-          // Refresh data via Bloc
-          context.read<ProfileBloc>().add(FetchProfileData());
+          // Update data via Bloc strictly with the fetched response
+          context.read<ProfileBloc>().add(UpdateProfileLocal(userResponse));
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Failed to update profile.')),
@@ -149,30 +175,39 @@ class _ProfileScreenState extends State<ProfileScreen> {
               context,
             ).showSnackBar(SnackBar(content: Text(state.message)));
           } else if (state is ProfileLoaded) {
-            final user = state.user.response;
-            if (_selectedQualification == null && user?.qualification != null) {
-              setState(() {
-                _selectedQualification = user!.qualification;
-              });
-            }
-            if (_selectedSpecialtyIds.isEmpty &&
-                user?.specialitiesOfInterestIds != null &&
-                user!.specialitiesOfInterestIds!.isNotEmpty) {
-              final ids = user.specialitiesOfInterestIds!
-                  .map((id) {
-                    if (id is int) return id;
-                    if (id is String) return int.tryParse(id);
-                    return null;
-                  })
-                  .whereType<int>()
-                  .toList();
+            // Only synchronize if we haven't recently updated locally
+            // This prevents stale server data from overwriting local state "then and there"
+            final hasRecentlyUpdated =
+                _lastUpdateTime != null &&
+                DateTime.now().difference(_lastUpdateTime!).inSeconds < 2;
 
-              setState(() {
-                _selectedSpecialtyIds = ids;
-              });
-            }
-            if (_nameController.text.isEmpty && user?.fullName != null) {
-              _nameController.text = user!.fullName!;
+            if (!hasRecentlyUpdated) {
+              final user = state.user.response;
+              if (user?.qualification != null) {
+                setState(() {
+                  _selectedQualification = user!.qualification;
+                });
+              }
+              if (user?.specialitiesOfInterestIds != null) {
+                final ids = user!.specialitiesOfInterestIds!
+                    .map((id) {
+                      if (id is int) return id;
+                      if (id is String) return int.tryParse(id);
+                      return null;
+                    })
+                    .whereType<int>()
+                    .toList();
+
+                setState(() {
+                  _selectedSpecialtyIds = ids;
+                });
+              }
+              if (user?.firstName != null) {
+                _firstNameController.text = user!.firstName!;
+              }
+              if (user?.lastName != null) {
+                _lastNameController.text = user!.lastName!;
+              }
             }
           }
         },
@@ -187,28 +222,62 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 child: Column(
                   children: [
                     // 1. Profile Header & Verification
-                    CircleAvatar(
-                      radius: 50,
-                      backgroundImage: user?.profilePic != null
-                          ? NetworkImage(user!.profilePic!)
-                          : null,
-                      backgroundColor: const Color(0xFF3F51B5),
-                      child: user?.profilePic == null
-                          ? Text(
-                              "${_nameController.text.isNotEmpty ? _nameController.text[0] : (user?.firstName?[0] ?? '')}${user?.lastName?[0] ?? ''}",
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 32,
-                                fontWeight: FontWeight.bold,
+                    Stack(
+                      children: [
+                        GestureDetector(
+                          onTap: _pickImage,
+                          child: CircleAvatar(
+                            radius: 50,
+                            backgroundImage: _selectedImage != null
+                                ? FileImage(_selectedImage!)
+                                : user?.profilePic != null
+                                ? NetworkImage(user!.profilePic!)
+                                      as ImageProvider
+                                : null,
+                            backgroundColor: const Color(0xFF3F51B5),
+                            child:
+                                _selectedImage == null &&
+                                    user?.profilePic == null
+                                ? Text(
+                                    "${_firstNameController.text.isNotEmpty ? _firstNameController.text[0] : (user?.firstName?[0] ?? '')}${_lastNameController.text.isNotEmpty ? _lastNameController.text[0] : (user?.lastName?[0] ?? '')}",
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 32,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  )
+                                : null,
+                          ),
+                        ),
+                        if (_isEditingName)
+                          Positioned(
+                            right: 0,
+                            bottom: 0,
+                            child: CircleAvatar(
+                              backgroundColor: Colors.white,
+                              radius: 18,
+                              child: IconButton(
+                                icon: const Icon(
+                                  Icons.camera_alt,
+                                  size: 18,
+                                  color: Colors.blue,
+                                ),
+                                onPressed: _pickImage,
                               ),
-                            )
-                          : null,
+                            ),
+                          ),
+                      ],
                     ),
                     const SizedBox(height: 12),
                     Text(
-                      _nameController.text.isNotEmpty
-                          ? _nameController.text
-                          : (user?.fullName ?? 'Dr. ABC'),
+                      (_firstNameController.text.isNotEmpty ||
+                              _lastNameController.text.isNotEmpty)
+                          ? "Dr. ${_firstNameController.text} ${_lastNameController.text}"
+                          : "Dr. ${user?.firstName ?? ''} ${user?.lastName ?? ''}"
+                                .trim()
+                                .isNotEmpty
+                          ? "Dr. ${user?.firstName ?? ''} ${user?.lastName ?? ''}"
+                          : "Dr. ABC",
                       style: const TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
@@ -269,26 +338,45 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           if (_isEditingName)
-                            Padding(
-                              padding: const EdgeInsets.only(bottom: 8.0),
-                              child: TextFormField(
-                                controller: _nameController,
-                                decoration: const InputDecoration(
-                                  labelText: 'Full Name',
-                                  isDense: true,
-                                  border: OutlineInputBorder(),
+                            Column(
+                              children: [
+                                TextFormField(
+                                  controller: _firstNameController,
+                                  decoration: const InputDecoration(
+                                    labelText: 'First Name',
+                                    isDense: true,
+                                    border: OutlineInputBorder(),
+                                  ),
+                                  onChanged: (val) {
+                                    setState(() {}); // Refresh header name
+                                  },
                                 ),
-                                onChanged: (val) {
-                                  setState(() {}); // Refresh header name
-                                },
-                                onFieldSubmitted: (_) => _handleProfileUpdate(),
-                              ),
+                                const SizedBox(height: 10),
+                                TextFormField(
+                                  controller: _lastNameController,
+                                  decoration: const InputDecoration(
+                                    labelText: 'Last Name',
+                                    isDense: true,
+                                    border: OutlineInputBorder(),
+                                  ),
+                                  onChanged: (val) {
+                                    setState(() {}); // Refresh header name
+                                  },
+                                  onFieldSubmitted: (_) =>
+                                      _handleProfileUpdate(),
+                                ),
+                              ],
                             )
                           else
                             Text(
-                              _nameController.text.isNotEmpty
-                                  ? _nameController.text
-                                  : (user?.fullName ?? 'Dr. ABC'),
+                              (_firstNameController.text.isNotEmpty ||
+                                      _lastNameController.text.isNotEmpty)
+                                  ? "Dr. ${_firstNameController.text} ${_lastNameController.text}"
+                                  : "Dr. ${user?.firstName ?? ''} ${user?.lastName ?? ''}"
+                                        .trim()
+                                        .isNotEmpty
+                                  ? "Dr. ${user?.firstName ?? ''} ${user?.lastName ?? ''}"
+                                  : "Dr. ABC",
                               style: const TextStyle(
                                 fontWeight: FontWeight.w500,
                               ),
@@ -470,10 +558,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       content: _isLoadingBilling
                           ? const Center(child: CircularProgressIndicator())
                           : Text(
-                              (_billingAddress != null &&
-                                      _billingAddress!.fullAddress.isNotEmpty)
-                                  ? _billingAddress!.fullAddress
-                                  : (user?.location ??
+                              (user?.location != null &&
+                                      user!.location!.isNotEmpty)
+                                  ? user.location!
+                                  : (_billingAddress?.fullAddress ??
                                         "Home\n123, MG Road, Indiranagar,\nBangalore, Karnataka - 560038\nIndia"),
                               style: const TextStyle(height: 1.5),
                             ),

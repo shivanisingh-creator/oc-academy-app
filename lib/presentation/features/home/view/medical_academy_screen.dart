@@ -65,7 +65,6 @@ class _MedicalAcademyScreenState extends State<MedicalAcademyScreen> {
   List<BlogPostResponse> _blogs = [];
   bool _isLoadingBlogs = true;
 
-
   @override
   void initState() {
     super.initState();
@@ -478,7 +477,7 @@ class _MedicalAcademyScreenState extends State<MedicalAcademyScreen> {
             ),
             const SizedBox(height: 10.0),
             FeaturedCoursesSection(courses: mockFeaturedCourses),
-            const SizedBox(height: 10.0),
+            const SizedBox(height: 5.0),
             Align(
               alignment: Alignment.centerLeft,
               child: Padding(
@@ -494,7 +493,7 @@ class _MedicalAcademyScreenState extends State<MedicalAcademyScreen> {
               ),
             ),
             const PartnershipScroller(),
-            const SizedBox(height: 20.0),
+            const SizedBox(height: 10.0),
 
             DailyChallengeCard(
               title: "Daily Clinical Challenge",

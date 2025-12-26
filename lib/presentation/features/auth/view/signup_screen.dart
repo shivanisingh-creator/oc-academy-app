@@ -16,6 +16,8 @@ import 'package:oc_academy_app/presentation/features/home/view/medical_academy_s
 import 'package:oc_academy_app/core/utils/helpers/url_helper.dart';
 
 import 'package:oc_academy_app/app/app_config.dart';
+import 'package:oc_academy_app/core/utils/helpers/snackbar_utils.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 
 class SignupScreen extends StatefulWidget {
   final String phoneNumber;
@@ -41,6 +43,8 @@ class _SignupScreenState extends State<SignupScreen> {
   final TextEditingController _lastNameController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _otherProfessionController =
+      TextEditingController();
 
   final AuthRepository _authRepository = AuthRepository();
   final ProfessionRepository _professionRepository = ProfessionRepository();
@@ -123,6 +127,7 @@ class _SignupScreenState extends State<SignupScreen> {
     _lastNameController.dispose();
     _phoneController.dispose();
     _emailController.dispose();
+    _otherProfessionController.dispose();
     super.dispose();
   }
 
@@ -134,6 +139,15 @@ class _SignupScreenState extends State<SignupScreen> {
   }
 
   void _submitForm() async {
+    // Check for internet connectivity
+    final connectivityResult = await (Connectivity().checkConnectivity());
+    if (connectivityResult.contains(ConnectivityResult.none)) {
+      if (mounted) {
+        SnackBarUtils.showError(context, "internet is not connected");
+      }
+      return;
+    }
+
     if (_formIsValid()) {
       final request = CreateProfileRequest(
         currentDevice: "device name",
@@ -146,40 +160,52 @@ class _SignupScreenState extends State<SignupScreen> {
         email: _emailController.text,
         registrationSource: "webapp",
         preAccessToken: widget.preAccessToken,
-        professionId: _selectedProfession!
-            .id, // Assuming 1-based indexing for profession IDs
+        professionId: _selectedProfession!.id,
+        otherProfession: _selectedProfession?.name == 'Other'
+            ? _otherProfessionController.text
+            : null,
         title: _selectedProfession?.name == 'Doctor'
             ? 'Dr.'
             : '', // Example: Set title based on profession
       );
 
-      final response = await _authRepository.createProfile(request);
-      if (response != null && response.response?.accessToken != null) {
-        await _tokenStorage.saveApiAccessToken(response.response!.accessToken!);
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const MedicalAcademyScreen()),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Failed to create profile. Please try again.'),
-            backgroundColor: Colors.red,
-          ),
-        );
+      try {
+        final response = await _authRepository.createProfile(request);
+        if (response != null && response.response?.accessToken != null) {
+          await _tokenStorage.saveApiAccessToken(
+            response.response!.accessToken!,
+          );
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const MedicalAcademyScreen(),
+            ),
+          );
+        } else {
+          if (mounted) {
+            SnackBarUtils.showError(
+              context,
+              'Failed to create profile. Please try again.',
+            );
+          }
+        }
+      } catch (e) {
+        if (mounted) {
+          SnackBarUtils.showError(context, e.toString());
+        }
       }
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please fill all required fields and agree to terms.'),
-          backgroundColor: Colors.red,
-        ),
+      SnackBarUtils.showError(
+        context,
+        'Please fill all required fields and agree to terms.',
       );
     }
   }
 
   bool _formIsValid() {
     return _selectedProfession != null &&
+        (_selectedProfession?.name != 'Other' ||
+            _otherProfessionController.text.isNotEmpty) &&
         _firstNameController.text.isNotEmpty &&
         _lastNameController.text.isNotEmpty &&
         _phoneController.text.isNotEmpty &&
@@ -189,6 +215,8 @@ class _SignupScreenState extends State<SignupScreen> {
 
   bool _areTextFieldsFilled() {
     return _selectedProfession != null &&
+        (_selectedProfession?.name != 'Other' ||
+            _otherProfessionController.text.isNotEmpty) &&
         _firstNameController.text.isNotEmpty &&
         _lastNameController.text.isNotEmpty &&
         _phoneController.text.isNotEmpty &&
@@ -249,7 +277,27 @@ class _SignupScreenState extends State<SignupScreen> {
                         ? 'Loading...'
                         : 'Select your profession',
                   ),
-            const SizedBox(height: 20),
+            if (_selectedProfession?.name == 'Other') ...[
+              const SizedBox(height: 20),
+              const Text(
+                'Please specify a profession',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.black87,
+                ),
+              ),
+              const SizedBox(height: 4),
+              CustomLabeledTextField(
+                label: '',
+                hintText: 'Enter your profession',
+                controller: _otherProfessionController,
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z\s]')),
+                ],
+              ),
+            ],
+            const SizedBox(height: 10),
 
             // First Name and Last Name
             Row(
@@ -284,6 +332,7 @@ class _SignupScreenState extends State<SignupScreen> {
               controller: _phoneController,
               isValid: _isPhoneNumberValid,
               readOnly: widget.phoneNumber.isNotEmpty,
+              onlyIndia: widget.phoneNumber.isNotEmpty,
             ),
             const SizedBox(height: 20),
 

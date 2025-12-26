@@ -91,11 +91,6 @@ class _PartnershipScrollerState extends State<PartnershipScroller> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Title Section
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
-        ),
-
         // Partnership Scroller Container
         SizedBox(
           height: 120, // Increased from 80

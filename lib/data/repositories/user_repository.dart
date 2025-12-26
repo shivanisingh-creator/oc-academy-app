@@ -72,27 +72,37 @@ class UserRepository {
     }
   }
 
-  Future<bool> updateProfileDetails({
+  Future<bool?> updateProfileDetails({
     String? fullName,
     String? qualification,
     List<int>? specialitiesOfInterestIds,
     String? profilePicPath,
   }) async {
     try {
-      final String? token = await _tokenStorage.getAccessToken();
-      if (token == null) {
-        _logger.e("❌ No access token found.");
-        return false;
-      }
+      final List<String> names = fullName?.trim().split(' ') ?? [];
+      final String firstName = names.isNotEmpty ? names.first : '';
+      final String lastName = names.length > 1
+          ? names.sublist(1).join(' ')
+          : '';
 
       final Map<String, dynamic> userUpdateRequest = {
-        if (fullName != null) "fullName": fullName,
+        "firstName": firstName,
+        "lastName": lastName,
+        "fullName": fullName,
         if (qualification != null) "qualification": qualification,
         if (specialitiesOfInterestIds != null)
           "specialitiesOfInterestIds": specialitiesOfInterestIds,
       };
 
-      FormData formData = FormData.fromMap({
+      _logger.d("Updating profile with userUpdateRequest: $userUpdateRequest");
+      final String? hkAccessToken = await _tokenStorage.getApiAccessToken();
+      final String? token = await _tokenStorage.getAccessToken();
+      if (token == null) {
+        _logger.e("❌ No access token found.");
+        return null;
+      }
+
+      final FormData formData = FormData.fromMap({
         "userUpdateRequest": jsonEncode(userUpdateRequest),
         if (profilePicPath != null)
           "profilePic": await MultipartFile.fromFile(
@@ -106,14 +116,16 @@ class UserRepository {
         data: formData,
         options: Options(
           headers: {
-            'access-token': '2c5fcf97-eb32-41b0-89c6-2b79a1d3a181',
-            'authorization': 'Bearer $token',
+            'Authorization': 'Bearer $token',
+            if (hkAccessToken != null) 'hk-access-token': hkAccessToken,
           },
         ),
       );
 
       if (response.statusCode == 200) {
-        _logger.i("✅ Update Profile Details successful.");
+        _logger.i(
+          "✅ Update Profile Details successful. Data: ${response.data}",
+        );
         return true;
       }
       return false;
@@ -123,5 +135,24 @@ class UserRepository {
       );
       return false;
     }
+  }
+
+  Future<UserLiteResponse?> updateProfileAndFetch({
+    String? fullName,
+    String? qualification,
+    List<int>? specialitiesOfInterestIds,
+    String? profilePicPath,
+  }) async {
+    final updateSuccess = await updateProfileDetails(
+      fullName: fullName,
+      qualification: qualification,
+      specialitiesOfInterestIds: specialitiesOfInterestIds,
+      profilePicPath: profilePicPath,
+    );
+
+    if (updateSuccess == true) {
+      return await getUserLite();
+    }
+    return null;
   }
 }

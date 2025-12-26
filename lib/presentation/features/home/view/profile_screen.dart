@@ -79,7 +79,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                       const SizedBox(height: 12),
                       Text(
-                        user?.fullName ?? 'Dr. ABC',
+                        "Dr. ${user?.firstName ?? ''} ${user?.lastName ?? ''}"
+                                .trim()
+                                .isNotEmpty
+                            ? "Dr. ${user?.firstName ?? ''} ${user?.lastName ?? ''}"
+                            : "Dr. ABC",
                         style: const TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.bold,
@@ -130,7 +134,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              user?.fullName ?? 'Dr. ABC',
+                              "Dr. ${user?.firstName ?? ''} ${user?.lastName ?? ''}"
+                                      .trim()
+                                      .isNotEmpty
+                                  ? "Dr. ${user?.firstName ?? ''} ${user?.lastName ?? ''}"
+                                  : "Dr. ABC",
                               style: const TextStyle(
                                 fontWeight: FontWeight.w500,
                               ),

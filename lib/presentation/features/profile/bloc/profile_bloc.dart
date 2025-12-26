@@ -43,5 +43,11 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       }
       emit(LogoutSuccess());
     });
+
+    on<UpdateProfileLocal>((event, emit) {
+      if (event.user.response != null) {
+        emit(ProfileLoaded(user: event.user));
+      }
+    });
   }
 }

@@ -10,3 +10,10 @@ abstract class ProfileEvent extends Equatable {
 class FetchProfileData extends ProfileEvent {}
 
 class LogoutEvent extends ProfileEvent {}
+
+class UpdateProfileLocal extends ProfileEvent {
+  final UserLiteResponse user;
+  const UpdateProfileLocal(this.user);
+  @override
+  List<Object> get props => [user];
+}

@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:oc_academy_app/core/constants/route_constants.dart';
 import 'package:oc_academy_app/data/repositories/home_repository.dart';
 import 'package:oc_academy_app/presentation/features/auth/view/widgets/profile_info_card_widget.dart';
+import 'package:oc_academy_app/presentation/features/auth/view/widgets/referal_card.dart';
 import 'package:oc_academy_app/presentation/features/auth/view/widgets/custom_phone_field.dart';
 import 'package:oc_academy_app/data/repositories/user_repository.dart';
 import 'package:oc_academy_app/data/models/user/billing_address_response.dart';
@@ -12,6 +13,7 @@ import 'package:oc_academy_app/core/utils/helpers/dialog_helper.dart';
 
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
+import 'package:share_plus/share_plus.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -144,6 +146,50 @@ class _ProfileScreenState extends State<ProfileScreen> {
         setState(() {
           _isUpdating = false;
         });
+      }
+    }
+  }
+
+  Future<void> _handleReferralShare() async {
+    try {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Fetching referral data...')),
+      );
+
+      final homeRepo = HomeRepository();
+      final userRepo = UserRepository();
+
+      final code = await homeRepo.getReferralCode();
+      final userLite = await userRepo.getUserLite();
+      final userId = userLite?.response?.userId;
+
+      if (code != null && userId != null) {
+        final String referralLink =
+            "https://www.ocacademy.in/filters?referralCode=$code&utm_source=referralPage&refererId=$userId";
+        final String message =
+            "Hi, I think OC Academy's specialized courses could enhance your medical career. Explore 100+ courses and get a 5% discount (up to ₹45,000). Let me know if you have questions! $referralLink";
+
+        // Share via system share sheet (WhatsApp, Gmail, etc.)
+        await Share.share(message);
+      } else {
+        if (mounted) {
+          String errorMsg = 'Could not fetch referral data.';
+          if (code == null && userId != null) {
+            errorMsg = 'Could not fetch referral code.';
+          } else if (code != null && userId == null) {
+            errorMsg = 'Could not fetch user ID.';
+          }
+
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(errorMsg)));
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: $e')));
       }
     }
   }
@@ -567,7 +613,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             ),
                     ),
 
-                    // 5. Logout Card
+                    // 5. Refer a Friend Card
+                    ReferralCard(onTap: _handleReferralShare),
+
+                    // 6. Logout Card
                     ProfileInfoCard(
                       title: "Logout",
                       actions: const [

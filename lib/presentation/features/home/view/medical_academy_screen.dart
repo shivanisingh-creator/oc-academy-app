@@ -16,10 +16,11 @@ import 'package:oc_academy_app/data/models/home/most_enrolled_response.dart';
 import 'package:oc_academy_app/presentation/features/home/widgets/trending_course_card.dart';
 import 'package:oc_academy_app/presentation/features/home/view/dashboard_screen.dart';
 import 'package:oc_academy_app/data/repositories/user_repository.dart';
-import 'package:flutter/services.dart';
+
 import 'package:oc_academy_app/presentation/features/home/view/widgets/continue_learning_card.dart';
 import 'package:oc_academy_app/data/models/home/recent_activity.dart';
 import 'package:oc_academy_app/data/models/blog/blog_post_response.dart';
+import 'package:share_plus/share_plus.dart';
 
 class MedicalAcademyScreen extends StatefulWidget {
   const MedicalAcademyScreen({super.key});
@@ -571,19 +572,15 @@ class _MedicalAcademyScreenState extends State<MedicalAcademyScreen> {
             TestimonialSlider(),
             const SizedBox(height: 20.0),
             ReferralCard(
-              onTap: () {
+              onTap: () async {
                 if (_referralCode != null && _userId != null) {
                   final String referralLink =
                       "https://www.ocacademy.in/filters?referralCode=$_referralCode&utm_source=referralPage&refererId=$_userId";
                   final String message =
                       "Hi, I think OC Academy's specialized courses could enhance your medical career. Explore 100+ courses and get a 5% discount (up to ₹45,000). Let me know if you have questions! $referralLink";
 
-                  Clipboard.setData(ClipboardData(text: message));
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Referral link copied to clipboard!'),
-                    ),
-                  );
+                  // Share via system share sheet
+                  await Share.share(message);
                 } else {
                   String errorMsg = 'Fetching referral data... please wait.';
                   if (_referralCode == null && _userId != null) {
@@ -591,9 +588,6 @@ class _MedicalAcademyScreenState extends State<MedicalAcademyScreen> {
                   } else if (_referralCode != null && _userId == null) {
                     errorMsg = 'Could not fetch user ID.';
                   } else if (_referralCode == null && _userId == null) {
-                    // Keep default message or say "Failed to load data" if enough time passed?
-                    // For now, let's assume it's still loading or failed both.
-                    // But if we want to be helpful:
                     errorMsg = 'Referral data not available yet.';
                   }
 

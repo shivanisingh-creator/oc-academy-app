@@ -38,6 +38,7 @@ dependencies:
   jwt_decoder: ^2.0.1
   webview_flutter: ^4.10.0
   image_picker: ^1.0.7
+  flutter_native_splash: ^2.4.4
 
 dev_dependencies:
   flutter_test:
@@ -49,12 +50,21 @@ dev_dependencies:
   json_serializable: ^6.8.0
   mockito: ^5.4.4
   flutter_launcher_icons: "^0.13.1"
+
 flutter_launcher_icons:
   android: "launcher_icon"
   ios: true
-  image_path: "assets/images/oc_icon.png"
-  adaptive_icon_background: "#FFFFFF" # Required for Android "Adaptive Icons"
-  adaptive_icon_foreground: "assets/images/oc_icon.png"
+  image_path: "assets/images/oc_icon_padded.png"
+  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_foreground: "assets/images/oc_icon_padded.png"
+
+flutter_native_splash:
+  color: "#FFFFFF"
+  image: "assets/images/oc_icon_padded.png"
+  android_12:
+    image: "assets/images/oc_icon_padded.png"
+    color: "#FFFFFF"
+  fullscreen: true
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

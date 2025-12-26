@@ -14,6 +14,7 @@ import 'package:oc_academy_app/data/models/user/user_lite_response.dart';
 import 'package:oc_academy_app/data/models/home/recent_activity.dart';
 import 'package:oc_academy_app/data/models/blog/blog_post_response.dart';
 import 'package:oc_academy_app/data/models/home/course_progress_response.dart';
+import 'package:oc_academy_app/data/local/fellowship_data.dart'; // Import local data
 
 class HomeRepository {
   final ApiUtils _apiUtils = ApiUtils.instance;
@@ -229,6 +230,32 @@ class HomeRepository {
     int size = 5,
   }) async {
     try {
+      if (type == 7) {
+        _logger.i("ℹ️ returning hardcoded fellowship data for type 7");
+        final List<MostEnrolledCourse> courses = mrcogData.map((data) {
+          return MostEnrolledCourse(
+            name: data['courseName'],
+            description: data['courseDescription'],
+            slug: data['slug'],
+            // Parse courseType safely or default to 0/null
+            courseType: data['courseType'] is int
+                ? data['courseType']
+                : int.tryParse(data['courseType'].toString()),
+            onexThumbnailUrl: data['onexThumbnailUrl'],
+            twoxThumbnailUrl: data['twoxThumbnailUrl'],
+            threexThumbnailUrl: data['threexThumbnailUrl'],
+            certifiers: (data['organizations'] as List<dynamic>?)
+                ?.map(
+                  (org) =>
+                      Certifier(name: org['name'], logoUrl: org['logoUrl']),
+                )
+                .toList(),
+          );
+        }).toList();
+
+        return MostEnrolledResponse(response: courses);
+      }
+
       final String? token = await _tokenStorage.getAccessToken();
       if (token == null) {
         _logger.e("❌ No access token found.");

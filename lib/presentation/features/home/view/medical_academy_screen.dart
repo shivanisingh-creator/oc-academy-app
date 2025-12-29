@@ -452,7 +452,7 @@ class _MedicalAcademyScreenState extends State<MedicalAcademyScreen> {
                         },
                         style: ElevatedButton.styleFrom(
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(0), // Makes it rectangular
+                            borderRadius: BorderRadius.circular(6), // Makes it rectangular
                           ),
                           backgroundColor: const Color(0xFF285698), // Sets the background color
                         ),

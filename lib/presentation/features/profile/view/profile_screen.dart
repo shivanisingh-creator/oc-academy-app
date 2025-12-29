@@ -260,6 +260,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
               context,
             ).showSnackBar(SnackBar(content: Text(state.message)));
           } else if (state is ProfileLoaded) {
+            print(
+                "BlocListener: received specialitiesOfInterestIds: ${state.user.response?.specialitiesOfInterestIds}"); // DEBUG
             // Only synchronize if we haven't recently updated locally
             // This prevents stale server data from overwriting local state "then and there"
             final hasRecentlyUpdated =

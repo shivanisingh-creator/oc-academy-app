@@ -234,7 +234,7 @@ class CourseCard extends StatelessWidget {
                     style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
                   ),
                   const Spacer(), // Pushes the button to the bottom
-                  const SizedBox(height: 8.0),
+                  const SizedBox(height: 4.0),
                   SizedBox(
                     width: double.infinity,
                     child: button,

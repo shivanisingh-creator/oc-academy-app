@@ -49,5 +49,23 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
         emit(ProfileLoaded(user: event.user));
       }
     });
+
+    on<UpdateSpecialties>((event, emit) async {
+      try {
+        final userResponse = await userRepository.updateProfileAndFetch(
+          fullName: "${event.firstName} ${event.lastName}",
+          qualification: event.qualification,
+          specialitiesOfInterestIds: event.specialtyIds,
+          profilePicPath: event.profilePicPath,
+        );
+        if (userResponse != null) {
+          emit(ProfileLoaded(user: userResponse));
+        } else {
+          emit(const ProfileError(message: 'Failed to update specialties.'));
+        }
+      } catch (e) {
+        emit(ProfileError(message: e.toString()));
+      }
+    });
   }
 }

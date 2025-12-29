@@ -35,7 +35,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   File? _selectedImage;
   BillingAddress? _billingAddress;
   bool _isLoadingBilling = true;
-  bool _justDeletedLastSpecialty = false;
 
   DateTime? _lastUpdateTime;
 
@@ -261,15 +260,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
               context,
             ).showSnackBar(SnackBar(content: Text(state.message)));
           } else if (state is ProfileLoaded) {
-            if (_justDeletedLastSpecialty) {
-              _justDeletedLastSpecialty = false; // Reset the flag
-              // Explicitly set _selectedSpecialtyIds to empty if we just deleted the last one
-              // and the backend returned stale data.
-              setState(() {
-                _selectedSpecialtyIds = [];
-              });
-              return; // Skip further processing of potentially stale data
-            }
             // Only synchronize if we haven't recently updated locally
             // This prevents stale server data from overwriting local state "then and there"
             final hasRecentlyUpdated =
@@ -618,9 +608,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                             _selectedSpecialtyIds,
                                           );
                                           newList.remove(id);
-                                          if (newList.isEmpty) {
-                                            _justDeletedLastSpecialty = true;
-                                          }
                                           setState(() {
                                             _selectedSpecialtyIds = newList;
                                           });

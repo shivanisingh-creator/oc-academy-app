@@ -91,7 +91,7 @@ class UserRepository {
         "fullName": fullName,
         if (qualification != null) "qualification": qualification,
         if (specialitiesOfInterestIds != null)
-          "specialitiesOfInterestIds": specialitiesOfInterestIds,
+          "specialitiesOfInterest": specialitiesOfInterestIds,
       };
 
       _logger.d("Updating profile with userUpdateRequest: $userUpdateRequest");
@@ -103,7 +103,11 @@ class UserRepository {
       }
 
       final FormData formData = FormData.fromMap({
-        "userUpdateRequest": jsonEncode(userUpdateRequest),
+        "userUpdateRequest": MultipartFile.fromBytes(
+          utf8.encode(jsonEncode(userUpdateRequest)),
+          filename: "userUpdateRequest.json",
+          contentType: DioMediaType.parse("application/json"),
+        ),
         if (profilePicPath != null)
           "profilePic": await MultipartFile.fromFile(
             profilePicPath,

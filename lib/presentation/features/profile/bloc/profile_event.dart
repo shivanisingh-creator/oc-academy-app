@@ -17,3 +17,22 @@ class UpdateProfileLocal extends ProfileEvent {
   @override
   List<Object> get props => [user];
 }
+
+class UpdateSpecialties extends ProfileEvent {
+  final List<int> specialtyIds;
+  final String firstName;
+  final String lastName;
+  final String? qualification;
+  final String? profilePicPath;
+
+  const UpdateSpecialties({
+    required this.specialtyIds,
+    required this.firstName,
+    required this.lastName,
+    this.qualification,
+    this.profilePicPath,
+  });
+
+  @override
+  List<Object> get props => [specialtyIds, firstName, lastName];
+}

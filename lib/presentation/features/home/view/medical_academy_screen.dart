@@ -20,6 +20,7 @@ import 'package:oc_academy_app/data/repositories/user_repository.dart';
 import 'package:oc_academy_app/presentation/features/home/view/widgets/continue_learning_card.dart';
 import 'package:oc_academy_app/data/models/home/recent_activity.dart';
 import 'package:oc_academy_app/data/models/blog/blog_post_response.dart';
+import 'package:oc_academy_app/data/models/user_courses/user_courses_response.dart';
 import 'package:share_plus/share_plus.dart';
 
 class MedicalAcademyScreen extends StatefulWidget {
@@ -65,6 +66,8 @@ class _MedicalAcademyScreenState extends State<MedicalAcademyScreen> {
   bool _isLoadingActivities = true;
   List<BlogPostResponse> _blogs = [];
   bool _isLoadingBlogs = true;
+  List<UserCourse> _myCourses = [];
+  bool _isLoadingCourses = true;
 
   @override
   void initState() {
@@ -74,6 +77,28 @@ class _MedicalAcademyScreenState extends State<MedicalAcademyScreen> {
     _fetchReferralData();
     _fetchRecentActivities();
     _fetchBlogs();
+    _fetchUserCourses();
+  }
+
+  Future<void> _fetchUserCourses() async {
+    try {
+      final response = await _homeRepository.getUserCourses();
+      if (mounted) {
+        setState(() {
+          if (response != null && response.response != null) {
+            _myCourses = response.response!.pendingCourses ?? [];
+          }
+          _isLoadingCourses = false;
+        });
+      }
+    } catch (e) {
+      debugPrint("Error fetching user courses: $e");
+      if (mounted) {
+        setState(() {
+          _isLoadingCourses = false;
+        });
+      }
+    }
   }
 
   Future<void> _fetchBlogs() async {
@@ -389,7 +414,7 @@ class _MedicalAcademyScreenState extends State<MedicalAcademyScreen> {
               ),
             ),
             const SizedBox(height: 10),
-            if (_isLoadingActivities)
+            if (_isLoadingActivities || _isLoadingCourses)
               Container(
                 margin: const EdgeInsets.only(top: 10.0, right: 10, left: 10),
                 child: const Center(child: CircularProgressIndicator()),
@@ -399,17 +424,53 @@ class _MedicalAcademyScreenState extends State<MedicalAcademyScreen> {
                 margin: const EdgeInsets.only(top: 10.0, right: 10, left: 10),
                 child: ContinueLearningCard(activity: _recentActivities.first),
               )
+            else if (_myCourses.isNotEmpty && _recentActivities.isEmpty)
+              Container(
+                margin: const EdgeInsets.only(top: 10.0, right: 10, left: 10),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12.0),
+                  border: (Border.all(color: const Color(0XFFD6D6D6))),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    children: [
+                      const Text(
+                        "You have not started any courses yet.",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(fontSize: 16, color: Colors.grey),
+                      ),
+                      const SizedBox(height: 16.0),
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const DashboardScreen()),
+                          );
+                        },
+                        child: const Text("Go to Dashboard"),
+                      ),
+                    ],
+                  ),
+                ),
+              )
             else
               Container(
                 margin: const EdgeInsets.only(top: 10.0, right: 10, left: 10),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(12.0),
-                  border: (Border.all(color: Color(0XFFD6D6D6))),
+                  border: (Border.all(color: const Color(0XFFD6D6D6))),
                 ),
                 child: const Padding(
                   padding: EdgeInsets.all(16.0),
-                  child: Text('No recent activity found.'),
+                  child: Text(
+                    "Look like you have not enrolled in any of our course, explore more",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 16, color: Colors.grey),
+                  ),
                 ),
               ),
 

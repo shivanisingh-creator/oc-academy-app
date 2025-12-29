@@ -30,8 +30,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool _isUpdating = false;
 
   bool _isEditingName = false;
+  bool _isEditingEmail = false;
+  bool _isEditingPhone = false;
   final TextEditingController _firstNameController = TextEditingController();
   final TextEditingController _lastNameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
   File? _selectedImage;
   BillingAddress? _billingAddress;
   bool _isLoadingBilling = true;
@@ -51,6 +55,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
       if (user != null) {
         _firstNameController.text = user.firstName ?? '';
         _lastNameController.text = user.lastName ?? '';
+        _emailController.text = user.email ?? '';
+        _phoneController.text = user.mobileNumber ?? '';
         _selectedQualification = user.qualification;
 
         if (user.specialitiesOfInterestIds != null) {
@@ -88,6 +94,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void dispose() {
     _firstNameController.dispose();
     _lastNameController.dispose();
+    _emailController.dispose();
+    _phoneController.dispose();
     super.dispose();
   }
 
@@ -152,6 +160,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     try {
       final userResponse = await UserRepository().updateProfileAndFetch(
         fullName: "${_firstNameController.text} ${_lastNameController.text}",
+        email: _emailController.text,
+        mobileNumber: _phoneController.text,
         qualification: _selectedQualification,
         specialitiesOfInterestIds: newSpecialtyIds ?? _selectedSpecialtyIds,
         profilePicPath: _selectedImage?.path,
@@ -311,6 +321,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
               }
               if (user?.lastName != null) {
                 _lastNameController.text = user!.lastName!;
+              }
+              if (user?.email != null) {
+                _emailController.text = user!.email!;
+              }
+              if (user?.mobileNumber != null) {
+                _phoneController.text = user!.mobileNumber!;
               }
             }
           }
@@ -479,27 +495,58 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       _lastNameController.text.isNotEmpty)
                                   ? "Dr. ${_firstNameController.text} ${_lastNameController.text}"
                                   : "Dr. ${user?.firstName ?? ''} ${user?.lastName ?? ''}"
-                                        .trim()
-                                        .isNotEmpty
-                                  ? "Dr. ${user?.firstName ?? ''} ${user?.lastName ?? ''}"
-                                  : "Dr. ABC",
+                                          .trim()
+                                          .isNotEmpty
+                                      ? "Dr. ${user?.firstName ?? ''} ${user?.lastName ?? ''}"
+                                      : "Dr. ABC",
                               style: const TextStyle(
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
-                          Text(user?.mobileNumber ?? '+91 9800122899'),
-                          Row(
-                            children: [
-                              Text(user?.email ?? 'aa@docademy.com'),
-                              const SizedBox(width: 8),
-                              if (user?.isEmailVerified == true)
-                                const Icon(
-                                  Icons.check_circle,
-                                  color: Colors.green,
-                                  size: 16,
-                                ),
-                            ],
-                          ),
+                          const SizedBox(height: 8),
+                          if (_isEditingName && (user?.isEmailVerified ?? false))
+                            TextFormField(
+                              controller: _phoneController,
+                              decoration: const InputDecoration(
+                                labelText: 'Phone Number',
+                                isDense: true,
+                              ),
+                            )
+                          else
+                            Row(
+                              children: [
+                                Text(user?.mobileNumber ??
+                                    '+91 9800122899'),
+                                if (user?.isMobileVerified == true)
+                                  const Icon(
+                                    Icons.check_circle,
+                                    color: Colors.green,
+                                    size: 16,
+                                  ),
+                              ],
+                            ),
+                          const SizedBox(height: 8),
+                          if (_isEditingName && (user?.isMobileVerified ?? false))
+                            TextFormField(
+                              controller: _emailController,
+                              decoration: const InputDecoration(
+                                labelText: 'Email',
+                                isDense: true,
+                              ),
+                            )
+                          else
+                            Row(
+                              children: [
+                                Text(user?.email ?? 'aa@docademy.com'),
+                                const SizedBox(width: 8),
+                                if (user?.isEmailVerified == true)
+                                  const Icon(
+                                    Icons.check_circle,
+                                    color: Colors.green,
+                                    size: 16,
+                                  ),
+                              ],
+                            ),
                         ],
                       ),
                     ),

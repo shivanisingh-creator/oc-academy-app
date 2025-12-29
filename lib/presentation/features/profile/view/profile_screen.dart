@@ -144,7 +144,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  Future<void> _handleProfileUpdate() async {
+  Future<void> _handleProfileUpdate({List<int>? newSpecialtyIds}) async {
     setState(() {
       _isUpdating = true;
     });
@@ -153,7 +153,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       final userResponse = await UserRepository().updateProfileAndFetch(
         fullName: "${_firstNameController.text} ${_lastNameController.text}",
         qualification: _selectedQualification,
-        specialitiesOfInterestIds: _selectedSpecialtyIds,
+        specialitiesOfInterestIds: newSpecialtyIds ?? _selectedSpecialtyIds,
         profilePicPath: _selectedImage?.path,
       );
 
@@ -611,7 +611,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                           setState(() {
                                             _selectedSpecialtyIds = newList;
                                           });
-                                          _handleProfileUpdate();
+                                          _handleProfileUpdate(
+                                              newSpecialtyIds: newList);
                                         },
                                         backgroundColor: Colors.grey
                                             .withOpacity(0.1),
@@ -633,7 +634,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             child: ElevatedButton(
                               onPressed: _isUpdating
                                   ? null
-                                  : _handleProfileUpdate,
+                                  : () => _handleProfileUpdate(),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: const Color(0XFF3359A7),
                                 padding: const EdgeInsets.symmetric(

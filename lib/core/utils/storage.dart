@@ -1,6 +1,7 @@
 // lib/data/auth_api/token_storage.dart
 
 import 'package:shared_preferences/shared_preferences.dart';
+
 // Define a constant key for storing the token (Use a strong name)
 const String _keyAccessToken = 'keycloak_access_token';
 const String _keyAccessTokenExpiry = 'keycloak_access_token_expiry';
@@ -74,7 +75,11 @@ class TokenStorage {
   Future<String?> getApiAccessToken() async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      return prefs.getString(_keyApiAccessToken);
+      final token = prefs.getString(_keyApiAccessToken);
+      if (token != null) {
+        print("🔑 API Access Token: $token");
+      }
+      return token;
     } catch (e) {
       print("❌ Error retrieving API access token: $e");
       return null;

@@ -18,12 +18,15 @@ import 'package:share_plus/share_plus.dart';
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
+  // Persist qualification across navigation to avoid API overrides
+  static String? _persistedQualification;
+
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  String? _selectedQualification;
+  String? _selectedQualification = ProfileScreen._persistedQualification;
   List<int> _selectedSpecialtyIds = [];
   List<Specialty> _specialties = [];
   bool _isLoadingSpecialties = true;
@@ -58,7 +61,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _lastNameController.text = user.lastName ?? '';
         _emailController.text = user.email ?? '';
         _phoneController.text = user.mobileNumber ?? '';
-        _selectedQualification = user.qualification;
+
+        // If not already set via field initialization, try server data
+        if (_selectedQualification == null) {
+          _selectedQualification = user.qualification;
+          ProfileScreen._persistedQualification = _selectedQualification;
+        }
 
         if (user.specialitiesOfInterestIds != null) {
           final rawIds = user.specialitiesOfInterestIds!;
@@ -281,11 +289,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
             final user = state.user.response;
 
-            // ALWAYS update Medical Details from API (Qualification & Specialities)
-            // This ensures logic: Change -> API -> Fetch -> UI Update is respected.
-            if (user?.qualification != null) {
+            // Only update qualification if absolutely null (not set locally or persisted)
+            if (_selectedQualification == null &&
+                ProfileScreen._persistedQualification == null &&
+                user?.qualification != null) {
               setState(() {
                 _selectedQualification = user!.qualification;
+                ProfileScreen._persistedQualification = _selectedQualification;
               });
             }
             if (user?.specialitiesOfInterestIds != null) {
@@ -652,7 +662,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             onChanged: (val) {
                               setState(() {
                                 _selectedQualification = val;
+                                ProfileScreen._persistedQualification = val;
                               });
+                              _handleProfileUpdate();
                             },
                             hintText: 'Select Qualification',
                           ),
@@ -700,6 +712,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                         setState(() {
                                           _selectedSpecialtyIds = newList;
                                         });
+                                        _handleProfileUpdate(
+                                          newSpecialtyIds: newList,
+                                        );
                                       }
                                     }
                                   },

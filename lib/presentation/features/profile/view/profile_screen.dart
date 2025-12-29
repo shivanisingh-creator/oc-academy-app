@@ -263,8 +263,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
           } else if (state is ProfileLoaded) {
             if (_justDeletedLastSpecialty) {
               _justDeletedLastSpecialty = false; // Reset the flag
-              // Do not update the local state from the bloc, as it's stale.
-              return;
+              // Explicitly set _selectedSpecialtyIds to empty if we just deleted the last one
+              // and the backend returned stale data.
+              setState(() {
+                _selectedSpecialtyIds = [];
+              });
+              return; // Skip further processing of potentially stale data
             }
             // Only synchronize if we haven't recently updated locally
             // This prevents stale server data from overwriting local state "then and there"

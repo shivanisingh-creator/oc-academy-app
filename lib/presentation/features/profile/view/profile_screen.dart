@@ -504,20 +504,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       _handleProfileUpdate(),
                                 ),
                               ],
-                            )
-                          else
-                            Text(
-                              (_firstNameController.text.isNotEmpty ||
-                                      _lastNameController.text.isNotEmpty)
-                                  ? "Dr. ${_firstNameController.text} ${_lastNameController.text}"
-                                  : "Dr. ${user?.firstName ?? ''} ${user?.lastName ?? ''}"
-                                        .trim()
-                                        .isNotEmpty
-                                  ? "Dr. ${user?.firstName ?? ''} ${user?.lastName ?? ''}"
-                                  : "Dr. ABC",
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w500,
-                              ),
                             ),
                           const SizedBox(height: 8),
 

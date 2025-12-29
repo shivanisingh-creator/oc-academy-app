@@ -125,10 +125,27 @@ class _DashboardScreenState extends State<DashboardScreen> {
         !_isLoadingCourses &&
         _activeCourses.isEmpty &&
         _completedCourses.isEmpty &&
-        _courseCategories.isEmpty;
+        _courseCategories.every(
+          (cat) =>
+              cat.courseProgressDetail == null ||
+              cat.courseProgressDetail!.isEmpty,
+        );
 
     return Scaffold(
       backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        toolbarHeight: 45.0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.black, size: 20),
+          onPressed: () => Navigator.pop(context),
+        ),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1.0),
+          child: Container(color: Colors.grey.withOpacity(0.2), height: 1.0),
+        ),
+      ),
       body: SafeArea(
         child: _isLoadingCourses
             ? const Center(child: CircularProgressIndicator())
@@ -170,23 +187,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   const SizedBox(height: 16.0),
                   SizedBox(
                     height: 280, // Adjust height based on content
-                    child: _activeCourses.isEmpty
-                        ? const Center(child: Text("No active courses found"))
-                        : ListView.builder(
-                            scrollDirection: Axis.horizontal,
-                            itemCount: _activeCourses.length,
-                            itemBuilder: (context, index) {
-                              final course = _activeCourses[index];
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: _activeCourses.length,
+                      itemBuilder: (context, index) {
+                        final course = _activeCourses[index];
 
-                              return CourseCard(
-                                title: course.courseName ?? 'Unknown Course',
-                                endDate: course.endDate,
-                                progress: course.progress,
-                                imageUrl: course
-                                    .twoxThumbnailUrl, // Use 2x thumbnail from API
-                              );
-                            },
-                          ),
+                        return CourseCard(
+                          title: course.courseName ?? 'Unknown Course',
+                          endDate: course.endDate,
+                          progress: course.progress,
+                          imageUrl: course
+                              .twoxThumbnailUrl, // Use 2x thumbnail from API
+                        );
+                      },
+                    ),
                   ),
 
                   if (_completedCourses.isNotEmpty) ...[
@@ -342,19 +357,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF285698),
               foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 12),
               elevation: 0,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(6),
               ),
             ),
             child: const Text(
               "Explore",
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 0.5,
-              ),
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
           ),
         ],

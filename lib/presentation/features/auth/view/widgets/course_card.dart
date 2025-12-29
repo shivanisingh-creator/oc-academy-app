@@ -2,18 +2,116 @@ import 'package:flutter/material.dart';
 
 class CourseCard extends StatelessWidget {
   final String title;
-  final String batchDate;
+  final int? endDate;
+  final int? progress;
   final String? imageUrl; // Image URL from API
+  final bool isCompleted;
+  final String? certificateUrl;
+  final int? startDate;
 
   const CourseCard({
     super.key,
     required this.title,
-    required this.batchDate,
+    this.endDate,
+    this.progress,
     this.imageUrl,
+    this.isCompleted = false,
+    this.certificateUrl,
+    this.startDate,
   });
 
   @override
   Widget build(BuildContext context) {
+    // Determine status
+    final now = DateTime.now();
+    final endDateTime = endDate != null
+        ? DateTime.fromMillisecondsSinceEpoch(endDate!)
+        : null;
+
+    // Logic: If end date is in the past, it's expired.
+    // Note: User prompt was slightly ambiguous ("if end date is greater than current date ... batch ended on"),
+    // but standard logic implies "Current > End" = Ended.
+    // Assuming "End Date < Current Date" -> Expired -> Contact Support.
+    // However, strictly following the user's "greater than current date" = "batch ended" would mean
+    // future courses are "ended". I will implement the LOGICAL interpretation:
+    // Expired (End < Now) -> Batch ended.
+    // Active (End > Now) -> Ends on.
+
+    final isExpired = endDateTime != null && endDateTime.isBefore(now);
+
+    final startDateTime = startDate != null
+        ? DateTime.fromMillisecondsSinceEpoch(startDate!)
+        : null;
+
+    final dateText = endDateTime != null
+        ? "${endDateTime.day}/${endDateTime.month}/${endDateTime.year}"
+        : "N/A";
+
+    final statusText = isCompleted
+        ? 'Completed'
+        : (isExpired
+            ? 'Batch ended on $dateText'
+            : 'Ends on $dateText');
+
+    Widget button;
+    if (isCompleted) {
+      if (certificateUrl != null && certificateUrl!.isNotEmpty) {
+        button = ElevatedButton(
+          onPressed: () {
+            // Download certificate logic
+            print("Download certificate");
+          },
+          child: const Text("Download Certificate"),
+        );
+      } else if (startDateTime != null && endDateTime != null && endDateTime.isBefore(startDateTime)) {
+        button = ElevatedButton(
+          onPressed: () {
+            // Watch again logic
+            print("Watch again");
+          },
+          child: const Text("Watch Again"),
+        );
+      } else {
+        button = ElevatedButton(
+          onPressed: () {
+            // Contact us logic
+            print("Contact us");
+          },
+          child: const Text("Contact Us"),
+        );
+      }
+    } else {
+      button = ElevatedButton(
+        onPressed: () {
+          if (isExpired) {
+            // Show Contact Support logic (Placeholder)
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Contacting Support...'),
+              ),
+            );
+          } else {
+            // Start/Continue Learning logic
+          }
+        },
+        style: ElevatedButton.styleFrom(
+          backgroundColor: const Color(0XFF3359A7),
+          foregroundColor: Colors.white,
+          padding: const EdgeInsets.symmetric(vertical: 12.0),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8.0),
+          ),
+        ),
+        child: Text(
+          isExpired
+              ? "Contact Support"
+              : ((progress ?? 0) > 0
+                  ? "Continue Learning"
+                  : "Start Learning"),
+        ),
+      );
+    }
+
     return Container(
       width: 240, // Fixed width for horizontal scrolling
       margin: const EdgeInsets.only(right: 16.0),
@@ -104,26 +202,13 @@ class CourseCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 4.0),
                 Text(
-                  'Batch ends on $batchDate',
+                  statusText,
                   style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
                 ),
                 const SizedBox(height: 12.0),
                 SizedBox(
                   width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      // TODO: Implement course details navigation
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0XFF3359A7),
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 12.0),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8.0),
-                      ),
-                    ),
-                    child: const Text('Start Learning'),
-                  ),
+                  child: button,
                 ),
               ],
             ),

@@ -25,7 +25,8 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   final HomeRepository _homeRepository = HomeRepository();
-  List<UserCourse> _myCourses = [];
+  List<UserCourse> _activeCourses = [];
+  List<UserCourse> _completedCourses = [];
   bool _isLoadingCourses = true;
   bool _showVerificationCard = false;
 
@@ -66,8 +67,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
     if (mounted) {
       setState(() {
         // Handle Courses
-        if (coursesResponse?.response?.pendingCourses != null) {
-          _myCourses = coursesResponse!.response!.pendingCourses!;
+        if (coursesResponse?.response != null) {
+          final allCourses = <UserCourse>[];
+          if (coursesResponse!.response!.pendingCourses != null) {
+            allCourses.addAll(coursesResponse!.response!.pendingCourses!);
+          }
+          if (coursesResponse!.response!.completedCourses != null) {
+            allCourses.addAll(coursesResponse!.response!.completedCourses!);
+          }
+
+          _activeCourses = allCourses
+              .where((c) => (c.progress ?? 0) < 100)
+              .toList();
+          _completedCourses = allCourses
+              .where((c) => (c.progress ?? 0) == 100)
+              .toList();
         }
         _isLoadingCourses = false;
 
@@ -136,27 +150,57 @@ class _DashboardScreenState extends State<DashboardScreen> {
               height: 280, // Adjust height based on content
               child: _isLoadingCourses
                   ? const Center(child: CircularProgressIndicator())
-                  : _myCourses.isEmpty
-                  ? const Center(child: Text("No courses found"))
+                  : _activeCourses.isEmpty
+                  ? const Center(child: Text("No active courses found"))
                   : ListView.builder(
                       scrollDirection: Axis.horizontal,
-                      itemCount: _myCourses.length,
+                      itemCount: _activeCourses.length,
                       itemBuilder: (context, index) {
-                        final course = _myCourses[index];
+                        final course = _activeCourses[index];
 
                         return CourseCard(
                           title: course.courseName ?? 'Unknown Course',
-                          batchDate: course.endDate != null
-                              ? DateTime.fromMillisecondsSinceEpoch(
-                                  course.endDate!,
-                                ).toString().split(' ')[0]
-                              : 'N/A', // Simple date formatting
+                          endDate: course.endDate,
+                          progress: course.progress,
                           imageUrl: course
                               .twoxThumbnailUrl, // Use 2x thumbnail from API
                         );
                       },
                     ),
             ),
+
+            if (!_isLoadingCourses && _completedCourses.isNotEmpty) ...[
+              const SizedBox(height: 24.0),
+              const Text(
+                'Completed Courses',
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.black87,
+                ),
+              ),
+              const SizedBox(height: 16.0),
+              SizedBox(
+                height: 280,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: _completedCourses.length,
+                  itemBuilder: (context, index) {
+                    final course = _completedCourses[index];
+
+                    return CourseCard(
+                      title: course.courseName ?? 'Unknown Course',
+                      endDate: course.endDate,
+                      progress: course.progress,
+                      imageUrl: course.twoxThumbnailUrl,
+                      isCompleted: true,
+                      certificateUrl: course.certificateUrl,
+                      startDate: course.startDate,
+                    );
+                  },
+                ),
+              ),
+            ],
 
             const SizedBox(height: 16.0),
 
@@ -206,8 +250,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     number: activity.id,
                     title: activity.name,
                     tag: activity.status,
-                    tagColor:
-                        Color(0XFF3359A7), // Default color for now, could be dynamic
+                    tagColor: Color(
+                      0XFF3359A7,
+                    ), // Default color for now, could be dynamic
                   );
                 }).toList(),
               ),

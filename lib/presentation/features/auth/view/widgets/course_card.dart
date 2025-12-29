@@ -68,39 +68,46 @@ class CourseCard extends StatelessWidget {
 
       if (certificateUrl != null && certificateUrl!.isNotEmpty) {
         completedButtons.add(
-          ElevatedButton(
-            onPressed: () {
-              // Download certificate logic
-              print("Download certificate");
-            },
-            style: buttonStyle,
-            child: const Text("Download"),
+          Expanded(
+            child: ElevatedButton(
+              onPressed: () {
+                // Download certificate logic
+                print("Download certificate");
+              },
+              style: buttonStyle,
+              child: const Text("Download"),
+            ),
           ),
         );
       }
 
       if (startDateTime != null && endDateTime != null && endDateTime.isBefore(startDateTime)) {
         completedButtons.add(
-          ElevatedButton(
-            onPressed: () {
-              // Watch again logic
-              print("Watch again");
-            },
-            style: buttonStyle,
-            child: const Text("Watch Again"),
+          Expanded(
+            child: ElevatedButton(
+              onPressed: () {
+                // Watch again logic
+                print("Watch again");
+              },
+              style: buttonStyle,
+              child: const Text("Watch Again"),
+            ),
           ),
         );
       }
 
       if (completedButtons.isEmpty) {
+        // If no other conditions met, show Contact Us
         completedButtons.add(
-          ElevatedButton(
-            onPressed: () {
-              // Contact us logic
-              print("Contact us");
-            },
-            style: buttonStyle,
-            child: const Text("Contact Us"),
+          Expanded(
+            child: ElevatedButton(
+              onPressed: () {
+                // Contact us logic
+                print("Contact us");
+              },
+              style: buttonStyle,
+              child: const Text("Contact Us"),
+            ),
           ),
         );
       }
@@ -108,16 +115,14 @@ class CourseCard extends StatelessWidget {
       if (completedButtons.length > 1) {
         button = Row(
           children: [
-            Expanded(child: completedButtons[0]),
-            const SizedBox(width: 8),
-            Expanded(child: completedButtons[1]),
+            completedButtons[0],
+            const SizedBox(width: 8), // Add spacing between buttons
+            completedButtons[1],
           ],
         );
       } else {
-        button = SizedBox(
-          width: double.infinity,
-          child: completedButtons[0],
-        );
+        // If only one button, it's already Expanded due to being wrapped in Expanded above
+        button = completedButtons[0];
       }
     } else {
       button = ElevatedButton(

@@ -161,8 +161,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     try {
       final userResponse = await UserRepository().updateProfileAndFetch(
         fullName: "${_firstNameController.text} ${_lastNameController.text}",
-        email: _emailController.text,
-        mobileNumber: _phoneController.text,
         qualification: _selectedQualification,
         specialitiesOfInterestIds: newSpecialtyIds ?? _selectedSpecialtyIds,
         profilePicPath: _selectedImage?.path,
@@ -521,8 +519,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                           // Phone Number Field
                           if (_isEditingContactInfo && !(user?.isMobileVerified ?? false))
-                            CustomPhoneField(
+                            TextFormField(
                               controller: _phoneController,
+                              decoration: const InputDecoration(
+                                labelText: 'Phone Number',
+                                isDense: true,
+                                border: OutlineInputBorder(),
+                              ),
                             )
                           else
                             Row(

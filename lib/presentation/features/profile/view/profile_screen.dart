@@ -543,7 +543,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 CustomDropdownField(
-                                  key: UniqueKey(),
                                   label: '',
                                   value: null,
                                   items: specialtyItems
@@ -612,6 +611,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                           setState(() {
                                             _selectedSpecialtyIds = newList;
                                           });
+                                          _handleProfileUpdate();
                                         },
                                         backgroundColor: Colors.grey
                                             .withOpacity(0.1),

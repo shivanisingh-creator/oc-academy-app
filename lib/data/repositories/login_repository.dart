@@ -93,7 +93,7 @@ class AuthRepository {
         url: ApiEndpoints.signupLoginMobile,
         data: {
           "mobileNumber": mobileNumber,
-          "appleUserId": "string",
+          "appleUserId": "",
 
           /// TODO: Handle this properly
         },

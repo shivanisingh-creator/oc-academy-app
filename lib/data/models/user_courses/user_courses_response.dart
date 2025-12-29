@@ -117,7 +117,7 @@ class UserCourse {
     progress = json['progress'];
     certificateUrl = json['certificateUrl'];
     courseDurationStr = json['courseDurationStr']?.toString();
-    issueDate = json['issueDate'];
+    issueDate = json['issueDate']?.toString();
     onexThumbnailUrl = json['onexThumbnailUrl'];
     twoxThumbnailUrl = json['twoxThumbnailUrl'];
     threexThumbnailUrl = json['threexThumbnailUrl'];

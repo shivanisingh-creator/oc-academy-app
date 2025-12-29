@@ -161,6 +161,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     try {
       final userResponse = await UserRepository().updateProfileAndFetch(
         fullName: "${_firstNameController.text} ${_lastNameController.text}",
+        email: _emailController.text,
+        mobileNumber: _phoneController.text,
         qualification: _selectedQualification,
         specialitiesOfInterestIds: newSpecialtyIds ?? _selectedSpecialtyIds,
         profilePicPath: _selectedImage?.path,
@@ -173,7 +175,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
           );
           setState(() {
             _isEditingName = false;
-            _isEditingContactInfo = false; // Reset the contact info editing flag
+            _isEditingContactInfo =
+                false; // Reset the contact info editing flag
             _lastUpdateTime = DateTime.now(); // Mark the update time
           });
           // Update data via Bloc strictly with the fetched response
@@ -434,37 +437,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ProfileInfoCard(
                       title: "Personal Details",
                       actions: [
-                        if ((user?.isMobileVerified == true && user?.email != null) ||
-                            (user?.isEmailVerified == true && user?.mobileNumber != null))
-                          IconButton(
-                            onPressed: () {
-                              if (_isEditingContactInfo) {
-                                _handleProfileUpdate();
-                              }
-                              setState(() {
-                                _isEditingContactInfo = !_isEditingContactInfo;
-                              });
-                            },
-                            icon: Icon(
-                              _isEditingContactInfo ? Icons.check : Icons.edit_outlined,
-                              size: 20,
-                              color: _isEditingContactInfo ? Colors.green : Colors.grey,
-                            ),
-                          ),
                         IconButton(
                           onPressed: () {
-                            if (_isEditingName) {
-                              // Trigger update when saving name
-                              _handleProfileUpdate();
-                            }
                             setState(() {
-                              _isEditingName = !_isEditingName;
+                              if (_isEditingName || _isEditingContactInfo) {
+                                // Cancel editing if already editing
+                                _isEditingName = false;
+                                _isEditingContactInfo = false;
+                              } else {
+                                // Enter edit mode
+                                _isEditingName = true;
+                                _isEditingContactInfo = true;
+                              }
                             });
                           },
                           icon: Icon(
-                            _isEditingName ? Icons.check : Icons.edit_outlined,
+                            (_isEditingName || _isEditingContactInfo)
+                                ? Icons.close
+                                : Icons.edit_outlined,
                             size: 20,
-                            color: _isEditingName ? Colors.green : Colors.grey,
+                            color: (_isEditingName || _isEditingContactInfo)
+                                ? const Color(0XFF3359A7)
+                                : Colors.grey,
                           ),
                         ),
                       ],
@@ -507,10 +501,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       _lastNameController.text.isNotEmpty)
                                   ? "Dr. ${_firstNameController.text} ${_lastNameController.text}"
                                   : "Dr. ${user?.firstName ?? ''} ${user?.lastName ?? ''}"
-                                          .trim()
-                                          .isNotEmpty
-                                      ? "Dr. ${user?.firstName ?? ''} ${user?.lastName ?? ''}"
-                                      : "Dr. ABC",
+                                        .trim()
+                                        .isNotEmpty
+                                  ? "Dr. ${user?.firstName ?? ''} ${user?.lastName ?? ''}"
+                                  : "Dr. ABC",
                               style: const TextStyle(
                                 fontWeight: FontWeight.w500,
                               ),
@@ -518,14 +512,32 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           const SizedBox(height: 8),
 
                           // Phone Number Field
-                          if (_isEditingContactInfo && !(user?.isMobileVerified ?? false))
-                            TextFormField(
-                              controller: _phoneController,
-                              decoration: const InputDecoration(
-                                labelText: 'Phone Number',
-                                isDense: true,
-                                border: OutlineInputBorder(),
-                              ),
+                          if (_isEditingContactInfo)
+                            Column(
+                              children: [
+                                TextFormField(
+                                  controller: _phoneController,
+                                  enabled: !(user?.isMobileVerified ?? false),
+                                  decoration: InputDecoration(
+                                    labelText: 'Phone Number',
+                                    isDense: true,
+                                    border: const OutlineInputBorder(),
+                                    suffixIcon:
+                                        (user?.isMobileVerified ?? false)
+                                        ? const Icon(
+                                            Icons.check_circle,
+                                            color: Color(0XFF3359A7),
+                                            size: 20,
+                                          )
+                                        : null,
+                                    fillColor: (user?.isMobileVerified ?? false)
+                                        ? Colors.grey.withOpacity(0.1)
+                                        : null,
+                                    filled: (user?.isMobileVerified ?? false),
+                                  ),
+                                ),
+                                const SizedBox(height: 10),
+                              ],
                             )
                           else
                             Row(
@@ -535,7 +547,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 if (user?.isMobileVerified == true)
                                   const Icon(
                                     Icons.check_circle,
-                                    color: Colors.green,
+                                    color: Color(0XFF3359A7),
                                     size: 16,
                                   ),
                               ],
@@ -543,13 +555,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           const SizedBox(height: 8),
 
                           // Email Field
-                          if (_isEditingContactInfo && !(user?.isEmailVerified ?? false))
+                          if (_isEditingContactInfo)
                             TextFormField(
                               controller: _emailController,
-                              decoration: const InputDecoration(
+                              enabled: !(user?.isEmailVerified ?? false),
+                              decoration: InputDecoration(
                                 labelText: 'Email',
                                 isDense: true,
-                                border: OutlineInputBorder(),
+                                border: const OutlineInputBorder(),
+                                suffixIcon: (user?.isEmailVerified ?? false)
+                                    ? const Icon(
+                                        Icons.check_circle,
+                                        color: Color(0XFF3359A7),
+                                        size: 20,
+                                      )
+                                    : null,
+                                fillColor: (user?.isEmailVerified ?? false)
+                                    ? Colors.grey.withOpacity(0.1)
+                                    : null,
+                                filled: (user?.isEmailVerified ?? false),
                               ),
                             )
                           else
@@ -560,11 +584,47 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 if (user?.isEmailVerified == true)
                                   const Icon(
                                     Icons.check_circle,
-                                    color: Colors.green,
+                                    color: Color(0XFF3359A7),
                                     size: 16,
                                   ),
                               ],
                             ),
+                          if (_isEditingName || _isEditingContactInfo) ...[
+                            const SizedBox(height: 16),
+                            SizedBox(
+                              width: double.infinity,
+                              child: ElevatedButton(
+                                onPressed: _isUpdating
+                                    ? null
+                                    : () => _handleProfileUpdate(),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0XFF3359A7),
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 12,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                ),
+                                child: _isUpdating
+                                    ? const SizedBox(
+                                        height: 20,
+                                        width: 20,
+                                        child: CircularProgressIndicator(
+                                          color: Colors.white,
+                                          strokeWidth: 2,
+                                        ),
+                                      )
+                                    : const Text(
+                                        "Update Personal Details",
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                              ),
+                            ),
+                          ],
                         ],
                       ),
                     ),
@@ -677,7 +737,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                             _selectedSpecialtyIds = newList;
                                           });
                                           _handleProfileUpdate(
-                                              newSpecialtyIds: newList);
+                                            newSpecialtyIds: newList,
+                                          );
                                         },
                                         backgroundColor: Colors.grey
                                             .withOpacity(0.1),
@@ -734,9 +795,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     // 4. Billing Address Card
                     ProfileInfoCard(
                       title: "Billing Address",
-                      actions: const [
-                        Icon(Icons.edit_outlined, size: 20, color: Colors.grey),
-                      ],
                       content: _isLoadingBilling
                           ? const Center(child: CircularProgressIndicator())
                           : Text(

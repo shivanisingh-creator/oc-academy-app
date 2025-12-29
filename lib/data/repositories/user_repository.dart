@@ -74,6 +74,8 @@ class UserRepository {
 
   Future<bool?> updateProfileDetails({
     String? fullName,
+    String? email,
+    String? mobileNumber,
     String? qualification,
     List<int>? specialitiesOfInterestIds,
     String? profilePicPath,
@@ -89,6 +91,8 @@ class UserRepository {
         "firstName": firstName,
         "lastName": lastName,
         "fullName": fullName,
+        if (email != null) "email": email,
+        if (mobileNumber != null) "mobileNumber": mobileNumber,
         if (qualification != null) "qualification": qualification,
         if (specialitiesOfInterestIds != null)
           "specialitiesOfInterest": specialitiesOfInterestIds,
@@ -143,12 +147,16 @@ class UserRepository {
 
   Future<UserLiteResponse?> updateProfileAndFetch({
     String? fullName,
+    String? email,
+    String? mobileNumber,
     String? qualification,
     List<int>? specialitiesOfInterestIds,
     String? profilePicPath,
   }) async {
     final updateSuccess = await updateProfileDetails(
       fullName: fullName,
+      email: email,
+      mobileNumber: mobileNumber,
       qualification: qualification,
       specialitiesOfInterestIds: specialitiesOfInterestIds,
       profilePicPath: profilePicPath,

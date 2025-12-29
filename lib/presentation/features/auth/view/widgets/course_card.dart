@@ -53,31 +53,70 @@ class CourseCard extends StatelessWidget {
             ? 'Batch ended on $dateText'
             : 'Ends on $dateText');
 
+    final buttonStyle = ElevatedButton.styleFrom(
+      backgroundColor: const Color(0XFF3359A7),
+      foregroundColor: Colors.white,
+      padding: const EdgeInsets.symmetric(vertical: 12.0),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8.0),
+      ),
+    );
+
     Widget button;
     if (isCompleted) {
+      List<Widget> completedButtons = [];
+
       if (certificateUrl != null && certificateUrl!.isNotEmpty) {
-        button = ElevatedButton(
-          onPressed: () {
-            // Download certificate logic
-            print("Download certificate");
-          },
-          child: const Text("Download Certificate"),
+        completedButtons.add(
+          ElevatedButton(
+            onPressed: () {
+              // Download certificate logic
+              print("Download certificate");
+            },
+            style: buttonStyle,
+            child: const Text("Download"),
+          ),
         );
-      } else if (startDateTime != null && endDateTime != null && endDateTime.isBefore(startDateTime)) {
-        button = ElevatedButton(
-          onPressed: () {
-            // Watch again logic
-            print("Watch again");
-          },
-          child: const Text("Watch Again"),
+      }
+
+      if (startDateTime != null && endDateTime != null && endDateTime.isBefore(startDateTime)) {
+        completedButtons.add(
+          ElevatedButton(
+            onPressed: () {
+              // Watch again logic
+              print("Watch again");
+            },
+            style: buttonStyle,
+            child: const Text("Watch Again"),
+          ),
+        );
+      }
+
+      if (completedButtons.isEmpty) {
+        completedButtons.add(
+          ElevatedButton(
+            onPressed: () {
+              // Contact us logic
+              print("Contact us");
+            },
+            style: buttonStyle,
+            child: const Text("Contact Us"),
+          ),
+        );
+      }
+
+      if (completedButtons.length > 1) {
+        button = Row(
+          children: [
+            Expanded(child: completedButtons[0]),
+            const SizedBox(width: 8),
+            Expanded(child: completedButtons[1]),
+          ],
         );
       } else {
-        button = ElevatedButton(
-          onPressed: () {
-            // Contact us logic
-            print("Contact us");
-          },
-          child: const Text("Contact Us"),
+        button = SizedBox(
+          width: double.infinity,
+          child: completedButtons[0],
         );
       }
     } else {
@@ -94,14 +133,7 @@ class CourseCard extends StatelessWidget {
             // Start/Continue Learning logic
           }
         },
-        style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0XFF3359A7),
-          foregroundColor: Colors.white,
-          padding: const EdgeInsets.symmetric(vertical: 12.0),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8.0),
-          ),
-        ),
+        style: buttonStyle,
         child: Text(
           isExpired
               ? "Contact Support"

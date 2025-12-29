@@ -32,6 +32,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool _isEditingName = false;
   bool _isEditingEmail = false;
   bool _isEditingPhone = false;
+  bool _isEditingContactInfo = false;
   final TextEditingController _firstNameController = TextEditingController();
   final TextEditingController _lastNameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
@@ -174,6 +175,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           );
           setState(() {
             _isEditingName = false;
+            _isEditingContactInfo = false; // Reset the contact info editing flag
             _lastUpdateTime = DateTime.now(); // Mark the update time
           });
           // Update data via Bloc strictly with the fetched response
@@ -434,6 +436,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ProfileInfoCard(
                       title: "Personal Details",
                       actions: [
+                        if ((user?.isMobileVerified == true && user?.email != null) ||
+                            (user?.isEmailVerified == true && user?.mobileNumber != null))
+                          IconButton(
+                            onPressed: () {
+                              if (_isEditingContactInfo) {
+                                _handleProfileUpdate();
+                              }
+                              setState(() {
+                                _isEditingContactInfo = !_isEditingContactInfo;
+                              });
+                            },
+                            icon: Icon(
+                              _isEditingContactInfo ? Icons.check : Icons.edit_outlined,
+                              size: 20,
+                              color: _isEditingContactInfo ? Colors.green : Colors.grey,
+                            ),
+                          ),
                         IconButton(
                           onPressed: () {
                             if (_isEditingName) {
@@ -449,11 +468,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             size: 20,
                             color: _isEditingName ? Colors.green : Colors.grey,
                           ),
-                        ),
-                        const Icon(
-                          Icons.camera_alt_outlined,
-                          size: 20,
-                          color: Colors.grey,
                         ),
                       ],
                       content: Column(
@@ -504,19 +518,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               ),
                             ),
                           const SizedBox(height: 8),
-                          if (_isEditingName && (user?.isEmailVerified ?? false))
-                            TextFormField(
+
+                          // Phone Number Field
+                          if (_isEditingContactInfo && !(user?.isMobileVerified ?? false))
+                            CustomPhoneField(
                               controller: _phoneController,
-                              decoration: const InputDecoration(
-                                labelText: 'Phone Number',
-                                isDense: true,
-                              ),
                             )
                           else
                             Row(
                               children: [
-                                Text(user?.mobileNumber ??
-                                    '+91 9800122899'),
+                                Text(user?.mobileNumber ?? '+91 9800122899'),
+                                const SizedBox(width: 8),
                                 if (user?.isMobileVerified == true)
                                   const Icon(
                                     Icons.check_circle,
@@ -526,12 +538,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               ],
                             ),
                           const SizedBox(height: 8),
-                          if (_isEditingName && (user?.isMobileVerified ?? false))
+
+                          // Email Field
+                          if (_isEditingContactInfo && !(user?.isEmailVerified ?? false))
                             TextFormField(
                               controller: _emailController,
                               decoration: const InputDecoration(
                                 labelText: 'Email',
                                 isDense: true,
+                                border: OutlineInputBorder(),
                               ),
                             )
                           else

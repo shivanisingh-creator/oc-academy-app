@@ -68,30 +68,26 @@ class CourseCard extends StatelessWidget {
 
       if (certificateUrl != null && certificateUrl!.isNotEmpty) {
         completedButtons.add(
-          Expanded(
-            child: ElevatedButton(
-              onPressed: () {
-                // Download certificate logic
-                print("Download certificate");
-              },
-              style: buttonStyle,
-              child: const Text("Download"),
-            ),
+          ElevatedButton(
+            onPressed: () {
+              // Download certificate logic
+              print("Download certificate");
+            },
+            style: buttonStyle,
+            child: const Text("Download"),
           ),
         );
       }
 
       if (startDateTime != null && endDateTime != null && endDateTime.isBefore(startDateTime)) {
         completedButtons.add(
-          Expanded(
-            child: ElevatedButton(
-              onPressed: () {
-                // Watch again logic
-                print("Watch again");
-              },
-              style: buttonStyle,
-              child: const Text("Watch Again"),
-            ),
+          ElevatedButton(
+            onPressed: () {
+              // Watch again logic
+              print("Watch again");
+            },
+            style: buttonStyle,
+            child: const Text("Watch Again"),
           ),
         );
       }
@@ -99,31 +95,25 @@ class CourseCard extends StatelessWidget {
       if (completedButtons.isEmpty) {
         // If no other conditions met, show Contact Us
         completedButtons.add(
-          Expanded(
-            child: ElevatedButton(
-              onPressed: () {
-                // Contact us logic
-                print("Contact us");
-              },
-              style: buttonStyle,
-              child: const Text("Contact Us"),
-            ),
+          ElevatedButton(
+            onPressed: () {
+              // Contact us logic
+              print("Contact us");
+            },
+            style: buttonStyle,
+            child: const Text("Contact Us"),
           ),
         );
       }
 
-      if (completedButtons.length > 1) {
-        button = Row(
-          children: [
-            completedButtons[0],
-            const SizedBox(width: 8), // Add spacing between buttons
-            completedButtons[1],
-          ],
-        );
-      } else {
-        // If only one button, it's already Expanded due to being wrapped in Expanded above
-        button = completedButtons[0];
+      List<Widget> rowChildren = [];
+      for (int i = 0; i < completedButtons.length; i++) {
+        rowChildren.add(Expanded(child: completedButtons[i]));
+        if (i < completedButtons.length - 1) {
+          rowChildren.add(const SizedBox(width: 8));
+        }
       }
+      button = Row(children: rowChildren);
     } else {
       button = ElevatedButton(
         onPressed: () {

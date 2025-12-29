@@ -633,7 +633,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ProfileInfoCard(
                       title: "Medical Details",
                       actions: const [],
-                      initiallyExpanded: true,
+                      initiallyExpanded: false,
                       expandedContent: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [

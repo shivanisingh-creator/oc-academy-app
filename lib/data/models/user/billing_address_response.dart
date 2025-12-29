@@ -44,6 +44,15 @@ class BillingAddress {
   });
 
   factory BillingAddress.fromJson(Map<String, dynamic> json) {
+    String? extractCountry(dynamic countryData) {
+      if (countryData == null) return null;
+      if (countryData is Map) {
+        return countryData['name']?.toString() ??
+            countryData['code']?.toString();
+      }
+      return countryData.toString();
+    }
+
     return BillingAddress(
       id: json['id'] is int
           ? json['id']
@@ -56,7 +65,7 @@ class BillingAddress {
       zipcode: json['zipcode']?.toString(),
       city: json['city']?.toString(),
       state: json['state']?.toString(),
-      country: json['country']?.toString(),
+      country: extractCountry(json['country']),
       source: json['source']?.toString(),
     );
   }

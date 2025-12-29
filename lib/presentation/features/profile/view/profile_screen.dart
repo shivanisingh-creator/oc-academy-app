@@ -43,6 +43,45 @@ class _ProfileScreenState extends State<ProfileScreen> {
     super.initState();
     _fetchSpecialties();
     _fetchBillingAddress();
+
+    // Initialize local state from current Bloc state if available
+    final state = context.read<ProfileBloc>().state;
+    if (state is ProfileLoaded) {
+      final user = state.user.response;
+      if (user != null) {
+        _firstNameController.text = user.firstName ?? '';
+        _lastNameController.text = user.lastName ?? '';
+        _selectedQualification = user.qualification;
+
+        if (user.specialitiesOfInterestIds != null) {
+          final rawIds = user.specialitiesOfInterestIds!;
+          final List<int> parsedIds = [];
+
+          for (var item in rawIds) {
+            if (item is int) {
+              parsedIds.add(item);
+            } else if (item is String) {
+              // Handle potential list format "[1, 2]" string or single "1"
+              if (item.startsWith('[') && item.endsWith(']')) {
+                final clean = item.replaceAll('[', '').replaceAll(']', '');
+                if (clean.isNotEmpty) {
+                  final split = clean.split(',');
+                  for (var s in split) {
+                    final p = int.tryParse(s.trim());
+                    if (p != null) parsedIds.add(p);
+                  }
+                }
+              } else {
+                final p = int.tryParse(item);
+                if (p != null) parsedIds.add(p);
+              }
+            }
+          }
+
+          _selectedSpecialtyIds = parsedIds;
+        }
+      }
+    }
   }
 
   @override
@@ -227,27 +266,46 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 _lastUpdateTime != null &&
                 DateTime.now().difference(_lastUpdateTime!).inSeconds < 2;
 
-            if (!hasRecentlyUpdated) {
-              final user = state.user.response;
-              if (user?.qualification != null) {
-                setState(() {
-                  _selectedQualification = user!.qualification;
-                });
-              }
-              if (user?.specialitiesOfInterestIds != null) {
-                final ids = user!.specialitiesOfInterestIds!
-                    .map((id) {
-                      if (id is int) return id;
-                      if (id is String) return int.tryParse(id);
-                      return null;
-                    })
-                    .whereType<int>()
-                    .toList();
+            final user = state.user.response;
 
-                setState(() {
-                  _selectedSpecialtyIds = ids;
-                });
+            // ALWAYS update Medical Details from API (Qualification & Specialities)
+            // This ensures logic: Change -> API -> Fetch -> UI Update is respected.
+            if (user?.qualification != null) {
+              setState(() {
+                _selectedQualification = user!.qualification;
+              });
+            }
+            if (user?.specialitiesOfInterestIds != null) {
+              final rawIds = user!.specialitiesOfInterestIds!;
+              final List<int> parsedIds = [];
+
+              for (var item in rawIds) {
+                if (item is int) {
+                  parsedIds.add(item);
+                } else if (item is String) {
+                  if (item.startsWith('[') && item.endsWith(']')) {
+                    final clean = item.replaceAll('[', '').replaceAll(']', '');
+                    if (clean.isNotEmpty) {
+                      final split = clean.split(',');
+                      for (var s in split) {
+                        final p = int.tryParse(s.trim());
+                        if (p != null) parsedIds.add(p);
+                      }
+                    }
+                  } else {
+                    final p = int.tryParse(item);
+                    if (p != null) parsedIds.add(p);
+                  }
+                }
               }
+
+              setState(() {
+                _selectedSpecialtyIds = parsedIds;
+              });
+            }
+
+            // Only protect Name fields from debounce
+            if (!hasRecentlyUpdated) {
               if (user?.firstName != null) {
                 _firstNameController.text = user!.firstName!;
               }
@@ -277,7 +335,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             backgroundImage: _selectedImage != null
                                 ? FileImage(_selectedImage!)
                                 : user?.profilePic != null
-                                ? NetworkImage(user!.profilePic!)
+                                ? NetworkImage(
+                                        "${user!.profilePic!}?v=${DateTime.now().millisecondsSinceEpoch}",
+                                      )
                                       as ImageProvider
                                 : null,
                             backgroundColor: const Color(0xFF3F51B5),
@@ -448,20 +508,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ProfileInfoCard(
                       title: "Medical Details",
                       actions: const [],
-                      initiallyExpanded: false,
+                      initiallyExpanded: true,
                       expandedContent: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           CustomDropdownField(
                             label: '',
-                            value:
-                                const [
-                                  'MBBS/FMG',
-                                  'MD/MSM/DNB',
-                                ].contains(_selectedQualification)
-                                ? _selectedQualification
-                                : null,
-                            items: const ['MBBS/FMG', 'MD/MSM/DNB'],
+                            value: _selectedQualification,
+                            // Ensure the current selection is always part of the items list
+                            items: [
+                              ...{
+                                'MBBS/FMG',
+                                'MD/MSM/DNB',
+                                if (_selectedQualification != null)
+                                  _selectedQualification!,
+                              }.toList(),
+                            ],
                             onChanged: (val) {
                               setState(() {
                                 _selectedQualification = val;
@@ -481,6 +543,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 CustomDropdownField(
+                                  key: UniqueKey(),
                                   label: '',
                                   value: null,
                                   items: specialtyItems
@@ -502,15 +565,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       final selected = _specialties.firstWhere(
                                         (s) => s.specialityName == val,
                                       );
-                                      setState(() {
-                                        if (!_selectedSpecialtyIds.contains(
-                                          selected.specialityId!,
-                                        )) {
-                                          _selectedSpecialtyIds.add(
-                                            selected.specialityId!,
-                                          );
-                                        }
-                                      });
+                                      // Create a new list reference to ensure setState detects change
+                                      final newList = List<int>.from(
+                                        _selectedSpecialtyIds,
+                                      );
+                                      if (!newList.contains(
+                                        selected.specialityId!,
+                                      )) {
+                                        newList.add(selected.specialityId!);
+                                        setState(() {
+                                          _selectedSpecialtyIds = newList;
+                                        });
+                                      }
                                     }
                                   },
                                   hintText: _isLoadingSpecialties
@@ -539,8 +605,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                           size: 16,
                                         ),
                                         onDeleted: () {
+                                          final newList = List<int>.from(
+                                            _selectedSpecialtyIds,
+                                          );
+                                          newList.remove(id);
                                           setState(() {
-                                            _selectedSpecialtyIds.remove(id);
+                                            _selectedSpecialtyIds = newList;
                                           });
                                         },
                                         backgroundColor: Colors.grey

@@ -450,7 +450,16 @@ class _MedicalAcademyScreenState extends State<MedicalAcademyScreen> {
                                 builder: (context) => const DashboardScreen()),
                           );
                         },
-                        child: const Text("Go to Dashboard"),
+                        style: ElevatedButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(0), // Makes it rectangular
+                          ),
+                          backgroundColor: const Color(0xFF285698), // Sets the background color
+                        ),
+                        child: const Text(
+                          "Go to Dashboard",
+                          style: TextStyle(color: Colors.white), // Ensures text is visible on dark background
+                        ),
                       ),
                     ],
                   ),

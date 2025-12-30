@@ -17,6 +17,9 @@ class AppConfig {
   final String keycloakClientSecret;
   final String termsOfUseUrl;
   final String privacyPolicyUrl;
+  final String aboutUsUrl;
+  final String contactUsUrl;
+  final String faqUrl;
   // ---------------------------
 
   // Define static Keycloak paths (these are constant across all Keycloak servers)
@@ -34,6 +37,9 @@ class AppConfig {
     required this.keycloakClientSecret,
     required this.termsOfUseUrl,
     required this.privacyPolicyUrl,
+    required this.aboutUsUrl,
+    required this.contactUsUrl,
+    required this.faqUrl,
   });
 
   // Factory method to initialize config based on a passed environment string
@@ -62,7 +68,10 @@ class AppConfig {
       keycloakClientId = ApiEndpoints.keycloakProdClientId,
       keycloakClientSecret = ApiEndpoints.keycloakProdClientSecret,
       termsOfUseUrl = LegalUrls.prodTermsOfUse,
-      privacyPolicyUrl = LegalUrls.prodPrivacyPolicy;
+      privacyPolicyUrl = LegalUrls.prodPrivacyPolicy,
+      aboutUsUrl = LegalUrls.prodAboutUs,
+      contactUsUrl = LegalUrls.prodContactUs,
+      faqUrl = LegalUrls.prodFaq;
 
   // Private constructor for Pre-Production
   AppConfig._preprod()
@@ -75,7 +84,10 @@ class AppConfig {
       keycloakClientId = ApiEndpoints.keycloakPreProdClientId,
       keycloakClientSecret = ApiEndpoints.keycloakPreProdClientSecret,
       termsOfUseUrl = LegalUrls.preprodTermsOfUse,
-      privacyPolicyUrl = LegalUrls.preprodPrivacyPolicy;
+      privacyPolicyUrl = LegalUrls.preprodPrivacyPolicy,
+      aboutUsUrl = LegalUrls.preprodAboutUs,
+      contactUsUrl = LegalUrls.preprodContactUs,
+      faqUrl = LegalUrls.preprodFaq;
 
   // Private constructor for Staging (Default)
   AppConfig._staging()
@@ -90,5 +102,8 @@ class AppConfig {
       keycloakClientSecret =
           ApiEndpoints.keycloakStagingClientSecret, // e.g., stg-ocacademy
       termsOfUseUrl = LegalUrls.stagingTermsOfUse,
-      privacyPolicyUrl = LegalUrls.stagingPrivacyPolicy;
+      privacyPolicyUrl = LegalUrls.stagingPrivacyPolicy,
+      aboutUsUrl = LegalUrls.stagingAboutUs,
+      contactUsUrl = LegalUrls.stagingContactUs,
+      faqUrl = LegalUrls.stagingFaq;
 }

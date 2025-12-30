@@ -33,8 +33,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool _isUpdating = false;
 
   bool _isEditingName = false;
-  bool _isEditingEmail = false;
-  bool _isEditingPhone = false;
   bool _isEditingContactInfo = false;
   final TextEditingController _firstNameController = TextEditingController();
   final TextEditingController _lastNameController = TextEditingController();

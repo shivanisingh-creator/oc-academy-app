@@ -17,6 +17,8 @@ class CreateProfileRequest {
   final int professionId;
   final String title;
   final String? otherProfession;
+  final String? primaryRole;
+  final int? otherProfessionId;
 
   CreateProfileRequest({
     required this.currentDevice,
@@ -32,6 +34,8 @@ class CreateProfileRequest {
     required this.professionId,
     required this.title,
     this.otherProfession,
+    this.primaryRole,
+    this.otherProfessionId,
   });
 
   factory CreateProfileRequest.fromJson(Map<String, dynamic> json) =>

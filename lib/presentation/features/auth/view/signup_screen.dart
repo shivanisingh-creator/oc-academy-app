@@ -149,6 +149,7 @@ class _SignupScreenState extends State<SignupScreen> {
     }
 
     if (_formIsValid()) {
+      final isOther = _selectedProfession?.name == 'Other';
       final request = CreateProfileRequest(
         currentDevice: "device name",
         deviceToken: "device token",
@@ -161,12 +162,14 @@ class _SignupScreenState extends State<SignupScreen> {
         registrationSource: "webapp",
         preAccessToken: widget.preAccessToken,
         professionId: _selectedProfession!.id,
-        otherProfession: _selectedProfession?.name == 'Other'
+        otherProfession: isOther ? _otherProfessionController.text : null,
+        otherProfessionId: isOther ? _selectedProfession!.id : null,
+        primaryRole: isOther
             ? _otherProfessionController.text
-            : null,
-        title: _selectedProfession?.name == 'Doctor'
-            ? 'Dr.'
-            : '', // Example: Set title based on profession
+            : _selectedProfession?.name,
+        title: isOther
+            ? 'Other'
+            : (_selectedProfession?.name == 'Doctor' ? 'Dr.' : ''),
       );
 
       try {

@@ -21,6 +21,9 @@ CreateProfileRequest _$CreateProfileRequestFromJson(
   preAccessToken: json['preAccessToken'] as String,
   professionId: (json['professionId'] as num).toInt(),
   title: json['title'] as String,
+  otherProfession: json['otherProfession'] as String?,
+  primaryRole: json['primaryRole'] as String?,
+  otherProfessionId: (json['otherProfessionId'] as num?)?.toInt(),
 );
 
 Map<String, dynamic> _$CreateProfileRequestToJson(
@@ -38,4 +41,7 @@ Map<String, dynamic> _$CreateProfileRequestToJson(
   'preAccessToken': instance.preAccessToken,
   'professionId': instance.professionId,
   'title': instance.title,
+  'otherProfession': instance.otherProfession,
+  'primaryRole': instance.primaryRole,
+  'otherProfessionId': instance.otherProfessionId,
 };

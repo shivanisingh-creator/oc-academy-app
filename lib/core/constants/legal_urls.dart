@@ -15,6 +15,13 @@ class LegalUrls {
   static const String stagingPrivacyPolicy =
       'https://stg.ocacademy.in/mob-app/privacy-policy';
 
+  static const String categoryPrefix = 'mob-app/courses-by-category/';
+  static const String certifications = 'certifications';
+  static const String fellowships = 'fellowships';
+  static const String postGrad = 'post-graduate-programs';
+  static const String pgDip = 'pg-dip';
+  static const String msc = 'msc';
+
   static const String preprodAboutUs =
       'https://preprod.ocacademy.in/mob-app/about-us';
   static const String prodAboutUs = 'https://ocacademy.in/mob-app/about-us';
@@ -84,5 +91,54 @@ class LegalUrls {
       case Environment.staging:
         return stagingFaq;
     }
+  }
+
+  static String getCategoryUrl(Environment env, String category) {
+    final String baseUrl;
+    switch (env) {
+      case Environment.production:
+        baseUrl = 'https://ocacademy.in/';
+        break;
+      case Environment.preprod:
+        baseUrl = 'https://preprod.ocacademy.in/';
+        break;
+      case Environment.staging:
+        baseUrl = 'https://stg.ocacademy.in/';
+        break;
+    }
+
+    String path;
+    switch (category.toLowerCase()) {
+      case 'certifications':
+      case 'certification programs':
+        path = certifications;
+        break;
+      case 'fellowships':
+      case 'fellowship programs':
+        path = fellowships;
+        break;
+      case 'post-graduate-programs':
+      case 'post graduate programs':
+      case 'international post graduate programs':
+      case 'international pg programs':
+      case 'post graduate program':
+      case 'post grad program':
+      case 'pg programs':
+      case 'pg program':
+        path = postGrad;
+        break;
+      case 'pg-dip':
+      case 'diploma':
+        path = pgDip;
+        break;
+      case 'msc':
+      case 'msc program':
+        path = msc;
+        break;
+      default:
+        path = '';
+    }
+
+    return '$baseUrl$categoryPrefix$path';
   }
 }

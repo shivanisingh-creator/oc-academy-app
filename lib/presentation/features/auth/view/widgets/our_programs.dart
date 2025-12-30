@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:oc_academy_app/core/utils/helpers/api_utils.dart';
+import 'package:oc_academy_app/core/utils/helpers/url_helper.dart';
+import 'package:oc_academy_app/core/constants/legal_urls.dart';
 import 'package:oc_academy_app/data/models/home/course_offering_response.dart';
 import 'package:oc_academy_app/data/repositories/home_repository.dart';
 
@@ -40,57 +43,62 @@ class ProgramCard extends StatelessWidget {
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Image Section
-          ClipRRect(
-            borderRadius: const BorderRadius.vertical(
-              top: Radius.circular(12.0),
+      child: InkWell(
+        onTap: () {
+          final env = ApiUtils.instance.config.environment;
+          final url = LegalUrls.getCategoryUrl(env, title);
+          UrlHelper.launchUrlString(url);
+        },
+        borderRadius: BorderRadius.circular(12.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Image Section
+            ClipRRect(
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(12.0),
+              ),
+              child: Image.network(
+                imageUrl,
+                height: 140, // Fixed height for the image
+                width: double.infinity,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  debugPrint('Image load error for $imageUrl: $error');
+                  return Container(
+                    height: 140,
+                    color: Colors.blueGrey.shade100,
+                    alignment: Alignment.center,
+                    child: const Text(
+                      'Placeholder Image',
+                      style: TextStyle(color: Colors.black54),
+                    ),
+                  );
+                },
+              ),
             ),
-            child: Image.network(
-              imageUrl,
-              height: 140, // Fixed height for the image
-              width: double.infinity,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) {
-                debugPrint('Image load error for $imageUrl: $error');
-                return Container(
-                  height: 140,
-                  color: Colors.blueGrey.shade100,
-                  alignment: Alignment.center,
-                  child: const Text(
-                    'Placeholder Image',
-                    style: TextStyle(color: Colors.black54),
-                  ),
-                );
-              },
-            ),
-          ),
 
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Title
-                SizedBox(
-                  height: 40.0,
-                  child: Text(
-                    title,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: Colors.black,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Title
+                  SizedBox(
+                    height: 40.0,
+                    child: Text(
+                      title,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: Colors.black,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 12),
+                  const SizedBox(height: 12),
 
-                // Tags Row
-                if (tags.isNotEmpty)
                   // Tags Row
                   if (tags.isNotEmpty)
                     Text(
@@ -103,49 +111,55 @@ class ProgramCard extends StatelessWidget {
                         fontWeight: FontWeight.w500,
                       ),
                     ),
-                const SizedBox(height: 12),
+                  const SizedBox(height: 12),
 
-                // Description
-                SizedBox(
-                  height: 40.0,
-                  child: Text(
-                    description,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(color: Colors.black54, fontSize: 13),
+                  // Description
+                  SizedBox(
+                    height: 40.0,
+                    child: Text(
+                      description,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: Colors.black54,
+                        fontSize: 13,
+                      ),
+                    ),
                   ),
-                ),
-                const SizedBox(height: 16),
+                  const SizedBox(height: 16),
 
-                // Learn More Link
-                InkWell(
-                  onTap: () {
-                    // Handle navigation
-                  },
-                  child: const Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        'Learn More',
-                        style: TextStyle(
-                          color: accentBlue,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
+                  // Learn More Link
+                  InkWell(
+                    onTap: () {
+                      final env = ApiUtils.instance.config.environment;
+                      final url = LegalUrls.getCategoryUrl(env, title);
+                      UrlHelper.launchUrlString(url);
+                    },
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'Learn More',
+                          style: TextStyle(
+                            color: accentBlue,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
-                      ),
-                      SizedBox(width: 4),
-                      Icon(
-                        Icons.arrow_forward_ios,
-                        color: accentBlue,
-                        size: 14,
-                      ),
-                    ],
+                        SizedBox(width: 4),
+                        Icon(
+                          Icons.arrow_forward_ios,
+                          color: accentBlue,
+                          size: 14,
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

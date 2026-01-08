@@ -66,7 +66,6 @@ class _LoginPageState extends State<LoginPage> {
     const Color primaryBlue = Color(
       0XFF3359A7,
     ); // For buttons and active states
-    const Color logoPink = Color(0xFFEC407A); // Pink for the 'OC' logo
 
     return Scaffold(
       backgroundColor: Colors.white,

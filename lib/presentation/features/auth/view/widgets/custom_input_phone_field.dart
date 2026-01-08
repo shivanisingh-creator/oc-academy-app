@@ -39,7 +39,7 @@ class _CustomPhoneInputFieldState extends State<CustomPhoneInputField> {
         const SizedBox(height: 8),
         Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: widget.readOnly ? Colors.grey[100] : Colors.white,
             borderRadius: BorderRadius.circular(10),
             border: Border.all(color: Colors.grey, width: 1.0),
           ),

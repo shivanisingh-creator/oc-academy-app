@@ -23,7 +23,7 @@ class AuthNavigationHelper {
           context,
           MaterialPageRoute(
             builder: (context) => SignupScreen(
-              phoneNumber: email != null && email.isNotEmpty ? "" : phoneNumber,
+              phoneNumber: phoneNumber,
               preAccessToken: preAccessToken,
               email: email,
               config: config,

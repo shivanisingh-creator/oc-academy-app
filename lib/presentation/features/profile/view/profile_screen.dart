@@ -511,23 +511,31 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               children: [
                                 TextFormField(
                                   controller: _phoneController,
-                                  enabled: !(user?.isMobileVerified ?? false),
+                                  // Lock mobile if email is verified (indicating email login) or if mobile itself is verified
+                                  enabled:
+                                      !(user?.isEmailVerified ?? false) &&
+                                      !(user?.isMobileVerified ?? false),
                                   decoration: InputDecoration(
                                     labelText: 'Phone Number',
                                     isDense: true,
                                     border: const OutlineInputBorder(),
                                     suffixIcon:
-                                        (user?.isMobileVerified ?? false)
+                                        (user?.isMobileVerified ?? false) ||
+                                            (user?.isEmailVerified ?? false)
                                         ? const Icon(
                                             Icons.check_circle,
                                             color: Color(0XFF3359A7),
                                             size: 20,
                                           )
                                         : null,
-                                    fillColor: (user?.isMobileVerified ?? false)
+                                    fillColor:
+                                        (user?.isMobileVerified ?? false) ||
+                                            (user?.isEmailVerified ?? false)
                                         ? Colors.grey.withOpacity(0.1)
                                         : null,
-                                    filled: (user?.isMobileVerified ?? false),
+                                    filled:
+                                        (user?.isMobileVerified ?? false) ||
+                                        (user?.isEmailVerified ?? false),
                                   ),
                                 ),
                                 const SizedBox(height: 10),
@@ -538,7 +546,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               children: [
                                 Text(user?.mobileNumber ?? '+91 9800122899'),
                                 const SizedBox(width: 8),
-                                if (user?.isMobileVerified == true)
+                                if ((user?.isMobileVerified ?? false) ||
+                                    (user?.isEmailVerified ?? false))
                                   const Icon(
                                     Icons.check_circle,
                                     color: Color(0XFF3359A7),
@@ -552,7 +561,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           if (_isEditingContactInfo)
                             TextFormField(
                               controller: _emailController,
-                              enabled: !(user?.isEmailVerified ?? false),
+                              // If logged in via email (verified), allow changing it.
+                              // If logged in via phone (mobile verified), only allow if email is NOT verified.
+                              enabled:
+                                  (user?.isEmailVerified ?? false) ||
+                                  !(user?.isEmailVerified ?? false),
                               decoration: InputDecoration(
                                 labelText: 'Email',
                                 isDense: true,
@@ -564,10 +577,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                         size: 20,
                                       )
                                     : null,
-                                fillColor: (user?.isEmailVerified ?? false)
+                                // Email remains white/editable if it's an email login
+                                fillColor:
+                                    (user?.isEmailVerified ?? false) &&
+                                        !(user?.isMobileVerified ?? false)
+                                    ? null
+                                    : (user?.isEmailVerified ?? false)
                                     ? Colors.grey.withOpacity(0.1)
                                     : null,
-                                filled: (user?.isEmailVerified ?? false),
+                                filled:
+                                    (user?.isEmailVerified ?? false) &&
+                                    (user?.isMobileVerified ?? false),
                               ),
                             )
                           else

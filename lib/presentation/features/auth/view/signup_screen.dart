@@ -327,7 +327,10 @@ class _SignupScreenState extends State<SignupScreen> {
             CustomPhoneInputField(
               controller: _phoneController,
               isValid: _isPhoneNumberValid,
-              readOnly: widget.phoneNumber.isNotEmpty,
+              readOnly:
+                  widget.phoneNumber.isNotEmpty ||
+                  ((widget.email != null && widget.email!.isNotEmpty) &&
+                      _phoneController.text.isNotEmpty),
               onlyIndia: widget.phoneNumber.isNotEmpty,
             ),
             const SizedBox(height: 20),
@@ -338,7 +341,12 @@ class _SignupScreenState extends State<SignupScreen> {
               hintText: 'Enter your email address',
               controller: _emailController,
               keyboardType: TextInputType.emailAddress,
-              readOnly: widget.email != null && widget.email!.isNotEmpty,
+              readOnly:
+                  widget.email != null &&
+                  widget.email!.isNotEmpty &&
+                  widget
+                      .phoneNumber
+                      .isNotEmpty, // Only lock if it was a phone login or if specifically requested
             ),
             const SizedBox(height: 20),
 

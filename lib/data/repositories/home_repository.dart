@@ -14,6 +14,8 @@ import 'package:oc_academy_app/data/models/user/user_lite_response.dart';
 import 'package:oc_academy_app/data/models/home/recent_activity.dart';
 import 'package:oc_academy_app/data/models/blog/blog_post_response.dart';
 import 'package:oc_academy_app/data/models/home/course_progress_response.dart';
+import 'package:oc_academy_app/data/models/home/live_event_response.dart';
+import 'package:oc_academy_app/data/models/home/course_timeline_response.dart';
 import 'package:oc_academy_app/data/local/fellowship_data.dart'; // Import local data
 
 class HomeRepository {
@@ -547,6 +549,96 @@ class HomeRepository {
     } catch (e, stackTrace) {
       _logger.e(
         "❌ Exception during getCourseProgress: $e\n${_apiUtils.handleError(e)}",
+        error: e,
+        stackTrace: stackTrace,
+      );
+      return null;
+    }
+  }
+
+  Future<LiveEventResponse?> getLiveEvent() async {
+    try {
+      final String? token = await _tokenStorage.getAccessToken();
+      if (token == null) {
+        _logger.e("❌ No access token found.");
+        return null;
+      }
+      final String? hkAccessToken = await _tokenStorage.getApiAccessToken();
+
+      String baseUrl = _apiUtils.config.baseUrl;
+      String courseBaseUrl = baseUrl.replaceFirst('commons-api', 'course-api');
+      if (courseBaseUrl.endsWith('/')) {
+        courseBaseUrl = courseBaseUrl.substring(0, courseBaseUrl.length - 1);
+      }
+      final String fullUrl = '$courseBaseUrl${ApiEndpoints.getLiveEvent}';
+
+      _logger.i("Fetching Live Event from: $fullUrl");
+
+      final response = await _apiUtils.get(
+        url: fullUrl,
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+            if (hkAccessToken != null) 'hk-access-token': hkAccessToken,
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        _logger.i("✅ Get Live Event successful.");
+        return LiveEventResponse.fromJson(response.data);
+      }
+      return null;
+    } catch (e, stackTrace) {
+      _logger.e(
+        "❌ Exception during getLiveEvent: $e\n${_apiUtils.handleError(e)}",
+        error: e,
+        stackTrace: stackTrace,
+      );
+      return null;
+    }
+  }
+
+  Future<CourseTimelineResponse?> getCourseTimeline({
+    required String startDate,
+    required String endDate,
+  }) async {
+    try {
+      final String? token = await _tokenStorage.getAccessToken();
+      if (token == null) {
+        _logger.e("❌ No access token found.");
+        return null;
+      }
+      final String? hkAccessToken = await _tokenStorage.getApiAccessToken();
+
+      String baseUrl = _apiUtils.config.baseUrl;
+      String courseBaseUrl = baseUrl.replaceFirst('commons-api', 'course-api');
+      if (courseBaseUrl.endsWith('/')) {
+        courseBaseUrl = courseBaseUrl.substring(0, courseBaseUrl.length - 1);
+      }
+      final String fullUrl = '$courseBaseUrl${ApiEndpoints.getCourseTimeline}';
+
+      _logger.i("Fetching Course Timeline from: $fullUrl");
+
+      final response = await _apiUtils.get(
+        url: fullUrl,
+        queryParameters: {'startDate': startDate, 'endDate': endDate},
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+            if (hkAccessToken != null) 'hk-access-token': hkAccessToken,
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        _logger.i("✅ Get Course Timeline successful.");
+        return CourseTimelineResponse.fromJson(response.data);
+      }
+      return null;
+    } catch (e, stackTrace) {
+      _logger.e(
+        "❌ Exception during getCourseTimeline: $e\n${_apiUtils.handleError(e)}",
         error: e,
         stackTrace: stackTrace,
       );

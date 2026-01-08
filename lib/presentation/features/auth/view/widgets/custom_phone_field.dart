@@ -30,7 +30,7 @@ class CustomDropdownField extends StatelessWidget {
               color: Colors.black87,
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 4),
         ],
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),

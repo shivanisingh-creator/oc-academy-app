@@ -75,6 +75,7 @@ class _SignupScreenState extends State<SignupScreen> {
     _firstNameController.addListener(_onFieldChanged);
     _lastNameController.addListener(_onFieldChanged);
     _emailController.addListener(_onFieldChanged);
+    _otherProfessionController.addListener(_onFieldChanged);
     _fetchProfessions();
 
     // Prefill email if provided (from Google Sign-In)
@@ -122,6 +123,7 @@ class _SignupScreenState extends State<SignupScreen> {
     _firstNameController.removeListener(_onFieldChanged);
     _lastNameController.removeListener(_onFieldChanged);
     _emailController.removeListener(_onFieldChanged);
+    _otherProfessionController.removeListener(_onFieldChanged);
     _phoneController.removeListener(_validatePhoneNumber);
     _firstNameController.dispose();
     _lastNameController.dispose();
@@ -282,17 +284,8 @@ class _SignupScreenState extends State<SignupScreen> {
                   ),
             if (_selectedProfession?.name == 'Other') ...[
               const SizedBox(height: 20),
-              const Text(
-                'Please specify a profession',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.black87,
-                ),
-              ),
-              const SizedBox(height: 4),
               CustomLabeledTextField(
-                label: '',
+                label: 'Please specify a profession',
                 hintText: 'Enter your profession',
                 controller: _otherProfessionController,
                 inputFormatters: [

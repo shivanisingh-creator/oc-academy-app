@@ -38,7 +38,7 @@ class CustomLabeledTextField extends StatelessWidget {
             color: Colors.black87,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 4),
         TextFormField(
           controller: controller,
           keyboardType: keyboardType,

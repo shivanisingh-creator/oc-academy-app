@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:oc_academy_app/presentation/features/auth/view/widgets/week_timeline_header.dart';
-import 'package:oc_academy_app/presentation/features/auth/view/widgets/weekline_activity_widget.dart';
 import 'package:oc_academy_app/presentation/features/home/view/widgets/continue_learning_card.dart';
 
 import 'package:oc_academy_app/presentation/features/auth/view/widgets/course_card.dart';
@@ -9,12 +7,16 @@ import 'package:oc_academy_app/presentation/features/auth/view/widgets/test_prep
 import 'package:oc_academy_app/presentation/features/auth/view/widgets/logbook_card.dart';
 
 import 'package:oc_academy_app/presentation/features/auth/view/widgets/verification_card.dart';
+import 'package:oc_academy_app/presentation/features/home/view/widgets/course_timeline_section.dart';
+import 'package:oc_academy_app/presentation/features/auth/view/widgets/activity_timeline_section.dart';
 
 import 'package:oc_academy_app/data/repositories/home_repository.dart';
 import 'package:oc_academy_app/data/models/user_courses/user_courses_response.dart';
 import 'package:oc_academy_app/data/models/user/user_lite_response.dart';
 import 'package:oc_academy_app/data/models/home/recent_activity.dart';
 import 'package:oc_academy_app/data/models/home/course_progress_response.dart';
+import 'package:oc_academy_app/data/models/home/live_event_response.dart';
+import 'package:oc_academy_app/presentation/features/home/view/widgets/live_streaming_card.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -36,6 +38,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   // Course Progress Data from API
   List<CourseCategory> _courseCategories = [];
+  LiveEvent? _liveEvent;
+  bool _isLoadingLiveEvent = true;
 
   @override
   void initState() {
@@ -53,12 +57,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
       final recentActivityFuture = _homeRepository.getRecentActivity();
       // Fetch Course Progress (Certifications, IPGP, etc)
       final courseProgressFuture = _homeRepository.getCourseProgress();
+      // Fetch Live Event
+      final liveEventFuture = _homeRepository.getLiveEvent();
 
       final results = await Future.wait([
         coursesFuture,
         userLiteFuture,
         recentActivityFuture,
         courseProgressFuture,
+        liveEventFuture,
       ]);
       final coursesResponse = results[0] as UserCoursesResponse?;
       final userLiteResponse = results[1] as UserLiteResponse?;
@@ -68,13 +75,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
       if (mounted) {
         setState(() {
           // Handle Courses
-          if (coursesResponse?.response != null) {
+          final coursesRes = coursesResponse;
+          if (coursesRes?.response != null) {
             final allCourses = <UserCourse>[];
-            if (coursesResponse!.response!.pendingCourses != null) {
-              allCourses.addAll(coursesResponse!.response!.pendingCourses!);
+            final response = coursesRes!.response!;
+            if (response.pendingCourses != null) {
+              allCourses.addAll(response.pendingCourses!);
             }
-            if (coursesResponse!.response!.completedCourses != null) {
-              allCourses.addAll(coursesResponse!.response!.completedCourses!);
+            if (response.completedCourses != null) {
+              allCourses.addAll(response.completedCourses!);
             }
 
             _activeCourses = allCourses
@@ -105,6 +114,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
           if (courseProgressResponse?.response != null) {
             _courseCategories = courseProgressResponse!.response!;
           }
+
+          // Handle Live Event
+          final liveEventResponse = results[4] as LiveEventResponse?;
+          if (liveEventResponse?.response != null) {
+            _liveEvent = liveEventResponse!.response;
+          }
         });
       }
     } catch (e) {
@@ -114,6 +129,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         setState(() {
           _isLoadingCourses = false;
           _isLoadingActivities = false;
+          _isLoadingLiveEvent = false;
         });
       }
     }
@@ -160,9 +176,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   // CONTINUE LEARNING Section moved to top
                   if (_isLoadingActivities)
                     const Center(child: CircularProgressIndicator())
-                  else if (_recentActivities.isNotEmpty)
+                  else if (_recentActivities.isNotEmpty) ...[
                     ContinueLearningCard(activity: _recentActivities.first),
-                  const SizedBox(height: 16.0), // Add some spacing after it
+                    const SizedBox(height: 16.0),
+                  ],
+
+                  if (!_isLoadingLiveEvent &&
+                      _liveEvent != null &&
+                      _liveEvent!.id != null) ...[
+                    LiveStreamingCard(event: _liveEvent!),
+                    const SizedBox(height: 16.0),
+                  ],
                   // 1. Get Verified Section
                   if (_showVerificationCard) ...[
                     const VerificationCard(),
@@ -239,59 +263,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
                   const SizedBox(height: 16.0),
 
-                  // 5. Your Week Section Header with Navigation Arrows
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        'Your Week',
-                        style: TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.black87,
-                        ),
-                      ),
-                      Row(
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.arrow_back_ios, size: 20),
-                            onPressed: () {
-                              // Navigate to previous week
-                            },
-                            color: const Color(0XFF3359A7),
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.arrow_forward_ios, size: 20),
-                            onPressed: () {
-                              // Navigate to next week
-                            },
-                            color: const Color(0XFF3359A7),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
                   const SizedBox(height: 16.0),
-                  const WeeklyTimelineHeader(),
-                  const SizedBox(height: 16.0),
-                  // Weekly Activity Section
+
+                  // Dynamic Course Timeline Section
+                  const CourseTimelineSection(),
+
+                  const SizedBox(height: 12.0),
+
+                  // Activity Timeline Section (Recent Activities)
                   if (_recentActivities.isNotEmpty)
-                    WeeklyActivityCard(
-                      courseTitle: _recentActivities
-                          .first
-                          .courseName, // Use the course name from the first activity
-                      activities: _recentActivities.map((activity) {
-                        return WeeklyActivity(
-                          number: activity.id,
-                          title: activity.name,
-                          tag: activity.status,
-                          tagColor: const Color(
-                            0XFF3359A7,
-                          ), // Default color for now, could be dynamic
-                        );
-                      }).toList(),
-                    ),
-                  const SizedBox(height: 16.0),
+                    ActivityTimelineSection(activities: _recentActivities),
+
+                  const SizedBox(height: 32.0),
 
                   // Certifications/Program Sections powered by API
                   ..._courseCategories.expand((category) {

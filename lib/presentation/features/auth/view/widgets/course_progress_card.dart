@@ -50,12 +50,15 @@ class _CertificationProgressCardState extends State<CertificationProgressCard> {
               children: [
                 Icon(icon, color: const Color(0XFF3359A7), size: 24),
                 const SizedBox(width: 8),
-                Text(
-                  value,
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0XFF3359A7),
+                Flexible(
+                  child: Text(
+                    value,
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0XFF3359A7),
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
                 ),
               ],

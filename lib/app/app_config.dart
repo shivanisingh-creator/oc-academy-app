@@ -20,6 +20,7 @@ class AppConfig {
   final String aboutUsUrl;
   final String contactUsUrl;
   final String faqUrl;
+  final String logbookUrl;
   // ---------------------------
 
   // Define static Keycloak paths (these are constant across all Keycloak servers)
@@ -40,6 +41,7 @@ class AppConfig {
     required this.aboutUsUrl,
     required this.contactUsUrl,
     required this.faqUrl,
+    required this.logbookUrl,
   });
 
   // Factory method to initialize config based on a passed environment string
@@ -71,7 +73,8 @@ class AppConfig {
       privacyPolicyUrl = LegalUrls.prodPrivacyPolicy,
       aboutUsUrl = LegalUrls.prodAboutUs,
       contactUsUrl = LegalUrls.prodContactUs,
-      faqUrl = LegalUrls.prodFaq;
+      faqUrl = LegalUrls.prodFaq,
+      logbookUrl = LegalUrls.prodLogbook;
 
   // Private constructor for Pre-Production
   AppConfig._preprod()
@@ -87,7 +90,8 @@ class AppConfig {
       privacyPolicyUrl = LegalUrls.preprodPrivacyPolicy,
       aboutUsUrl = LegalUrls.preprodAboutUs,
       contactUsUrl = LegalUrls.preprodContactUs,
-      faqUrl = LegalUrls.preprodFaq;
+      faqUrl = LegalUrls.preprodFaq,
+      logbookUrl = LegalUrls.preprodLogbook;
 
   // Private constructor for Staging (Default)
   AppConfig._staging()
@@ -105,5 +109,6 @@ class AppConfig {
       privacyPolicyUrl = LegalUrls.stagingPrivacyPolicy,
       aboutUsUrl = LegalUrls.stagingAboutUs,
       contactUsUrl = LegalUrls.stagingContactUs,
-      faqUrl = LegalUrls.stagingFaq;
+      faqUrl = LegalUrls.stagingFaq,
+      logbookUrl = LegalUrls.stagingLogbook;
 }

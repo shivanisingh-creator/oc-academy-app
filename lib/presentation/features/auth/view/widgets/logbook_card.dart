@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:oc_academy_app/core/utils/helpers/api_utils.dart';
+import 'package:oc_academy_app/core/utils/helpers/url_helper.dart';
 
 class LogbookCard extends StatelessWidget {
   const LogbookCard({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final String logbookUrl = ApiUtils.instance.config.logbookUrl;
+
     return Container(
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
@@ -40,7 +44,7 @@ class LogbookCard extends StatelessWidget {
             width: double.infinity,
             child: ElevatedButton(
               onPressed: () {
-                // TODO: Implement navigation to Logbook screen
+                UrlHelper.launchUrlString(logbookUrl);
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Color(0XFF3359A7), // A nice blue

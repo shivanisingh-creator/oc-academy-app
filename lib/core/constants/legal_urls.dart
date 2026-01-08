@@ -38,6 +38,11 @@ class LegalUrls {
   static const String prodFaq = 'https://ocacademy.in/mob-app/faq';
   static const String stagingFaq = 'https://stg.ocacademy.in/mob-app/faq';
 
+  static const String preprodLogbook =
+      'https://preprod-logbook.ocacademy.in/login';
+  static const String prodLogbook = 'https://logbook.ocacademy.in/login';
+  static const String stagingLogbook = 'https://stg-logbook.ocacademy.in/login';
+
   static String getTermsOfUseUrl(Environment env) {
     switch (env) {
       case Environment.production:
@@ -90,6 +95,17 @@ class LegalUrls {
         return preprodFaq;
       case Environment.staging:
         return stagingFaq;
+    }
+  }
+
+  static String getLogbookUrl(Environment env) {
+    switch (env) {
+      case Environment.production:
+        return prodLogbook;
+      case Environment.preprod:
+        return preprodLogbook;
+      case Environment.staging:
+        return stagingLogbook;
     }
   }
 

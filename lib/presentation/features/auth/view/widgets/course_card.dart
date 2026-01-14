@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:oc_academy_app/core/utils/helpers/api_utils.dart';
+import 'package:oc_academy_app/core/utils/helpers/url_helper.dart';
+import 'package:oc_academy_app/core/constants/legal_urls.dart';
 
 class CourseCard extends StatelessWidget {
   final String title;
@@ -49,17 +52,13 @@ class CourseCard extends StatelessWidget {
 
     final statusText = isCompleted
         ? 'Completed'
-        : (isExpired
-            ? 'Batch ended on $dateText'
-            : 'Ends on $dateText');
+        : (isExpired ? 'Batch ended on $dateText' : 'Ends on $dateText');
 
     final buttonStyle = ElevatedButton.styleFrom(
       backgroundColor: const Color(0XFF3359A7),
       foregroundColor: Colors.white,
       padding: const EdgeInsets.symmetric(vertical: 12.0),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8.0),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
     );
 
     Widget button;
@@ -79,7 +78,9 @@ class CourseCard extends StatelessWidget {
         );
       }
 
-      if (startDateTime != null && endDateTime != null && endDateTime.isBefore(startDateTime)) {
+      if (startDateTime != null &&
+          endDateTime != null &&
+          endDateTime.isBefore(startDateTime)) {
         completedButtons.add(
           ElevatedButton(
             onPressed: () {
@@ -97,8 +98,9 @@ class CourseCard extends StatelessWidget {
         completedButtons.add(
           ElevatedButton(
             onPressed: () {
-              // Contact us logic
-              print("Contact us");
+              final env = ApiUtils.instance.config.environment;
+              final url = LegalUrls.getContactUsUrl(env);
+              UrlHelper.launchUrlString(url);
             },
             style: buttonStyle,
             child: const Text("Contact Us"),
@@ -118,12 +120,9 @@ class CourseCard extends StatelessWidget {
       button = ElevatedButton(
         onPressed: () {
           if (isExpired) {
-            // Show Contact Support logic (Placeholder)
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Contacting Support...'),
-              ),
-            );
+            final env = ApiUtils.instance.config.environment;
+            final url = LegalUrls.getContactUsUrl(env);
+            UrlHelper.launchUrlString(url);
           } else {
             // Start/Continue Learning logic
           }
@@ -132,9 +131,7 @@ class CourseCard extends StatelessWidget {
         child: Text(
           isExpired
               ? "Contact Support"
-              : ((progress ?? 0) > 0
-                  ? "Continue Learning"
-                  : "Start Learning"),
+              : ((progress ?? 0) > 0 ? "Continue Learning" : "Start Learning"),
         ),
       );
     }
@@ -235,10 +232,7 @@ class CourseCard extends StatelessWidget {
                   ),
                   const Spacer(), // Pushes the button to the bottom
                   const SizedBox(height: 4.0),
-                  SizedBox(
-                    width: double.infinity,
-                    child: button,
-                  ),
+                  SizedBox(width: double.infinity, child: button),
                 ],
               ),
             ),

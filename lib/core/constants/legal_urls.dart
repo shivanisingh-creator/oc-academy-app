@@ -21,6 +21,12 @@ class LegalUrls {
   static const String postGrad = 'post-graduate-programs';
   static const String pgDip = 'pg-dip';
   static const String msc = 'msc';
+  static const String fellowshipsAndPostGrad =
+      'fellowship-and-post-graduate-programs';
+  static const String internationalDiplomaAndMsc =
+      'international-diploma-and-msc';
+
+  static const String specialityPrefix = 'mob-app/courses-by-speciality/';
 
   static const String preprodAboutUs =
       'https://preprod.ocacademy.in/mob-app/about-us';
@@ -151,10 +157,41 @@ class LegalUrls {
       case 'msc program':
         path = msc;
         break;
+      case 'fellowship-and-post-graduate-programs':
+      case 'fellowship and post graduate programs':
+        path = fellowshipsAndPostGrad;
+        break;
+      case 'international-diploma-and-msc':
+      case 'international diploma and msc':
+        path = internationalDiplomaAndMsc;
+        break;
       default:
         path = '';
     }
 
     return '$baseUrl$categoryPrefix$path';
+  }
+
+  static String getSpecialityUrl(Environment env, String specialityName) {
+    final String baseUrl;
+    switch (env) {
+      case Environment.production:
+        baseUrl = 'https://ocacademy.in/';
+        break;
+      case Environment.preprod:
+        baseUrl = 'https://preprod.ocacademy.in/';
+        break;
+      case Environment.staging:
+        baseUrl = 'https://stg.ocacademy.in/';
+        break;
+    }
+
+    // Replace spaces with hyphens and make it lowercase for the URL
+    final String formattedName = specialityName.toLowerCase().replaceAll(
+      ' ',
+      '-',
+    );
+
+    return '$baseUrl$specialityPrefix$formattedName';
   }
 }

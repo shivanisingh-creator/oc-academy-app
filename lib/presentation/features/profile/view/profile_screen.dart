@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:oc_academy_app/core/constants/route_constants.dart';
+import 'package:oc_academy_app/app/app_config.dart';
+import 'package:oc_academy_app/core/utils/helpers/api_utils.dart';
+import 'package:oc_academy_app/core/utils/helpers/url_helper.dart';
+import 'package:oc_academy_app/core/constants/legal_urls.dart';
 import 'package:oc_academy_app/data/repositories/home_repository.dart';
 import 'package:oc_academy_app/presentation/features/auth/view/widgets/profile_info_card_widget.dart';
 import 'package:oc_academy_app/presentation/features/auth/view/widgets/referal_card.dart';
@@ -829,7 +833,57 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     // 5. Refer a Friend Card
                     ReferralCard(onTap: _handleReferralShare),
 
-                    // 6. Logout Card
+                    // 6. Help & Support Card
+                    ProfileInfoCard(
+                      title: "Help & Support",
+                      initiallyExpanded: false,
+                      expandedContent: Column(
+                        children: [
+                          _buildSupportLink(
+                            context,
+                            "About Us",
+                            Icons.info_outline,
+                            LegalUrls.getAboutUsUrl(
+                              ApiUtils.instance.config.environment,
+                            ),
+                          ),
+                          _buildSupportLink(
+                            context,
+                            "Contact Us",
+                            Icons.contact_support_outlined,
+                            LegalUrls.getContactUsUrl(
+                              ApiUtils.instance.config.environment,
+                            ),
+                          ),
+                          _buildSupportLink(
+                            context,
+                            "FAQ",
+                            Icons.help_outline,
+                            LegalUrls.getFaqUrl(
+                              ApiUtils.instance.config.environment,
+                            ),
+                          ),
+                          _buildSupportLink(
+                            context,
+                            "Privacy Policy",
+                            Icons.privacy_tip_outlined,
+                            LegalUrls.getPrivacyPolicyUrl(
+                              ApiUtils.instance.config.environment,
+                            ),
+                          ),
+                          _buildSupportLink(
+                            context,
+                            "Terms of Use",
+                            Icons.description_outlined,
+                            LegalUrls.getTermsOfUseUrl(
+                              ApiUtils.instance.config.environment,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    // 7. Logout Card
                     ProfileInfoCard(
                       title: "Logout",
                       actions: const [
@@ -860,6 +914,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
           },
         ),
       ),
+    );
+  }
+
+  Widget _buildSupportLink(
+    BuildContext context,
+    String title,
+    IconData icon,
+    String url,
+  ) {
+    return ListTile(
+      leading: Icon(icon, color: const Color(0XFF3359A7), size: 22),
+      title: Text(
+        title,
+        style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+      ),
+      trailing: const Icon(
+        Icons.arrow_forward_ios,
+        size: 14,
+        color: Colors.grey,
+      ),
+      onTap: () => UrlHelper.launchUrlString(url),
+      contentPadding: EdgeInsets.zero,
+      visualDensity: VisualDensity.compact,
     );
   }
 }

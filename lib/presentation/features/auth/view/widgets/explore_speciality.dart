@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:oc_academy_app/data/models/home/specialty_response.dart';
 import 'package:oc_academy_app/data/repositories/home_repository.dart';
+import 'package:oc_academy_app/core/utils/helpers/api_utils.dart';
+import 'package:oc_academy_app/core/utils/helpers/url_helper.dart';
+import 'package:oc_academy_app/core/constants/legal_urls.dart';
 
 class ExploreBySpecialtySection extends StatefulWidget {
   final Color accentBlue;
@@ -80,17 +83,21 @@ class _ExploreBySpecialtySectionState extends State<ExploreBySpecialtySection> {
             itemCount: _specialties.length,
             itemBuilder: (context, index) {
               final specialty = _specialties[index];
-              return GestureDetector(
+              return SpecialtyPillItem(
+                specialty: specialty,
+                accentColor: widget.accentBlue,
+                isPillSelected: index == _selectedIndex,
                 onTap: () {
                   setState(() {
                     _selectedIndex = index;
                   });
+                  final env = ApiUtils.instance.config.environment;
+                  final url = LegalUrls.getSpecialityUrl(
+                    env,
+                    specialty.specialityName ?? '',
+                  );
+                  UrlHelper.launchUrlString(url);
                 },
-                child: SpecialtyPillItem(
-                  specialty: specialty,
-                  accentColor: widget.accentBlue,
-                  isPillSelected: index == _selectedIndex,
-                ),
               );
             },
           ),
@@ -105,11 +112,13 @@ class SpecialtyPillItem extends StatelessWidget {
   final Specialty specialty;
   final Color accentColor;
   final bool isPillSelected;
+  final VoidCallback onTap;
 
   const SpecialtyPillItem({
     required this.specialty,
     required this.accentColor,
     required this.isPillSelected,
+    required this.onTap,
     super.key,
   });
 
@@ -122,49 +131,53 @@ class SpecialtyPillItem extends StatelessWidget {
         ? accentColor.withOpacity(0.1)
         : Colors.grey.shade100;
 
-    return Padding(
-      padding: const EdgeInsets.only(
-        right: 20.0,
-      ), // Changed: Increased spacing.
-      child: Column(
-        children: [
-          // Circular Icon Container
-          Container(
-            width: 85, // Changed: Made circle bigger.
-            height: 85, // Changed: Made circle bigger.
-            decoration: BoxDecoration(
-              color: pillBackgroundColor,
-              shape: BoxShape.circle,
-              // border property removed as per request.
-            ),
-            child: ClipOval(
-              child: Image.network(
-                specialty.specialityImageUrl ?? '',
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) =>
-                    Icon(Icons.local_hospital, color: iconColor, size: 30),
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12.0),
+      child: Padding(
+        padding: const EdgeInsets.only(
+          right: 20.0,
+        ), // Changed: Increased spacing.
+        child: Column(
+          children: [
+            // Circular Icon Container
+            Container(
+              width: 85, // Changed: Made circle bigger.
+              height: 85, // Changed: Made circle bigger.
+              decoration: BoxDecoration(
+                color: pillBackgroundColor,
+                shape: BoxShape.circle,
+                // border property removed as per request.
+              ),
+              child: ClipOval(
+                child: Image.network(
+                  specialty.specialityImageUrl ?? '',
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) =>
+                      Icon(Icons.local_hospital, color: iconColor, size: 30),
+                ),
               ),
             ),
-          ),
-          const SizedBox(height: 8),
-          // Text Label
-          SizedBox(
-            width: 80,
-            child: Text(
-              specialty.specialityName ?? '',
-              textAlign: TextAlign.center,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                color: Colors.black,
-                fontSize: 12,
-                fontWeight: isPillSelected
-                    ? FontWeight.bold
-                    : FontWeight.normal,
+            const SizedBox(height: 8),
+            // Text Label
+            SizedBox(
+              width: 80,
+              child: Text(
+                specialty.specialityName ?? '',
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 12,
+                  fontWeight: isPillSelected
+                      ? FontWeight.bold
+                      : FontWeight.normal,
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

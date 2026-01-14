@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:oc_academy_app/core/constants/route_constants.dart';
-import 'package:oc_academy_app/app/app_config.dart';
 import 'package:oc_academy_app/core/utils/helpers/api_utils.dart';
 import 'package:oc_academy_app/core/utils/helpers/url_helper.dart';
 import 'package:oc_academy_app/core/constants/legal_urls.dart';
@@ -32,6 +32,7 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   String? _selectedQualification = ProfileScreen._persistedQualification;
   List<int> _selectedSpecialtyIds = [];
+  final GlobalKey<FormState> _personalDetailsFormKey = GlobalKey<FormState>();
   List<Specialty> _specialties = [];
   bool _isLoadingSpecialties = true;
   bool _isUpdating = false;
@@ -164,6 +165,33 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _handleProfileUpdate({List<int>? newSpecialtyIds}) async {
+    // If the name/contact info fields are visible, validate them first
+    if ((_isEditingName || _isEditingContactInfo) &&
+        _personalDetailsFormKey.currentState?.validate() == false) {
+      return;
+    }
+
+    // Validation for Medical Details (if they were visible or changed)
+    if (_selectedQualification == null || _selectedQualification!.isEmpty) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please select your qualification')),
+        );
+      }
+      return;
+    }
+
+    if (_selectedSpecialtyIds.isEmpty) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('At least one specialization is mandatory'),
+          ),
+        );
+      }
+      return;
+    }
+
     setState(() {
       _isUpdating = true;
     });
@@ -478,34 +506,59 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           if (_isEditingName)
-                            Column(
-                              children: [
-                                TextFormField(
-                                  controller: _firstNameController,
-                                  decoration: const InputDecoration(
-                                    labelText: 'First Name',
-                                    isDense: true,
-                                    border: OutlineInputBorder(),
+                            Form(
+                              key: _personalDetailsFormKey,
+                              child: Column(
+                                children: [
+                                  TextFormField(
+                                    controller: _firstNameController,
+                                    decoration: const InputDecoration(
+                                      labelText: 'First Name',
+                                      isDense: true,
+                                      border: OutlineInputBorder(),
+                                    ),
+                                    inputFormatters: [
+                                      FilteringTextInputFormatter.allow(
+                                        RegExp(r'[a-zA-Z\s]'),
+                                      ),
+                                    ],
+                                    validator: (val) {
+                                      if (val == null || val.trim().isEmpty) {
+                                        return 'First Name is mandatory';
+                                      }
+                                      return null;
+                                    },
+                                    onChanged: (val) {
+                                      setState(() {}); // Refresh header name
+                                    },
                                   ),
-                                  onChanged: (val) {
-                                    setState(() {}); // Refresh header name
-                                  },
-                                ),
-                                const SizedBox(height: 10),
-                                TextFormField(
-                                  controller: _lastNameController,
-                                  decoration: const InputDecoration(
-                                    labelText: 'Last Name',
-                                    isDense: true,
-                                    border: OutlineInputBorder(),
+                                  const SizedBox(height: 10),
+                                  TextFormField(
+                                    controller: _lastNameController,
+                                    decoration: const InputDecoration(
+                                      labelText: 'Last Name',
+                                      isDense: true,
+                                      border: OutlineInputBorder(),
+                                    ),
+                                    inputFormatters: [
+                                      FilteringTextInputFormatter.allow(
+                                        RegExp(r'[a-zA-Z\s]'),
+                                      ),
+                                    ],
+                                    validator: (val) {
+                                      if (val == null || val.trim().isEmpty) {
+                                        return 'Last Name is mandatory';
+                                      }
+                                      return null;
+                                    },
+                                    onChanged: (val) {
+                                      setState(() {}); // Refresh header name
+                                    },
+                                    onFieldSubmitted: (_) =>
+                                        _handleProfileUpdate(),
                                   ),
-                                  onChanged: (val) {
-                                    setState(() {}); // Refresh header name
-                                  },
-                                  onFieldSubmitted: (_) =>
-                                      _handleProfileUpdate(),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           const SizedBox(height: 8),
 
@@ -656,7 +709,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           CustomDropdownField(
-                            label: '',
+                            label: 'Select Qualification',
                             value: _selectedQualification,
                             // Ensure the current selection is always part of the items list
                             items: [
@@ -672,7 +725,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 _selectedQualification = val;
                                 ProfileScreen._persistedQualification = val;
                               });
-                              _handleProfileUpdate();
                             },
                             hintText: 'Select Qualification',
                           ),
@@ -688,7 +740,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 CustomDropdownField(
-                                  label: '',
+                                  label: 'Select Specialization',
                                   value: null,
                                   items: specialtyItems
                                       .where(
@@ -720,9 +772,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                         setState(() {
                                           _selectedSpecialtyIds = newList;
                                         });
-                                        _handleProfileUpdate(
-                                          newSpecialtyIds: newList,
-                                        );
                                       }
                                     }
                                   },
@@ -759,9 +808,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                           setState(() {
                                             _selectedSpecialtyIds = newList;
                                           });
-                                          _handleProfileUpdate(
-                                            newSpecialtyIds: newList,
-                                          );
                                         },
                                         backgroundColor: Colors.grey
                                             .withOpacity(0.1),
@@ -803,7 +849,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       ),
                                     )
                                   : const Text(
-                                      "Update Profile",
+                                      "Update Medical Details",
                                       style: TextStyle(
                                         color: Colors.white,
                                         fontWeight: FontWeight.bold,

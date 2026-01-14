@@ -139,7 +139,7 @@ class PartnerLogo extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(12.0),
         child: Image.network(
-          imageUrl,
+          imageUrl.trim().replaceAll(' ', '%20'),
           fit: BoxFit.contain,
           errorBuilder: (context, error, stackTrace) {
             return Icon(Icons.business, size: 40, color: Colors.grey.shade400);

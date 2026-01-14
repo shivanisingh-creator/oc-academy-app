@@ -395,9 +395,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 ? FileImage(_selectedImage!)
                                 : user?.profilePic != null
                                 ? NetworkImage(
-                                        "${user!.profilePic!}?v=${DateTime.now().millisecondsSinceEpoch}",
-                                      )
-                                      as ImageProvider
+                                    "${user!.profilePic!.trim().replaceAll(' ', '%20')}?v=${DateTime.now().millisecondsSinceEpoch}",
+                                  )
                                 : null,
                             backgroundColor: const Color(0xFF3F51B5),
                             child:

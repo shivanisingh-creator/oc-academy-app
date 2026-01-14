@@ -37,7 +37,12 @@ class TrendingCourseCard extends StatelessWidget {
               top: Radius.circular(12.0),
             ),
             child: Image.network(
-              course.twoxThumbnailUrl ?? course.onexThumbnailUrl ?? '',
+              (course.twoxThumbnailUrl ??
+                      course.threexThumbnailUrl ??
+                      course.onexThumbnailUrl ??
+                      '')
+                  .trim()
+                  .replaceAll(' ', '%20'),
               height: 150,
               width: cardWidth,
               fit: BoxFit.cover,

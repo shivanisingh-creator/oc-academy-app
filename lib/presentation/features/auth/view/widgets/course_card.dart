@@ -12,6 +12,11 @@ class CourseCard extends StatelessWidget {
   final String? certificateUrl;
   final int? startDate;
 
+  String? get _formattedImageUrl {
+    if (imageUrl == null || imageUrl!.isEmpty) return null;
+    return imageUrl!.trim().replaceAll(' ', '%20');
+  }
+
   const CourseCard({
     super.key,
     required this.title,
@@ -174,9 +179,9 @@ class CourseCard extends StatelessWidget {
               borderRadius: const BorderRadius.vertical(
                 top: Radius.circular(12.0),
               ),
-              child: imageUrl != null && imageUrl!.isNotEmpty
+              child: _formattedImageUrl != null
                   ? Image.network(
-                      imageUrl!,
+                      _formattedImageUrl!,
                       width: double.infinity,
                       height: 100,
                       fit: BoxFit.cover,

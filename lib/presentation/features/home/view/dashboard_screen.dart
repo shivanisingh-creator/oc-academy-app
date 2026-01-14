@@ -221,8 +221,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           title: course.courseName ?? 'Unknown Course',
                           endDate: course.endDate,
                           progress: course.progress,
-                          imageUrl: course
-                              .twoxThumbnailUrl, // Use 2x thumbnail from API
+                          imageUrl:
+                              course.twoxThumbnailUrl ??
+                              course.threexThumbnailUrl ??
+                              course.onexThumbnailUrl,
                         );
                       },
                     ),
@@ -251,7 +253,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             title: course.courseName ?? 'Unknown Course',
                             endDate: course.endDate,
                             progress: course.progress,
-                            imageUrl: course.twoxThumbnailUrl,
+                            imageUrl:
+                                course.twoxThumbnailUrl ??
+                                course.threexThumbnailUrl ??
+                                course.onexThumbnailUrl,
+
                             isCompleted: true,
                             certificateUrl: course.certificateUrl,
                             startDate: course.startDate,

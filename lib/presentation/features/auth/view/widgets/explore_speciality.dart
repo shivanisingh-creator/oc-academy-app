@@ -151,7 +151,10 @@ class SpecialtyPillItem extends StatelessWidget {
               ),
               child: ClipOval(
                 child: Image.network(
-                  specialty.specialityImageUrl ?? '',
+                  (specialty.specialityImageUrl ?? '').trim().replaceAll(
+                    ' ',
+                    '%20',
+                  ),
                   fit: BoxFit.cover,
                   errorBuilder: (context, error, stackTrace) =>
                       Icon(Icons.local_hospital, color: iconColor, size: 30),

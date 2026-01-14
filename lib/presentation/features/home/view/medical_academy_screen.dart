@@ -222,12 +222,12 @@ class _MedicalAcademyScreenState extends State<MedicalAcademyScreen> {
       ),
       FeaturedProgramData(
         title: 'Clinical Fellowship in Diabetes Management',
-        imageUrl: 'assets/images/program2.jpg',
+        imageUrl: 'assets/images/mrcp.png',
         accreditedBy: 'Royal College',
       ),
       FeaturedProgramData(
         title: 'Short Course in Advanced Diagnostics',
-        imageUrl: 'assets/images/program3.jpg',
+        imageUrl: 'assets/images/mrcp.png',
         accreditedBy: 'Global Academy',
       ),
     ];
@@ -447,18 +447,25 @@ class _MedicalAcademyScreenState extends State<MedicalAcademyScreen> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => const DashboardScreen()),
+                              builder: (context) => const DashboardScreen(),
+                            ),
                           );
                         },
                         style: ElevatedButton.styleFrom(
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(6), // Makes it rectangular
+                            borderRadius: BorderRadius.circular(
+                              6,
+                            ), // Makes it rectangular
                           ),
-                          backgroundColor: const Color(0xFF285698), // Sets the background color
+                          backgroundColor: const Color(
+                            0xFF285698,
+                          ), // Sets the background color
                         ),
                         child: const Text(
                           "Go to Dashboard",
-                          style: TextStyle(color: Colors.white), // Ensures text is visible on dark background
+                          style: TextStyle(
+                            color: Colors.white,
+                          ), // Ensures text is visible on dark background
                         ),
                       ),
                     ],

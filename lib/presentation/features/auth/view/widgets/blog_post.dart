@@ -89,7 +89,7 @@ class BlogCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    String imageUrl = _extractImageUrl();
+    String imageUrl = _extractImageUrl().trim().replaceAll(' ', '%20');
     String readTime = blog.estimatedReadingTime ?? 'N/A';
     String category = blog.class_list
         .firstWhere(

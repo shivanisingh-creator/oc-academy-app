@@ -304,7 +304,10 @@ class _MedicalAcademyScreenState extends State<MedicalAcademyScreen> {
                             },
                             blendMode: BlendMode.dstIn,
                             child: Image.network(
-                              banner.contentAppUrl ?? '',
+                              (banner.contentAppUrl ?? '').trim().replaceAll(
+                                ' ',
+                                '%20',
+                              ),
                               fit: BoxFit.fill,
                               errorBuilder: (context, error, stackTrace) {
                                 return Container(

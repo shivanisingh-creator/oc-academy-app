@@ -58,24 +58,36 @@ class ProgramCard extends StatelessWidget {
               borderRadius: const BorderRadius.vertical(
                 top: Radius.circular(12.0),
               ),
-              child: Image.network(
-                imageUrl,
-                height: 140, // Fixed height for the image
-                width: double.infinity,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  debugPrint('Image load error for $imageUrl: $error');
-                  return Container(
-                    height: 140,
-                    color: Colors.blueGrey.shade100,
-                    alignment: Alignment.center,
-                    child: const Text(
-                      'Placeholder Image',
-                      style: TextStyle(color: Colors.black54),
+              child: imageUrl.isNotEmpty
+                  ? Image.network(
+                      imageUrl,
+                      height: 140, // Fixed height for the image
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        debugPrint('Image load error for $imageUrl: $error');
+                        return Container(
+                          height: 140,
+                          color: Colors.blueGrey.shade100,
+                          alignment: Alignment.center,
+                          child: Icon(
+                            Icons.school_outlined,
+                            size: 40,
+                            color: Colors.blueGrey.shade300,
+                          ),
+                        );
+                      },
+                    )
+                  : Container(
+                      height: 140,
+                      color: Colors.blueGrey.shade100,
+                      alignment: Alignment.center,
+                      child: Icon(
+                        Icons.school_outlined,
+                        size: 40,
+                        color: Colors.blueGrey.shade300,
+                      ),
                     ),
-                  );
-                },
-              ),
             ),
 
             Padding(
@@ -224,7 +236,7 @@ class _ExploreProgramsSectionState extends State<ExploreProgramsSection> {
         itemBuilder: (context, index) {
           final program = _programs[index];
           return ProgramCard(
-            imageUrl: (program.media ?? '').replaceAll(' ', '%20'),
+            imageUrl: (program.media ?? '').trim().replaceAll(' ', '%20'),
             title: program.title ?? '',
             tags: program.tags ?? [],
             description: program.description ?? '',

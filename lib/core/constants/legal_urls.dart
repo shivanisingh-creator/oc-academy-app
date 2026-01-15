@@ -15,7 +15,7 @@ class LegalUrls {
   static const String stagingPrivacyPolicy =
       'https://stg.ocacademy.in/mob-app/privacy-policy';
 
-  static const String categoryPrefix = 'mob-app/courses-by-category/';
+  static const String categoryPrefix = 'courses-by-category/';
   static const String certifications = 'certifications';
   static const String fellowships = 'fellowships';
   static const String postGrad = 'post-graduate-programs';
@@ -26,7 +26,7 @@ class LegalUrls {
   static const String internationalDiplomaAndMsc =
       'international-diploma-and-msc';
 
-  static const String specialityPrefix = 'mob-app/courses-by-speciality/';
+  static const String specialityPrefix = 'courses-by-speciality/';
 
   static const String preprodAboutUs =
       'https://preprod.ocacademy.in/mob-app/about-us';
@@ -186,10 +186,10 @@ class LegalUrls {
         break;
     }
 
-    // Replace spaces with hyphens and make it lowercase for the URL
+    // Replace spaces with %20 and make it lowercase for the URL
     final String formattedName = specialityName.toLowerCase().replaceAll(
       ' ',
-      '-',
+      '%20',
     );
 
     return '$baseUrl$specialityPrefix$formattedName';
